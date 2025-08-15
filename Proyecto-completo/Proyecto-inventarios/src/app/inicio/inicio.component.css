@@ -1,0 +1,78 @@
+#topBar{
+  border-radius: 0px;
+  border: 1px solid black;
+  background-color: rgb(238, 202, 6);
+}
+
+#ico-user{
+font-size: 50px;
+}
+
+.container{
+  display: flex;
+  height: 100vh;
+  margin-left: 0%;
+  padding: 0%;
+}
+
+#menu{
+  flex: 0 0 250px;
+  border: 1px solid black;
+  border-top: none;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background-color: rgb(238, 202, 6);;
+}
+
+button{
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  margin: 1px;
+  border: none;
+  background-color: rgb(238, 202, 6);
+}
+
+button:hover{
+  background-color: red;
+  color: white;
+}
+
+a{
+  padding: 10px;
+  margin: 1px;
+  text-decoration: none;
+  color: black;
+  display: flex;
+}
+a:hover{
+  background-color: white;
+  cursor: pointer;
+}
+
+#Tabla{
+  scrollbar-width: thin;
+}
+
+#TablaD{
+  padding: 10px;
+  margin-top: 2px;
+  margin-left: 2px;
+  color: white;
+}
+
+th{
+  padding: 10px;
+  border: 1px solid black;
+  background-color: gray;
+  color: white;
+  text-align: center;
+}
+
+td{
+  padding: 10px;
+  border: 1px solid black;
+  background-color: white;
+  color: black;
+  text-align: center;
+}

@@ -1,0 +1,77 @@
+<div class="col-auto" >
+  <div class="card p-4" id="topBar">
+    <!-- información del usuario -->
+
+    <div class="d-flex align-items-center" id="info-user">
+      <i class="bi bi-person-circle" id="ico-user"></i>
+      <div class="d-flex flex-column ms-3">
+        <span class="fw-bold text-dark">Nombre usuario</span>
+        <span class="text-muted small">Rol</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="col" id="menu">
+    <div class="d-flex justify-content-start">
+      <div style="width: 250px;">
+
+        <!-- Inventario -->
+        <button class="w-100" type="button" data-bs-toggle="collapse"
+          data-bs-target="#submenuInventario" aria-expanded="false" aria-controls="submenuInventario">
+          Inventarios
+        </button>
+
+        <div class="collapse" id="submenuInventario">
+          <div class="list-group ">
+            <a (click)="administrarSustancias()">Inventario Principal</a>
+            <a (click)="administrarSustancias()">Inventarios Secundarios</a>
+            <a (click)="administrarSustancias()">Agregar Inventario Secundario</a>
+          </div>
+        </div>
+
+        <!-- Administradores -->
+        <button class="w-100" type="button" data-bs-toggle="collapse" data-bs-target="#submenuAdmin"
+          aria-expanded="false" aria-controls="submenuAdmin">
+          Administradores
+        </button>
+
+        <div class="collapse" id="submenuAdmin">
+          <div class="list-group">
+            <a href="#" >Lista de Administradores</a>
+            <a href="#" >Agregar Administrador</a>
+          </div>
+        </div>
+
+        <!-- Auxiliares -->
+        <button class="w-100" type="button" data-bs-toggle="collapse" data-bs-target="#submenuAux"
+          aria-expanded="false" aria-controls="submenuAux">
+          Auxiliares
+        </button>
+
+        <div class="collapse" id="submenuAux">
+          <div class="list-group">
+            <a href="#">Lista de Auxiliares</a>
+            <a href="#">Agregar Auxiliares</a>
+          </div>
+        </div>
+
+        <!-- Configuración -->
+        <button class="w-100" type="button" data-bs-toggle="collapse" data-bs-target="#submenuConfig"
+          aria-expanded="false" aria-controls="submenuConfig">
+          Configuración
+        </button>
+
+        <div class="collapse" id="submenuConfig">
+          <div class="list-group">
+            <a href="#">Cambio de contraseña</a>
+            <a href="#">Editar perfil</a>
+          </div>
+        </div>
+
+        <button class="w-100">Cerrar Sesión</button>
+
+      </div>
+    </div>
+  </div>

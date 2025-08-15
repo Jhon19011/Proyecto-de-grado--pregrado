@@ -1,0 +1,14 @@
+#principal-login{
+    width: 35rem;
+}
+
+#login{
+    background-color: white;
+}
+.forgot a {
+    color: var(--blue-dark);
+    text-decoration: none;
+}
+.forgot a:hover {
+    text-decoration: underline;
+  }

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="/login/login.component.css">
+<div id="principal-login"class="container d-flex justify-content-center align-items-center vh-100">
+    <div id="login"class="text-center card card-body border border-secondary border-3 ">
+        <h1 class="fw-bold">Iniciar Sesión</h1>
+        <form #f="ngForm" (ngSubmit)="f.form.valid && ingresar(f)" class="mt-4 mx-auto">
+            <!-- campo de email -->
+            <div class="d-flex align-items-center mt-2" id="user">
+                <i id = "ico-user"class="bi bi-person-circle mx-2"></i>
+                <input id="email" name="email" type="email" class="form-control fa-solid fa-envelope" placeholder="Usuario" ngModel required>
+            </div>
+            <!-- campo de password -->
+            <div class="d-flex align-items-center mt-2" id="pass">
+                <i class="bi bi-shield-lock mx-2" id="ico-user"></i>
+                <input type="password" class="form-control "id="password" name="password" placeholder="Contraseña" ngModel required>
+            </div>
+            <div class="mt-4">
+                <a href="#">Olvidé mi contraseña</a>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4 w-100">Ingresar</button>
+        </form>
+    </div>
+</div>
