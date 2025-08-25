@@ -2,15 +2,34 @@ const db = require('../../DB/mysql');
 
 const TABLA = 'sede';
 
-function todos (){
-    return db.todos(TABLA);
+function todosSede (){
+    return db.todosSede(TABLA);
 }
 
-function uno (id){
-    return db.uno(TABLA, id);
+function unoSede (id){
+    return db.unoSede(TABLA, id);
+}
+
+function agregarSede (body){
+    console.log('Controller: Datos recibidos:', body);
+    if (body.idsede) {
+        // Si tiene ID, es una actualización
+        console.log('Controller: Actualizando sede existente');
+        return db.actualizar(TABLA, body);
+    } else {
+        // Si no tiene ID, es una inserción
+        console.log('Controller: Insertando nueva sede');
+        return db.insertar(TABLA, body);
+    }
+}
+
+function eliminarSede (body){
+    return db.eliminarSede(TABLA, body);
 }
 
 module.exports = {
-    todos,
-    uno
+    todosSede,
+    unoSede,
+    agregarSede,
+    eliminarSede
 }
