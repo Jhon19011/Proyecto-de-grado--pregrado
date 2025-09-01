@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const config = require('./config');
 
-const sede = require('./modulos/sustancias/rutas');
+const routes = require('./modulos/sustancias/rutas');
 const error = require('./red/errors');
 
 const app = express();
@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.set('port', config.app.port);
 
 // Rutas
-app.use('/api/sede', sede)
+app.use('/api', routes)
 app.use(error)
 
 module.exports = app;

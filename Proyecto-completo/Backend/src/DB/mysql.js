@@ -1,5 +1,6 @@
 const mysql = require('mysql2');
 const config = require('../config');
+//const { listar } = require('../modulos/sustancias/controlador');
 
 const dbconfig = {
     host: config.mysql.host,
@@ -34,7 +35,7 @@ function conMysql() {
 
 conMysql();
 
-function todosSede(tabla) {
+function listarDB(tabla) {
     return new Promise((resolve, reject) => {
         conexion.query(`SELECT * FROM ${tabla}`, (error, results) => {
             if (error) {
@@ -46,12 +47,12 @@ function todosSede(tabla) {
     });
 }
 
-function unoSede(tabla, id) {
+function listarUnoDB(tabla, id) {
     return new Promise((resolve, reject) => {
-        conexion.query(`SELECT * FROM ${tabla} WHERE idsede=${id}`, (error, results) => {
+        conexion.query(`SELECT * FROM ${tabla} WHERE id${tabla}=${id}`, (error, results) => {
             if (error) {
                 return reject(error);
-            } else{
+            } else {
                 resolve(results[0]);
             }
         });
@@ -59,34 +60,45 @@ function unoSede(tabla, id) {
 
 }
 
-function insertar(tabla, data) {
+function insertarDB(tabla, data) {
     return new Promise((resolve, reject) => {
-        console.log('Intentando insertar datos:', { tabla, data });
-        if (!data.nombre_sede) {
-            console.error('Falta el campo obligatorio nombre_sede');
-            return reject(new Error('Es requerido el campo nombre_sede'));
-        }
-        conexion.query(`INSERT INTO ${tabla} SET ?`, data, (error, results) => {
+
+        const query = 'INSERT INTO ?? SET ?';
+
+        conexion.query(query, [tabla, data], (error, results) => {
             if (error) {
                 console.error('Error al insertar:', error);
                 return reject(error);
             } else {
-                console.log('Inserción exitosa:', results);
+                console.log('Inserción exitosa en ${tabla}', results);
                 resolve(results);
             }
         });
     });
 }
 
-function actualizar(tabla, data) {
+function actualizarDB(tabla, data) {
     return new Promise((resolve, reject) => {
-        if (!data.idsede || !data.nombre_sede) {
-            return reject(new Error('Se requieren idsede y nombre_sede para actualizar'));
-        }
-        
-        const query = 'UPDATE ?? SET nombre_sede = ? WHERE idsede = ?';
-        const values = [tabla, data.nombre_sede, data.idsede];
+        const primaryKey = Object.keys(data).find(key => key.startsWith('id')); // Se toma la llave primaria que comienza con 'id'
 
+        if (!primaryKey) {
+            return reject(new Error('Clave primaria no encontrada en los datos para actualización'));
+        }
+
+        const idValue = data[primaryKey]; // Se toma el valor de la clave primaria
+
+        const campos = Object.keys(data).filter(key => key !== primaryKey); // Toma los campos a actualizar excluyendo la llave primaria 
+
+        const setValues = campos.map(key => `\`${key}\` = ?`).join(', '); // Se construye el SET de la consulta
+
+        const query = `UPDATE ?? SET ${setValues} WHERE ?? = ?`; // Se hace la consulta completa
+
+        const values = [
+            tabla, 
+            ...campos.map(key => data[key]),
+            primaryKey,
+            idValue
+        ];
 
         conexion.query(query, values, (error, results) => {
             if (error) {
@@ -100,35 +112,41 @@ function actualizar(tabla, data) {
     });
 }
 
-function agregarSede(tabla, data) {
-    console.log('Datos recibidos en agregarSede:', data);
-    
+function agregarDB(tabla, data) {
+    console.log('Datos recibidos en agregar:', data);
+
+    const primaryKey = Object.keys(data).find(key => key.startsWith('id'));
+
     // Verificar si existe el idsede
-    if(data.idsede) {
-        console.log('Actualizando sede existente');
-        const updateData = {
-            nombre_sede: data.nombre_sede
-        };
-        return actualizar(tabla, updateData);
+    if (primaryKey && data[primaryKey]) {
+        console.log('Actualizando elemento existente en ${tabla}');
+        return actualizarDB(tabla, data);
     } else {
-        console.log('Insertando nueva sede');
-        return insertar(tabla, data);
+        console.log('Insertando nuevo elemento en ${tabla}');
+        return insertarDB(tabla, data);
     }
 }
 
-function eliminarSede(tabla, data) {
+function eliminarDB(tabla, data) {
     return new Promise((resolve, reject) => {
-        console.log('Intentando eliminar sede:', { tabla, data });
-        if (!data.idsede) {
-            return reject(new Error('Se requiere el campo idsede'));
-        }
+
+        const primaryKey = Object.keys(data).find(key => key.startsWith('id'));
         
-        conexion.query(`DELETE FROM ${tabla} WHERE idsede = ?`, [data.idsede], (error, results) => {
+        if (!primaryKey) {
+            return reject(new Error('Clave primaria no encontrada en los datos para eliminación'));
+        }
+
+        const idValue = data[primaryKey];
+
+        const query = 'DELETE FROM ?? WHERE ?? = ?';
+        const values =  [tabla, primaryKey, idValue];
+
+        conexion.query(query, values, (error, results) => {
             if (error) {
                 console.error('Error al eliminar:', error);
                 return reject(error);
             } else {
-                console.log('Eliminación exitosa:', results);
+                console.log(`Eliminación exitosa en ${tabla}`, results);
                 resolve(results);
             }
         });
@@ -136,10 +154,10 @@ function eliminarSede(tabla, data) {
 }
 
 module.exports = {
-    todosSede,
-    unoSede,
-    agregarSede,
-    eliminarSede,
-    insertar,
-    actualizar,
+    listarDB,
+    listarUnoDB,
+    agregarDB,
+    eliminarDB,
+    insertarDB,
+    actualizarDB,
 };
