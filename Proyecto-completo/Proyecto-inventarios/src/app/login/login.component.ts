@@ -1,20 +1,54 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { NgForm, FormsModule } from '@angular/forms';
-import { LoginServiceService } from '../login-service.service';
+import { LoginServiceService } from '../services/login-service.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  constructor(private router:Router, private loginService: LoginServiceService){}
+  private auth = inject(LoginServiceService);
+  correo = '';
+  password = '';
 
-  ingresar(form: NgForm){
-    const email = form.value.email;
-    const password = form.value.password;
-    this.loginService.login(email, password);
+  constructor(private router: Router) { }
+
+  login() {
+
+    if (!this.correo || !this.password) {
+      alert('Todos los campos son obligatorios');
+      return;
+    }
+
+    console.log('Intentando logearse con:', this.correo, this.password);
+
+    this.auth.login(this.correo, this.password).subscribe({
+      next: (res) => {
+        console.log('Respuesta del servidor:', res); //respuesta completa
+        if (res && res.token) {
+          this.auth.guardarToken(res.token);
+          console.log('Usuario autenticado:', res.usuario);
+          this.router.navigate(['/inicio']);
+        } else {
+          console.error("Respuesta sin token:", res);
+          alert('Error en la autenticación');
+        }
+      },
+      error: (err) => {
+        console.error('Error al logearse:', err);
+        let mensaje = 'Error en el servidor';
+        if (err.error?.mensaje) {
+          mensaje = err.error.mensaje;
+        } else if (err.error?.body) {
+          mensaje = err.error.body;
+        }
+        alert(`Error al iniciar sesión: ${mensaje}`);
+      }
+    });
   }
 }

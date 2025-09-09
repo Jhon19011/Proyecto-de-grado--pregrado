@@ -2,18 +2,13 @@ import { RouterModule, Routes } from '@angular/router';
 import { InicioComponent } from './inicio/inicio.component';
 import { LoginComponent } from './login/login.component';
 import { SustanciasComponent } from './sustancias/sustancias.component';
-import { NgModule } from '@angular/core';
+import { AuthGuard } from './auth.guard';
 
 export const routes: Routes = [
-    {path: '', redirectTo: 'login', pathMatch: 'full'},
-    {path: 'inicio', component: InicioComponent},
     {path: 'login', component: LoginComponent},
-    {path: 'sustancias', component: SustanciasComponent}
+    {path: 'inicio', component: InicioComponent, canActivate: [AuthGuard]},
+    {path: 'sustancias', component: SustanciasComponent, canActivate: [AuthGuard]},
+    {path: '', redirectTo: '/login', pathMatch: 'full'}
 ];
-
-@NgModule({
-    imports: [RouterModule.forRoot(routes)],
-    exports: [RouterModule]
-})
 
 export class AppRoutingModule { }
