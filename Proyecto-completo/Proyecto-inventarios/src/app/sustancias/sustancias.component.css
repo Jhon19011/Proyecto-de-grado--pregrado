@@ -29,3 +29,17 @@ i:hover{
 table{
   margin-top: 10px;
 }
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table-scroll table {
+  min-width: 1200px;
+}

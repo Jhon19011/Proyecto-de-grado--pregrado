@@ -1,7 +1,7 @@
 #topBar{
   border-radius: 0px;
   border: 1px solid black;
-  background-color: rgb(238, 202, 6);
+  background-color:white;
 }
 
 #ico-user{
@@ -21,7 +21,7 @@ font-size: 50px;
   border-top: none;
   box-sizing: border-box;
   overflow-y: auto;
-  background-color: rgb(238, 202, 6);;
+  background-color: white;
 }
 
 button{
@@ -30,11 +30,11 @@ button{
   padding: 10px;
   margin: 1px;
   border: none;
-  background-color: rgb(238, 202, 6);
+  background-color: white;
 }
 
 button:hover{
-  background-color: red;
+  background-color: blue;
   color: white;
 }
 
@@ -46,7 +46,8 @@ a{
   display: flex;
 }
 a:hover{
-  background-color: white;
+  background-color: grey;
+  color: white;
   cursor: pointer;
 }
 

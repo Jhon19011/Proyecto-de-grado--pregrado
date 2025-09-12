@@ -27,7 +27,7 @@ async function login(data) {
     console.log('Password recibido:', password);
 
     // Verificar contraseña (comparación directa sin hash)
-    const validPassword = password === usuario[0].password;
+    const validPassword = await bcrypt.compare(password, usuario[0].password);
     console.log('Resultado de la comparación:', validPassword);
     
     if (!validPassword) {
@@ -55,6 +55,4 @@ async function login(data) {
     };
 }
 
-module.exports = {
-    login
-};
+module.exports = { login };

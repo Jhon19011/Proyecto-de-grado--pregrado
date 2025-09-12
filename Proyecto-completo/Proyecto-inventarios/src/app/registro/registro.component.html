@@ -1,0 +1,68 @@
+<div class="card p-4" id="topBar">
+    <div class="d-flex align-items-center" id="info-user">
+        <div class="d-flex flex-column ms-3">
+            <div>
+                <i class="bi bi-arrow-left" id="volver" (click)="volver()"></i>
+            </div>
+            <span class="fw-bold text-dark">Crear Usuario</span>
+        </div>
+    </div>
+</div>
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card card-body border border-secondary border-3" style="width: 400px;">
+
+        <form (ngSubmit)="registrar()" class="mt-4">
+
+            <div class="mb-2">
+                <input type="text" class="form-control" placeholder="Nombres" [(ngModel)]="nombres" name="nombres"
+                    required>
+            </div>
+
+            <div class="mb-2">
+                <input type="text" class="form-control" placeholder="Apellidos" [(ngModel)]="apellidos" name="apellidos"
+                    required>
+            </div>
+
+            <div class="mb-2">
+                <input type="email" class="form-control" placeholder="Correo" [(ngModel)]="correo" name="correo"
+                    required>
+            </div>
+
+            <div class="mb-2">
+                <input type="number" class="form-control" placeholder="Teléfono" [(ngModel)]="telefono" name="telefono">
+            </div>
+
+            <div class="mb-2">
+                <input type="password" class="form-control" placeholder="Contraseña" [(ngModel)]="password"
+                    name="password" required>
+            </div>
+
+            <!-- Input de rol y sede -->
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="rolSelect">Rol</label>
+                </div>
+                <select class="custom-select" id="rolSelect" [(ngModel)]="rol" name="rol" required>
+                    <option [ngValue]="null" disabled selected>Seleccione rol</option>
+                    <option [ngValue]="1">Administrador</option>
+                    <option [ngValue]="2">Auxiliar</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="sedeSelect">Sede</label>
+                </div>
+                <select class="custom-select" id="sedeSelect" [(ngModel)]="sedeU" name="sedeU" required>
+                    <option [ngValue]="null" disabled selected>Seleccione sede</option>
+                    <option [ngValue]="1">Principal Bogotá D.C.</option>
+                    <option [ngValue]="2">Bucaramanga</option>
+                    <option [ngValue]="3">Villavicencio</option>
+                    <option [ngValue]="4">Medellín</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-1">Registrar</button>
+        </form>
+    </div>
+</div>

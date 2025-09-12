@@ -1,6 +1,5 @@
 const mysql = require('mysql2');
 const config = require('../config');
-//const { listar } = require('../modulos/sustancias/controlador');
 
 const dbconfig = {
     host: config.mysql.host,

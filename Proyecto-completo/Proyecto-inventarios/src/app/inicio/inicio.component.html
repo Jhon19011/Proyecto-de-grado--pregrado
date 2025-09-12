@@ -34,26 +34,13 @@
         <!-- Administradores -->
         <button class="w-100" type="button" data-bs-toggle="collapse" data-bs-target="#submenuAdmin"
           aria-expanded="false" aria-controls="submenuAdmin">
-          Administradores
+          Usuarios
         </button>
 
         <div class="collapse" id="submenuAdmin">
           <div class="list-group">
-            <a href="#" >Lista de Administradores</a>
-            <a href="#" >Agregar Administrador</a>
-          </div>
-        </div>
-
-        <!-- Auxiliares -->
-        <button class="w-100" type="button" data-bs-toggle="collapse" data-bs-target="#submenuAux"
-          aria-expanded="false" aria-controls="submenuAux">
-          Auxiliares
-        </button>
-
-        <div class="collapse" id="submenuAux">
-          <div class="list-group">
-            <a href="#">Lista de Auxiliares</a>
-            <a href="#">Agregar Auxiliares</a>
+            <a (click)="listarUsuarios()" >Lista de Usuarios</a>
+            <a (click)="agregarUsuarios()" >Agregar Usuario</a>
           </div>
         </div>
 

@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
 const db = require('../../DB/mysql');
 
-const TABLA = 'usuarios';
+const TABLA = 'usuario';
 
 async function registrar(data) {
     if (!data.correo || !data.password) {
-        throw new Error('Correo y password son requeridos');
+        throw new Error('Correo y contraseña requeridos');
     }
 
     // Verificar si el usuario ya existe
@@ -14,11 +14,11 @@ async function registrar(data) {
         throw new Error('El usuario ya existe');
     }
 
-    // Encriptar la contraseña
+    // Hashear la contraseña
     const salt = await bcrypt.genSalt(10);
     data.password = await bcrypt.hash(data.password, salt);
 
-    // Insertar el usuario
+    // Insertar en BD
     return db.insertarDB(TABLA, data);
 }
 

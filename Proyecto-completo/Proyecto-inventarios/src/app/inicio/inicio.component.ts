@@ -17,4 +17,12 @@ export class InicioComponent {
     // Redirigir a la página de administración de sustancias
     this.router.navigate(['sustancias']);
   }
+
+  listarUsuarios(){
+    this.router.navigate(['usuarios']);
+  }
+
+  agregarUsuarios(){
+    this.router.navigate(['registro']);
+  }
 }

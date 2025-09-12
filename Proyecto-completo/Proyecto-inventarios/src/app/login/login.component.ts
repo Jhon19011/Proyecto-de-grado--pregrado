@@ -41,7 +41,7 @@ export class LoginComponent {
       },
       error: (err) => {
         console.error('Error al logearse:', err);
-        let mensaje = 'Error en el servidor';
+        let mensaje = 'Usuario o contraseña incorrectos';
         if (err.error?.mensaje) {
           mensaje = err.error.mensaje;
         } else if (err.error?.body) {

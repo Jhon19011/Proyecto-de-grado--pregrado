@@ -2,7 +2,7 @@ const { verificarToken } = require('./middleware/auth');
 const express = require('express');
 const morgan = require('morgan');
 const config = require('./config');
-const routes = require('./modulos/sustancias/rutas');
+const routes = require('./modulos/CRUD/rutas');
 const authRoutes = require('./modulos/auth/rutas');
 const userRoutes = require('./modulos/usuarios/rutas');
 const error = require('./red/errors');
@@ -28,7 +28,7 @@ app.set('port', config.app.port);
 // Rutas
 app.use('/api', routes);
 app.use('/api/auth', authRoutes);
-app.use('/api/usuarios', userRoutes);
+app.use('/api/usuario', userRoutes);
 app.use(error);
 
 module.exports = app;
