@@ -1,4 +1,5 @@
 const db = require('../../DB/mysql');
+const error = require('../../middleware/errors')
 const TABLA = 'tablas'
 
 // Crear inventario
@@ -6,24 +7,20 @@ async function crearInventario(data) {
     const { nombretabla, sedeT, principal } = data;
 
     if (!nombretabla || !sedeT) {
-        throw new Error('Los campos nombre y sede son obligatorios');
+        throw error('Los campos nombre y sede son obligatorios');
     }
 
     // Validar que no exista otro inventario con el mismo nombre en la misma sede
     const existente = await db.query(`SELECT * FROM ${TABLA} WHERE nombretabla = ? AND sedeT = ?`, [nombretabla, sedeT]);
     if (existente.length > 0) {
-        throw new Error('Ya existe un inventario con ese nombre');
-        err.statusCode = 400;
-        throw err;
+        throw error(`El inventario "${nombretabla}" ya existe en la sede ${sedeT}`, 400);
     }
 
     // Validar que no exista otro inventario principal en la misma sede
     if (principal) {
         const existePrincipal = await db.query(`SELECT * FROM ${TABLA} WHERE sedeT = ? AND principal = 1`, [sedeT]);
         if (existePrincipal.length > 0) {
-            throw new Error('Ya existe un inventario principal en esta sede');
-            err.statusCode = 400;
-            throw err;
+            throw error(`Ya existe un inventario principal en la sede ${sedeT}`, 400);
         }
     }
 

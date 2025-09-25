@@ -1,11 +1,8 @@
-function error (mensaje, code){
-    let e = new Error(mensaje);
 
-    if(code){
-        e.statusCode = code;
-    }
-
+function error(mensaje, code) {
+    const e = new Error(mensaje);
+    e.statusCode = code || 500;
     return e;
 }
 
-mopdule.exports = error;
+module.exports = error;

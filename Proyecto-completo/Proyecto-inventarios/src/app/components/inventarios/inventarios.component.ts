@@ -55,14 +55,30 @@ export class InventariosComponent {
     } else {
       // crear inventario
       this.servicioInventarios.crearInventario(data).subscribe({
-        next: (res: any) => {
+        next: () => {
           alert('Inventario creado con éxito');
           this.listarInventarios();
           this.resetForm();
         },
         error: (err) => {
           console.error('Error al crear inventario', err);
-          alert(err.error.body);
+
+          // Si el error es un string se parsea
+          let mensaje = 'Error inesperado al crear inventario';
+
+          if(err.error){
+            if(typeof err.error === 'string'){
+              try {
+                const parsed = JSON.parse(err.error);
+                mensaje = parsed.body || mensaje;
+              } catch {
+                mensaje = err.error; // Si no es JSON se muestra tal cual
+              }
+            } else if (err.error.body){
+              mensaje = err.error.body;
+            }
+          }
+          alert(mensaje);
         }
       });
     }
