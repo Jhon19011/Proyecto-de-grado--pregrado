@@ -1,27 +1,56 @@
 const express = require('express');
 const router = express.Router();
 const controlador = require('./controlador');
-const crud = require('../CRUD/controlador');
 const respuesta = require('../../red/respuestas');
 
-router.post('/registro', registro);
-
-router.get('', async (req, res) =>{
-    try{
-        const usuarios = await crud.listar();
-        respuesta.success(req, res, usuarios, 200);
-    }catch(error){
-        respuesta.error(req, res, error.message, 500);
+// Crear usuario
+router.post('/', async (req, res, next) => {
+    try {
+        const nuevo = await controlador.crearUsuario(req.body);
+        respuesta.success(req, res, nuevo, 201);
+    } catch (err) {
+        next(err);
     }
 });
 
-async function registro(req, res) {
+// Listar usuarios
+router.get('/', async (req, res, next) => {
     try {
-        const usuario = await controlador.registrar(req.body);
-        respuesta.success(req, res, 'Usuario registrado exitosamente', 201);
-    } catch (error) {
-        respuesta.error(req, res, error.message, 400);
+        const usuarios = await controlador.listarUsuarios();
+        respuesta.success(req, res, usuarios, 200);
+    } catch (err) {
+        next(err);
     }
-}
+});
+
+//Listar usuario por id
+router.get('/:id', async (req, res, next) => {
+    try {
+        const usuario = await controlador.obtenerUsuario(req.params.id);
+        respuesta.success(req, res, usuario, 200);
+    } catch (err) {
+        next(err);
+    }
+});
+
+//Actualizar Usuario
+router.put('/:id', async (req, res, next) => {
+    try {
+        const actualizado = await controlador.actualizarUsuario(req.params.id, req.body);
+        respuesta.success(req, res, actualizado, 200);
+    } catch (err) {
+        next(err);
+    }
+});
+
+//Eliminar usuario
+router.delete('/:id', async (req, res, next) => {
+    try {
+        const result = await controlador.eliminarUsuario(req.params.id);
+        respuesta.success(req, res, result, 200);
+    } catch (err) {
+        next(err);
+    }
+});
 
 module.exports = router;

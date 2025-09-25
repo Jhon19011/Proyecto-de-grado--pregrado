@@ -13,9 +13,9 @@ export class InicioComponent {
 
   constructor(private router: Router) {}
 
-  administrarSustancias(){
+  administrarInventarios(){
     // Redirigir a la página de administración de sustancias
-    this.router.navigate(['sustancias']);
+    this.router.navigate(['inventarios']);
   }
 
   listarUsuarios(){
@@ -24,5 +24,8 @@ export class InicioComponent {
 
   agregarUsuarios(){
     this.router.navigate(['registro']);
+  }
+  sustancias(){
+    this.router.navigate(['sustancias']);
   }
 }

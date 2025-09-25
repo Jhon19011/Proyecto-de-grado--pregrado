@@ -4,7 +4,7 @@
             <div>
                 <i class="bi bi-arrow-left" id="volver" (click)="volver()"></i>
             </div>
-            <span class="fw-bold text-dark">Crear Usuario</span>
+            <span class="fw-bold text-dark">{{ modoEdicion ? 'Editar Usuario' : 'Crear Usuario' }}</span>
         </div>
     </div>
 </div>
@@ -32,7 +32,7 @@
                 <input type="number" class="form-control" placeholder="Teléfono" [(ngModel)]="telefono" name="telefono">
             </div>
 
-            <div class="mb-2">
+            <div class="mb-2" *ngIf="!modoEdicion">
                 <input type="password" class="form-control" placeholder="Contraseña" [(ngModel)]="password"
                     name="password" required>
             </div>
@@ -62,7 +62,7 @@
                     <option [ngValue]="4">Medellín</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary w-100 mt-1">Registrar</button>
+            <button type="submit" class="btn btn-primary w-100 mt-1">{{ modoEdicion ? 'Actualizar' : 'Registrar' }}</button>
         </form>
     </div>
 </div>

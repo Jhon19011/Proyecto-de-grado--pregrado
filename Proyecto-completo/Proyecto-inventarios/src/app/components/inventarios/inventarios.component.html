@@ -1,0 +1,61 @@
+<div class="card p-4" id="topBar">
+  <div class="d-flex align-items-center" id="info-user">
+    <div class="d-flex flex-column ms-3">
+      <div>
+        <i class="bi bi-arrow-left" id="volver" (click)="volver()"></i>
+      </div>
+      <span class="fw-bold text-dark">Gestión de Inventarios</span>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <!-- Formulario -->
+  <div class="card card-body mt-3">
+    <h5>{{ idtablas ? 'Editar Inventario' : 'Crear Inventario' }}</h5>
+    <div class="mb-2">
+      <input type="text" class="form-control" placeholder="Nombre del inventario"
+             [(ngModel)]="nombretabla" name="nombretabla">
+    </div>
+    <div class="mb-2">
+      <input type="number" class="form-control" placeholder="ID de la sede"
+             [(ngModel)]="sedeT" name="sedeT">
+    </div>
+    <div class="mb-2 form-check">
+      <input type="checkbox" class="form-check-input" [(ngModel)]="principal" name="principal" id="chkPrincipal">
+      <label class="form-check-label" for="chkPrincipal">¿Inventario principal?</label>
+    </div>
+    <button class="btn btn-success w-100" (click)="guardarInventario()">
+      {{ idtablas ? 'Actualizar Inventario' : 'Crear Inventario' }}
+    </button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card card-body mt-4">
+    <h5>Lista de Inventarios</h5>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Sede</th>
+          <th>Principal</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inv of inventarios">
+          <td>{{ inv.nombretabla }}</td>
+          <td>{{ inv.sedeT }}</td>
+          <td>{{ inv.principal ? 'Sí' : 'No' }}</td>
+          <td>
+            <button class="btn btn-primary btn-sm me-2"
+                    (click)="idtablas = inv.idtablas; nombretabla = inv.nombretabla; sedeT = inv.sedeT; principal = inv.principal">
+              Editar
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="eliminarInventario(inv.idtablas)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

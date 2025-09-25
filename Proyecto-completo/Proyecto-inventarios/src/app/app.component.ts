@@ -10,20 +10,10 @@ import { CommonModule } from '@angular/common';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit {
+export class AppComponent{
   title = 'Proyecto-inventarios';
   private http = inject(HttpClient);
   roles: any[] = [];
   apiUrl = 'http://localhost:4000/api/rol';
-
-  ngOnInit(){
-    this.listarRoles();
-  }
-
-  listarRoles() {
-    this.http.get<any>(this.apiUrl).subscribe({
-      next: (data) => this.roles = data.body,
-      error: (err) => console.error('Error al listar los roles:', err)
-    });
-  }  
+  
 }

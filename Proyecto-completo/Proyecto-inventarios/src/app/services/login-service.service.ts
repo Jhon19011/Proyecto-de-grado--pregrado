@@ -24,20 +24,4 @@ export class LoginServiceService {
   logout() {
     localStorage.removeItem('token');
   }
-
-  registrar(nombres: string, apellidos: string, correo: string, telefono: string, password: string, rol: number, sedeU: number){
-    return this.http.post(`${this.apiUrl}/usuario/registro`,{
-      nombres,
-      apellidos,
-      correo,
-      telefono,
-      password,
-      rol,
-      sedeU
-    });
-  }
-
-  listarUsuarios(){
-    return this.http.get(`${this.apiUrl}/usuario`)
-  }
 }

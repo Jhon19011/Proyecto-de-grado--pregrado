@@ -1,0 +1,148 @@
+<div class="col-auto">
+  <div class="card p-4" id="topBar">
+    <div class="d-flex align-items-center" id="info-user">
+      <div class="d-flex flex-column ms-3">
+        <div>
+          <i class="bi bi-arrow-left" id="volver" (click)="volver()"></i>
+        </div>
+        <span class="fw-bold text-dark">Sustancias</span>
+      </div>
+    </div>
+  </div>
+  <div>
+    <i id="adicionar" class="bi bi-plus-square-fill" (click)="resetForm()" data-bs-toggle="modal"
+      data-bs-target="#crearSustanciaModal"></i>
+
+    <i id="filtro" class="bi bi-funnel-fill"></i>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Numero</th>
+          <th>Código</th>
+          <th>Nombre Comercial</th>
+          <th>Marca</th>
+          <th>Lote</th>
+          <th>Clase de Peligro Según ONU</th>
+          <th>Categoría IARC</th>
+          <th>CAS</th>
+          <th>Estado</th>
+          <th>Fecha de Vencimiento</th>
+          <th>Presentación</th>
+          <th>PDF</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of sustancias">
+          <td>{{s.numero}}</td>
+          <td>{{s.codigo}}</td>
+          <td>{{s.nombreComercial}}</td>
+          <td>{{s.marca}}</td>
+          <td>{{s.lote}}</td>
+          <td>{{s.clasedepeligrosegunonu}}</td>
+          <td>{{s.categoriaIARC}}</td>
+          <td>{{s.CAS}}</td>
+          <td>{{s.estado}}</td>
+          <td>{{s.fechadevencimiento}}</td>
+          <td>{{s.presentacion}}</td>
+          <td>{{s.PDF}}</td>
+          <td>
+            <button class="btn btn-sm btn-primary me-2" (click)="editarSustancia(s)" data-bs-toggle="modal"
+              data-bs-target="#crearSustanciaModal">
+              Editar
+            </button>
+
+            <button class="btn btn-sm btn-danger" (click)="eliminarSustancia(s.idsustancia)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="crearSustanciaModal" tabindex="-1" aria-labelledby="crearSustanciaModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- Encabezado -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="crearSustanciaModalLabel">Registrar Sustancia</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <!-- Cuerpo con formulario -->
+      <div class="modal-body">
+        <form (ngSubmit)="guardarSustancia()" #formSustancia="ngForm">
+          <div class="row g-2">
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="numero" name="numero" placeholder="Numero" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="codigo" name="codigo" placeholder="Código" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="row g-2 mt-2">
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="nombreComercial" name="nombreComercial" placeholder="Nombre Comercial"
+                class="form-control">
+            </div>
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="marca" name="marca" placeholder="Marca" class="form-control">
+            </div>
+          </div>
+
+          <div class="row g-2 mt-2">
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="lote" name="lote" placeholder="Lote" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="CAS" name="CAS" placeholder="CAS" class="form-control">
+            </div>
+          </div>
+
+          <div class="row g-2 mt-2">
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="clasedepeligrosegunonu" name="clasedepeligrosegunonu"
+                placeholder="Clase de Peligro Según la ONU" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="categoriaIARC" name="categoriaIARC" placeholder="Categoría IARC"
+                class="form-control">
+            </div>
+          </div>
+
+          <div class="row g-2 mt-2">
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="estado" name="estado" placeholder="Estado" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <input type="date" [(ngModel)]="fechadevencimiento" name="fechadevencimiento"
+                placeholder="Fecha de Vencimiento" class="form-control">
+            </div>
+          </div>
+
+          <div class="row g-2 mt-2">
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="presentacion" name="presentacion" placeholder="Presentación"
+                class="form-control">
+            </div>
+            <div class="col-md-6">
+              <input type="text" [(ngModel)]="PDF" name="PDF" placeholder="PDF" class="form-control">
+            </div>
+          </div>
+          <!-- botones -->
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary w-100">{{ idsustancia ? 'Actualizar' :
+              'Agregar' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

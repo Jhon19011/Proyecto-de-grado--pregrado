@@ -43,3 +43,13 @@ table{
 .table-scroll table {
   min-width: 1200px;
 }
+#adicionar{
+  font-size: 25px;
+  color: white;
+  margin-left: 10px;
+}
+#filtro{
+  font-size: 25px;
+  color: white;
+  margin-left: 10px;
+}

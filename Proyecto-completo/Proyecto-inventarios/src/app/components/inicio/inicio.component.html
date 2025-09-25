@@ -16,6 +16,20 @@
   <div class="col" id="menu">
     <div class="d-flex justify-content-start">
       <div style="width: 250px;">
+        
+        <!-- Sustancias -->
+        <button class="w-100" (click)="sustancias()" type="button" data-bs-toggle="collapse"
+          data-bs-target="#submenuSustancias" aria-expanded="false" aria-controls="submenuSustancias">
+          Sustancias
+        </button>
+
+        <!-- <div class="collapse" id="submenuSustancias">
+          <div class="list-group ">
+            <a (click)="administrarSustancias()">Inventario Principal</a>
+            <a (click)="administrarSustancias()">Inventarios Secundarios</a>
+            <a (click)="administrarSustancias()">Agregar Inventario Secundario</a>
+          </div>
+        </div> -->
 
         <!-- Inventario -->
         <button class="w-100" type="button" data-bs-toggle="collapse"
@@ -25,9 +39,7 @@
 
         <div class="collapse" id="submenuInventario">
           <div class="list-group ">
-            <a (click)="administrarSustancias()">Inventario Principal</a>
-            <a (click)="administrarSustancias()">Inventarios Secundarios</a>
-            <a (click)="administrarSustancias()">Agregar Inventario Secundario</a>
+            <a (click)="administrarInventarios()">Inventario</a>
           </div>
         </div>
 
