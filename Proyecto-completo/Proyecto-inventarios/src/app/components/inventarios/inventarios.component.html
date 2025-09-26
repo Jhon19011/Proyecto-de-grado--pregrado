@@ -53,6 +53,7 @@
               Editar
             </button>
             <button class="btn btn-danger btn-sm" (click)="eliminarInventario(inv.idtablas)">Eliminar</button>
+            <button class="btn btn-success btn-sm" [routerLink]="['/inventarios', inv.idtablas]">Detalle</button>
           </td>
         </tr>
       </tbody>

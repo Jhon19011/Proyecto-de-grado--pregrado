@@ -1,0 +1,132 @@
+<div class="card p-3">
+    <h4>Detalle del Inventario {{ tabla }}</h4>
+
+    <!-- Formulario para asignar sustancia -->
+    <div class="card card-body mt-3">
+        <h5>Asignar Sustancia</h5>
+
+        <div class="mb-2">
+            <label>Sustancia</label>
+            <select class="form-control" [(ngModel)]="sustancia">
+                <option [ngValue]="null">-- Selecciona una sustancia --</option>
+                <option *ngFor="let s of sustanciasDisponibles" [value]="s.idsustancia">
+                    {{ s.nombreComercial }} - {{ s.marca }}
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-2">
+            <input type="number" class="form-control" placeholder="Cantidad" [(ngModel)]="cantidad">
+        </div>
+
+        <div class="mb-2">
+            <input type="number" class="form-control" placeholder="Cantidad Remanente" [(ngModel)]="cantidadremanente">
+        </div>
+
+        <div class="mb-2">
+            <input type="number" class="form-control" placeholder="Gasto Total" [(ngModel)]="gastototal">
+        </div>
+
+        <div class="mb-2">
+            <input type="text" class="form-control" placeholder="Ubicación de almacenamiento"
+                [(ngModel)]="ubicaciondealmacenamiento">
+        </div>
+
+        <button class="btn btn-success w-100" (click)="asignarSustancia()">
+            Asignar Sustancia
+        </button>
+    </div>
+
+    <!-- Tabla de sustancias asignadas -->
+    <div class="card card-body mt-4">
+        <h5>Sustancias Asignadas</h5>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Código</th>
+                    <th>Nombre Comercial</th>
+                    <th>Marca</th>
+                    <th>Lote</th>
+                    <th>CAS</th>
+                    <th>Clase de Peligro Según la ONU</th>
+                    <th>Categoría IARC</th>
+                    <th>Estado</th>
+                    <th>Fecha de Vencimiento</th>
+                    <th>Presentación</th>
+                    <th>Cantidad</th>
+                    <th>Cantidad Remanente</th>
+                    <th>Gasto Total</th>
+                    <th>Ubicación de Almacenamiento</th>
+                    <th>PDF</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let s of sustanciasAsignadas">
+                    <td>{{ s.numero }}</td>
+                    <td>{{ s.codigo }}</td>
+                    <td>{{ s.nombreComercial }}</td>
+                    <td>{{ s.marca }}</td>
+                    <td>{{ s.lote }}</td>
+                    <td>{{ s.CAS }}</td>
+                    <td>{{ s.clasedepeligrosegunonu }}</td>
+                    <td>{{ s.categoriaIARC }}</td>
+                    <td>{{ s.estado }}</td>
+                    <td>{{ s.fechadevencimiento }}</td>
+                    <td>{{ s.presentacion }}</td>
+                    <td>{{ s.cantidad }}</td>
+                    <td>{{ s.cantidadremanente }}</td>
+                    <td>{{ s.gastototal }}</td>
+                    <td>{{ s.ubicaciondealmacenamiento }}</td>
+                    <td>{{ s.PDF }}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" (click)="abrirEdicion(s)">Editar</button>
+                        <button class="btn btn-danger btn-sm"
+                            (click)="eliminarAsignacion(s.idinventario_sustancia)">Quitar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de edición -->
+    <div class="modal fade" id="modalEdicion" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Asignación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" *ngIf="asignacionSeleccionada">
+                    <form>
+                        <div class="mb-2">
+                            <label>Cantidad</label>
+                            <input type="number" [(ngModel)]="asignacionSeleccionada.cantidad" name="cantidad"
+                                class="form-control">
+                        </div>
+                        <div class="mb-2">
+                            <label>Cantidad Remanente</label>
+                            <input type="number" [(ngModel)]="asignacionSeleccionada.cantidadremanente"
+                                name="cantidadremanente" class="form-control">
+                        </div>
+                        <div class="mb-2">
+                            <label>Gasto Total</label>
+                            <input type="number" [(ngModel)]="asignacionSeleccionada.gastototal" name="gastototal"
+                                class="form-control">
+                        </div>
+                        <div class="mb-2">
+                            <label>Ubicación</label>
+                            <input type="text" [(ngModel)]="asignacionSeleccionada.ubicaciondealmacenamiento"
+                                name="ubicaciondealmacenamiento" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success" (click)="guardarEdicion()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

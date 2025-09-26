@@ -6,6 +6,7 @@ const authRoutes = require('./modulos/auth/rutas');
 const userRoutes = require('./modulos/usuarios/rutas');
 const sustanciasRoutes = require('./modulos/sustancias/rutas');
 const inventariosRoutes = require('./modulos/inventarios/rutas');
+const inventarioSustancias = require('./modulos/inventario_sustancias/rutas')
 const error = require('./red/errors');
 const cors = require('cors');
 
@@ -30,6 +31,7 @@ app.use(verificarToken);
 // Rutas Privadas
 app.use('/api/sustancias', sustanciasRoutes);
 app.use('/api/inventarios', inventariosRoutes);
+app.use('/api/inventario_sustancias', inventarioSustancias);
 
 app.use(error);
 
