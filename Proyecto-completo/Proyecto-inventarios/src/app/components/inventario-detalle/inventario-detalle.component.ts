@@ -4,6 +4,7 @@ import { InventarioSustanciaService } from '../../services/inventario-sustancia.
 import { SustanciasService } from '../../services/sustancias.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { MovimientosService } from '../../services/movimientos.service';
 declare var bootstrap: any;
 
 @Component({
@@ -14,12 +15,15 @@ declare var bootstrap: any;
 })
 export class InventarioDetalleComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute, private servicioAsignacion: InventarioSustanciaService, private servicioSustancias: SustanciasService) { }
+  constructor(private route: ActivatedRoute, private servicioAsignacion: InventarioSustanciaService, private servicioSustancias: SustanciasService, private servicioMovimientos: MovimientosService) { }
 
   tabla!: number;
   sustanciasAsignadas: any[] = [];
   sustanciasDisponibles: any[] = [];
   asignacionSeleccionada: any = null;
+  movimientos: any[] = [];
+  movimientoSeleccionado: any = null;
+  modalMov: any;
   modalRef: any;
 
   // para asignar
@@ -78,6 +82,41 @@ export class InventarioDetalleComponent implements OnInit {
       error: (err) => {
         console.error('Error al asignar:', err);
         alert(err.error.body || 'Error al asignar sustancia');
+      }
+    });
+  }
+
+  abrirMovimientos(asignacion: any){
+    this.movimientoSeleccionado = { ...asignacion, tipo: 'entrada', cantidad: null, motivo:'', usuario:''};
+    const modal = document.getElementById('modalMov');
+    this.modalMov = new bootstrap.Modal(modal!);
+    this.modalMov.show();
+
+    // Cargar historial
+    this.servicioMovimientos.listarMovimientos(asignacion.idinventario_sustancia).subscribe({
+      next: (res:any) => this.movimientos = res.body || res,
+      error: (err) => console.error('Error al listar movimientos:', err)
+    });
+  }
+
+  registrarMovimiento(){
+    const mov = {
+      inventario_sustancia_id: this.movimientoSeleccionado.idinventario_sustancia,
+      tipo: this.movimientoSeleccionado.tipo,
+      cantidad: this.movimientoSeleccionado.cantidad,
+      motivo: this.movimientoSeleccionado.motivo,
+      usuario: this.movimientoSeleccionado.usuario
+    };
+
+    this.servicioMovimientos.registrarMovimiento(mov).subscribe({
+      next: () => {
+        alert('Movimiento registrado con éxito');
+        this.cargarSustancias();
+        this.abrirMovimientos(this.movimientoSeleccionado);
+      },
+      error: (err) => {
+        console.error('Error al registrar movimiento:', err);
+        alert(err.error.body || 'Error al registrar movimiento');
       }
     });
   }

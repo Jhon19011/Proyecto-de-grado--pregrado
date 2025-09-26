@@ -82,6 +82,7 @@
                     <td>{{ s.PDF }}</td>
                     <td>
                         <button class="btn btn-primary btn-sm" (click)="abrirEdicion(s)">Editar</button>
+                        <button class="btn btn-info btn-sm" (click)="abrirMovimientos(s)">Movimientos</button>
                         <button class="btn btn-danger btn-sm"
                             (click)="eliminarAsignacion(s.idinventario_sustancia)">Quitar</button>
                     </td>
@@ -125,6 +126,74 @@
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button class="btn btn-success" (click)="guardarEdicion()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de movimientos -->
+    <div class="modal fade" id="modalMov" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Movimientos - {{ movimientoSeleccionado?.nombreComercial }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" *ngIf="movimientoSeleccionado">
+
+                    <!-- Formulario movimiento -->
+                    <form>
+                        <div class="mb-2">
+                            <label>Tipo</label>
+                            <select class="form-control" [(ngModel)]="movimientoSeleccionado.tipo" name="tipo">
+                                <option value="entrada">Entrada</option>
+                                <option value="salida">Salida</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label>Cantidad</label>
+                            <input type="number" [(ngModel)]="movimientoSeleccionado.cantidad" name="cantidad"
+                                class="form-control">
+                        </div>
+                        <div class="mb-2">
+                            <label>Motivo</label>
+                            <input type="text" [(ngModel)]="movimientoSeleccionado.motivo" name="motivo"
+                                class="form-control">
+                        </div>
+                        <div class="mb-2">
+                            <label>Usuario</label>
+                            <input type="text" [(ngModel)]="movimientoSeleccionado.usuario" name="usuario"
+                                class="form-control">
+                        </div>
+                        <button type="button" class="btn btn-success w-100"
+                            (click)="registrarMovimiento()">Registrar</button>
+                    </form>
+
+                    <hr>
+
+                    <!-- Historial -->
+                    <h6>Historial de Movimientos</h6>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Fecha</th>
+                                <th>Motivo</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let m of movimientos">
+                                <td>{{ m.tipo }}</td>
+                                <td>{{ m.cantidad }}</td>
+                                <td>{{ m.fecha | date:'short' }}</td>
+                                <td>{{ m.motivo }}</td>
+                                <td>{{ m.usuario }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
                 </div>
             </div>
         </div>
