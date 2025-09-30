@@ -113,6 +113,12 @@ export class InventarioDetalleComponent implements OnInit {
         alert('Movimiento registrado con éxito');
         this.cargarSustancias();
         this.abrirMovimientos(this.movimientoSeleccionado);
+        if(this.modalMov) {
+          this.modalMov.hide();
+          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+          document.body.classList.remove('modal-open');
+          document.body.style.removeProperty('padding-right');
+        }
       },
       error: (err) => {
         console.error('Error al registrar movimiento:', err);

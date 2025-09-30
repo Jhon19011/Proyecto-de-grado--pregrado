@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const db = require('../../DB/mysql');
 
+
 const TABLA = 'usuario';
 
 async function crearUsuario(data) {
@@ -13,7 +14,7 @@ async function crearUsuario(data) {
     // Ya existe el correo?
     const usuarioExistente = await db.query(`SELECT * FROM ${TABLA} WHERE correo = ?`, [correo]);
 
-    if(usuarioExistente.length > 0){
+    if (usuarioExistente.length > 0) {
         throw new Error('El usuario ya existe');
     }
 
@@ -26,7 +27,7 @@ async function crearUsuario(data) {
 
     const result = await db.query(query, [nombres, apellidos, correo, telefono, contrsenahasheada, rol, sedeU]);
 
-    return {id: result.insertId, nombres, apellidos, correo, telefono, rol, sedeU};
+    return { id: result.insertId, nombres, apellidos, correo, telefono, rol, sedeU };
 }
 
 async function listarUsuarios() {
@@ -42,8 +43,8 @@ async function obtenerUsuario(id) {
 }
 
 async function actualizarUsuario(id, data) {
-    if(data.password){
-        const salt = await bcrypt.getSalt(10);
+    if (data.password) {
+        const salt = await bcrypt.genSalt(10);
         data.password = await bcrypt.hash(data.password, salt);
     }
 
@@ -53,7 +54,7 @@ async function actualizarUsuario(id, data) {
     const query = `UPDATE ${TABLA} SET ${campos} WHERE idusuario = ?`;
     await db.query(query, [...valores, id]);
 
-    return {id, ...data};
+    return { id, ...data };
 }
 
 async function eliminarUsuario(id) {
@@ -66,5 +67,5 @@ module.exports = {
     crearUsuario,
     obtenerUsuario,
     actualizarUsuario,
-    eliminarUsuario
+    eliminarUsuario,
 };

@@ -73,7 +73,7 @@
                     <td>{{ s.clasedepeligrosegunonu }}</td>
                     <td>{{ s.categoriaIARC }}</td>
                     <td>{{ s.estado }}</td>
-                    <td>{{ s.fechadevencimiento }}</td>
+                    <td>{{ s.fechadevencimiento | date:'short'}}</td>
                     <td>{{ s.presentacion }}</td>
                     <td>{{ s.cantidad }}</td>
                     <td>{{ s.cantidadremanente }}</td>
@@ -193,7 +193,6 @@
                             </tr>
                         </tbody>
                     </table>
-
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controlador = require('./controlador');
+const recuperar = require('./recuperar')
 const respuesta = require('../../red/respuestas');
 
 // Crear usuario
@@ -49,6 +50,27 @@ router.delete('/:id', async (req, res, next) => {
         const result = await controlador.eliminarUsuario(req.params.id);
         respuesta.success(req, res, result, 200);
     } catch (err) {
+        next(err);
+    }
+});
+
+//Solicitar recuperación
+router.post('/recuperar', async (req, res, next) => {
+    try {
+        const { correo } = req.body;
+        const result = await recuperar.solicitarRecuperacion(correo);
+        respuesta.success(req, res, result, 200);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/restablecer', async (req, res, next) => {
+    try {
+        const { token, nuevaContrasena } = req.body;
+        const result = await recuperar.restablecerContrasena(token, nuevaContrasena);
+        respuesta.success(req, res, result, 200);
+    } catch (err){
         next(err);
     }
 });

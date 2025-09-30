@@ -16,7 +16,7 @@ export class LoginComponent {
   correo = '';
   password = '';
 
-  constructor(private router: Router) { }
+  constructor(public router: Router) { }
 
   login() {
 

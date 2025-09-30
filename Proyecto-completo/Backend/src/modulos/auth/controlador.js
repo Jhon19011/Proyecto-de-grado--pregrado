@@ -46,7 +46,7 @@ async function login(data) {
 
     return {
         usuario: {
-            id: usuario[0].id,
+            id: usuario[0].idusuario,
             correo: usuario[0].correo
         },
         token
