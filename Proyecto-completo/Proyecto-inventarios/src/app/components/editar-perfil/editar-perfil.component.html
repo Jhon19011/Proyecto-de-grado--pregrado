@@ -1,0 +1,25 @@
+<div class="container mt-4" style="max-width: 500px;">
+  <div class="card p-4">
+    <h3 class="mb-3">Editar Perfil</h3>
+    <form (ngSubmit)="guardar()">
+      <div class="mb-3">
+        <label for="nombres" class="form-label">Nombres</label>
+        <input id="nombres" [(ngModel)]="nombres" name="nombres" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="apellidos" class="form-label">Apellidos</label>
+        <input id="apellidos" [(ngModel)]="apellidos" name="apellidos" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo</label>
+        <input id="correo" type="email" [(ngModel)]="correo" name="correo" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="telefono" class="form-label">Teléfono</label>
+        <input id="telefono" [(ngModel)]="telefono" name="telefono" class="form-control">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+    </form>
+  </div>
+</div>
+

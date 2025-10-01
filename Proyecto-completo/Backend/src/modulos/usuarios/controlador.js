@@ -62,10 +62,22 @@ async function eliminarUsuario(id) {
     return { mensaje: 'Usuario eliminado con éxito' };
 }
 
+async function actualizarPerfil(id, data) {
+    const {nombres, apellidos, correo, telefono } = data;
+    const query = `
+    UPDATE usuario
+    SET nombres = ?, apellidos = ?, correo = ?, telefono = ?
+    WHERE idusuario = ?`;
+
+    await db.query(query, [nombres, apellidos, correo, telefono, id]);
+    return { mensaje: 'Perfil actualizado con éxito' };
+}
+
 module.exports = {
     listarUsuarios,
     crearUsuario,
     obtenerUsuario,
     actualizarUsuario,
     eliminarUsuario,
+    actualizarPerfil
 };

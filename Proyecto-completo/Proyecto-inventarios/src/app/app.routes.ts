@@ -9,6 +9,7 @@ import { InventariosComponent } from './components/inventarios/inventarios.compo
 import { InventarioDetalleComponent } from './components/inventario-detalle/inventario-detalle.component';
 import { RecuperarComponent } from './components/recuperar/recuperar.component';
 import { RestablecerComponent } from './components/restablecer/restablecer.component';
+import { EditarPerfilComponent } from './components/editar-perfil/editar-perfil.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -18,6 +19,7 @@ export const routes: Routes = [
     { path: 'restablecer', component: RestablecerComponent },
     { path: 'inicio', component: InicioComponent, canActivate: [AuthGuard] },
     { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard] },
+    { path: 'editar-perfil', component: EditarPerfilComponent, canActivate: [AuthGuard] },
     { path: 'sustancias', component: SustanciasComponent, canActivate: [AuthGuard] },
     { path: 'inventarios', component: InventariosComponent, canActivate: [AuthGuard] },
     { path: 'inventarios/:id', component: InventarioDetalleComponent, canActivate: [AuthGuard] },
