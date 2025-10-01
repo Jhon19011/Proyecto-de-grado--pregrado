@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { LoginServiceService } from '../../services/login-service.service';
 
 @Component({
   selector: 'app-inicio',
@@ -10,8 +11,17 @@ import { Router } from '@angular/router';
   styleUrl: './inicio.component.css'
 })
 export class InicioComponent {
+  nombreUsuario = '';
+  apellidoUsuario = '';
+  rol = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private loginService: LoginServiceService) {}
+
+  ngOnInit(){
+    this.nombreUsuario = localStorage.getItem('nombre') || 'Usuario';
+    this.apellidoUsuario = localStorage.getItem('apellido') || 'Apellidos';
+    this.rol = localStorage.getItem('rol') || '';
+  }
 
   administrarInventarios(){
     // Redirigir a la página de administración de sustancias
@@ -27,5 +37,9 @@ export class InicioComponent {
   }
   sustancias(){
     this.router.navigate(['sustancias']);
+  }
+
+  logout(){
+    this.loginService.logout();
   }
 }

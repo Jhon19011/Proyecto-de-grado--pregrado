@@ -5,8 +5,8 @@
     <div class="d-flex align-items-center" id="info-user">
       <i class="bi bi-person-circle" id="ico-user"></i>
       <div class="d-flex flex-column ms-3">
-        <span class="fw-bold text-dark">Nombre usuario</span>
-        <span class="text-muted small">Rol</span>
+        <span class="fw-bold text-dark">{{ nombreUsuario }} {{ apellidoUsuario }}</span>
+        <span class="text-muted small">{{ rol }}</span>
       </div>
     </div>
   </div>
@@ -23,28 +23,14 @@
           Sustancias
         </button>
 
-        <!-- <div class="collapse" id="submenuSustancias">
-          <div class="list-group ">
-            <a (click)="administrarSustancias()">Inventario Principal</a>
-            <a (click)="administrarSustancias()">Inventarios Secundarios</a>
-            <a (click)="administrarSustancias()">Agregar Inventario Secundario</a>
-          </div>
-        </div> -->
-
         <!-- Inventario -->
-        <button class="w-100" type="button" data-bs-toggle="collapse"
+        <button class="w-100" (click)="administrarInventarios()"  type="button" data-bs-toggle="collapse"
           data-bs-target="#submenuInventario" aria-expanded="false" aria-controls="submenuInventario">
           Inventarios
         </button>
 
-        <div class="collapse" id="submenuInventario">
-          <div class="list-group ">
-            <a (click)="administrarInventarios()">Inventario</a>
-          </div>
-        </div>
-
-        <!-- Administradores -->
-        <button class="w-100" type="button" data-bs-toggle="collapse" data-bs-target="#submenuAdmin"
+        <!-- Usuarios -->
+        <button *ngIf="rol === 'Administrador'"  class="w-100" type="button" data-bs-toggle="collapse" data-bs-target="#submenuAdmin"
           aria-expanded="false" aria-controls="submenuAdmin">
           Usuarios
         </button>
@@ -68,9 +54,7 @@
             <a href="#">Editar perfil</a>
           </div>
         </div>
-
-        <button class="w-100">Cerrar Sesión</button>
-
+        <button class="w-100" (click)="logout()" >Cerrar Sesión</button>
       </div>
     </div>
   </div>

@@ -4,6 +4,11 @@ const db = require('../../DB/mysql');
 
 const TABLA = 'usuario';
 
+const rolesMap = {
+    1: 'Administrador',
+    4: 'Auxiliar'
+};
+
 async function login(data) {
     const { correo, password } = data;
 
@@ -19,26 +24,26 @@ async function login(data) {
         throw new Error('Usuario no encontrado');
     }
 
-    console.log('Usuario encontrado:', {
-        id: usuario[0].idusuario,
-        correo: usuario[0].correo,
-        passwordLength: usuario[0].password ? usuario[0].password.length : 0
-    });
-    console.log('Password recibido:', password);
+    // Se define el usuario
+    const usuarios = usuario[0];
 
     const validPassword = await bcrypt.compare(password, usuario[0].password);
-
-    console.log('Resultado de la comparación:', validPassword);
 
     if (!validPassword) {
         throw new Error('Contraseña incorrecta');
     }
 
+    // Mapear rol de usuario
+    const rolNombre = rolesMap[Number(usuarios.rol)];
+
     // Generar token
     const token = jwt.sign(
         {
-            id: usuario[0].idusuario,
-            correo: usuario[0].correo
+            id: usuarios.idusuario,
+            correo: usuarios.correo,
+            nombre: usuarios.nombres,
+            apellidos: usuarios.apellidos,
+            rol: rolNombre
         },
         'secreto',
         { expiresIn: '1h' }
@@ -46,10 +51,14 @@ async function login(data) {
 
     return {
         usuario: {
-            id: usuario[0].idusuario,
-            correo: usuario[0].correo
+            id: usuarios.idusuario,
+            correo: usuarios.correo,
+            nombre: usuarios.nombres,
+            apellido: usuarios.apellidos,
+            rol: rolNombre
         },
-        token
+        token,
+        rol: rolNombre
     };
 }
 

@@ -25,8 +25,6 @@ export class LoginComponent {
       return;
     }
 
-    console.log('Intentando logearse con:', this.correo, this.password);
-
     this.auth.login(this.correo, this.password).subscribe({
       next: (res) => {
         console.log('Respuesta del servidor:', res); //respuesta completa

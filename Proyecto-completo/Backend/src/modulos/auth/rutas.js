@@ -1,15 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const controlador = require('./controlador');
-const respuesta = require('../../red/respuestas');
 
 router.post('/login', login);
 
 async function login(req, res) {
     try {
-        const { token, usuario } = await controlador.login(req.body);
-        // Enviamos directamente el token y el usuario, sin envolverlo en body
-        res.json({ token, usuario });
+        const { token, usuario, rol } = await controlador.login(req.body);
+        // Enviamos directamente el token, el usuario y el rol, sin envolverlo en body
+        res.json({ token, usuario, rol });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
