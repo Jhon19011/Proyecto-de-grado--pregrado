@@ -54,6 +54,7 @@
                     <th>Estado</th>
                     <th>Fecha de Vencimiento</th>
                     <th>Presentación</th>
+                    <th>Unidad</th>
                     <th>Cantidad</th>
                     <th>Cantidad Remanente</th>
                     <th>Gasto Total</th>
@@ -75,6 +76,7 @@
                     <td>{{ s.estado }}</td>
                     <td>{{ s.fechadevencimiento | date:'short'}}</td>
                     <td>{{ s.presentacion }}</td>
+                    <td>{{ s.unidad }}</td>
                     <td>{{ s.cantidad }}</td>
                     <td>{{ s.cantidadremanente }}</td>
                     <td>{{ s.gastototal }}</td>
@@ -136,7 +138,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Movimientos - {{ movimientoSeleccionado?.nombreComercial }}</h5>
+                    <h5 class="modal-title">Movimientos {{ movimientoSeleccionado?.nombreComercial }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" *ngIf="movimientoSeleccionado">
@@ -178,6 +180,7 @@
                             <tr>
                                 <th>Tipo</th>
                                 <th>Cantidad</th>
+                                <th>Unidad</th>
                                 <th>Fecha</th>
                                 <th>Motivo</th>
                                 <th>Usuario</th>
@@ -187,6 +190,7 @@
                             <tr *ngFor="let m of movimientos">
                                 <td>{{ m.tipo }}</td>
                                 <td>{{ m.cantidad }}</td>
+                                <td>{{ m.unidad }}</td>
                                 <td>{{ m.fecha | date:'short' }}</td>
                                 <td>{{ m.motivo }}</td>
                                 <td>{{ m.usuario }}</td>

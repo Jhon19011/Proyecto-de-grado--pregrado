@@ -40,7 +40,8 @@ async function login(data) {
     const token = jwt.sign(
         {
             id: usuarios.idusuario,
-            rol: rolNombre
+            rol: rolNombre, 
+            sedeU: usuarios.sedeU
         },
         'secreto',
         { expiresIn: '1h' }
@@ -53,6 +54,7 @@ async function login(data) {
             nombre: usuarios.nombres,
             apellido: usuarios.apellidos,
             telefono: usuarios.telefono,
+            sede: usuarios.sedeU,
             rol: rolNombre
         },
         token,

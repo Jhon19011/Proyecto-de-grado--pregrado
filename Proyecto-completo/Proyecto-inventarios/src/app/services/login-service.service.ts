@@ -21,6 +21,7 @@ export class LoginServiceService {
           localStorage.setItem('correo', res.usuario.correo);
           localStorage.setItem('nombre', res.usuario.nombre);
           localStorage.setItem('apellido', res.usuario.apellido);
+          localStorage.setItem('sede', res.usuario.sede);
           localStorage.setItem('telefono', res.usuario.telefono || '');
         })
       );

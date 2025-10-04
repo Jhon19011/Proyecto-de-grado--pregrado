@@ -1,4 +1,4 @@
-<div class="col-auto" >
+<div class="col-auto">
   <div class="card p-4" id="topBar">
     <!-- información del usuario -->
 
@@ -16,29 +16,36 @@
   <div class="col" id="menu">
     <div class="d-flex justify-content-start">
       <div style="width: 250px;">
-        
+
         <!-- Sustancias -->
-        <button class="w-100" (click)="sustancias()" type="button" data-bs-toggle="collapse"
+        <button class="w-100" type="button" data-bs-toggle="collapse"
           data-bs-target="#submenuSustancias" aria-expanded="false" aria-controls="submenuSustancias">
           Sustancias
         </button>
 
+        <div class="collapse" id="submenuSustancias">
+          <div class="list-group">
+            <a (click)="sustancias()">Sustancias</a>
+            <a (click)="controladas()">Sustancias Controladas</a>
+          </div>
+        </div>
+
         <!-- Inventario -->
-        <button class="w-100" (click)="administrarInventarios()"  type="button" data-bs-toggle="collapse"
+        <button class="w-100" (click)="administrarInventarios()" type="button" data-bs-toggle="collapse"
           data-bs-target="#submenuInventario" aria-expanded="false" aria-controls="submenuInventario">
           Inventarios
         </button>
 
         <!-- Usuarios -->
-        <button *ngIf="rol === 'Administrador'"  class="w-100" type="button" data-bs-toggle="collapse" data-bs-target="#submenuAdmin"
-          aria-expanded="false" aria-controls="submenuAdmin">
+        <button *ngIf="rol === 'Administrador'" class="w-100" type="button" data-bs-toggle="collapse"
+          data-bs-target="#submenuAdmin" aria-expanded="false" aria-controls="submenuAdmin">
           Usuarios
         </button>
 
         <div class="collapse" id="submenuAdmin">
           <div class="list-group">
-            <a (click)="listarUsuarios()" >Lista de Usuarios</a>
-            <a (click)="agregarUsuarios()" >Agregar Usuario</a>
+            <a (click)="listarUsuarios()">Lista de Usuarios</a>
+            <a (click)="agregarUsuarios()">Agregar Usuario</a>
           </div>
         </div>
 
@@ -53,7 +60,7 @@
             <a routerLink="/editar-perfil">Editar perfil</a>
           </div>
         </div>
-        <button class="w-100" (click)="logout()" >Cerrar Sesión</button>
+        <button class="w-100" (click)="logout()">Cerrar Sesión</button>
       </div>
     </div>
   </div>

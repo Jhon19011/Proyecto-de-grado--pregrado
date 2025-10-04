@@ -23,6 +23,8 @@
           <th>Numero</th>
           <th>Código</th>
           <th>Nombre Comercial</th>
+          <th>Sustancia de control</th>
+          <th>Autorizada</th>
           <th>Marca</th>
           <th>Lote</th>
           <th>Clase de Peligro Según ONU</th>
@@ -31,6 +33,7 @@
           <th>Estado</th>
           <th>Fecha de Vencimiento</th>
           <th>Presentación</th>
+          <th>Unidad</th>
           <th>PDF</th>
           <th>Acciones</th>
         </tr>
@@ -40,6 +43,17 @@
           <td>{{s.numero}}</td>
           <td>{{s.codigo}}</td>
           <td>{{s.nombreComercial}}</td>
+          <td>
+            <span [ngClass]="s.esControlada ? 'badge bg-warning' : 'badge bg-secondary'">
+              {{s.esControlada ? 'sí' : 'No'}}
+            </span>
+          </td>
+          <td *ngIf="s.esControlada">
+            <span [ngClass]="s.autorizada ? 'badge bg-success' : 'badge bg-danger'">
+              {{s.autorizada ? 'Autorizada' : 'No autorizada'}}
+            </span>
+          </td>
+          <td *ngIf="!s.esControlada">-</td>
           <td>{{s.marca}}</td>
           <td>{{s.lote}}</td>
           <td>{{s.clasedepeligrosegunonu}}</td>
@@ -48,6 +62,7 @@
           <td>{{s.estado}}</td>
           <td>{{s.fechadevencimiento}}</td>
           <td>{{s.presentacion}}</td>
+          <td>{{s.unidad}}</td>
           <td>{{s.PDF}}</td>
           <td>
             <button class="btn btn-sm btn-primary me-2" (click)="editarSustancia(s)" data-bs-toggle="modal"
@@ -136,6 +151,14 @@
               <input type="text" [(ngModel)]="PDF" name="PDF" placeholder="PDF" class="form-control">
             </div>
           </div>
+
+          <select id="unidad" type="text" [(ngModel)]="unidad" name="unidad" placeholder="Unidad" class="form-control">
+            <option value="g">g</option>
+            <option value="kg">kg</option>
+            <option value="ml">ml</option>
+            <option value="L">L</option>
+          </select>
+
           <!-- botones -->
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary w-100">{{ idsustancia ? 'Actualizar' :

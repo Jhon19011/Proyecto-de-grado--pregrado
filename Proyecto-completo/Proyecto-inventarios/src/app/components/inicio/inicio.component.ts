@@ -15,31 +15,36 @@ export class InicioComponent {
   apellidoUsuario = '';
   rol = '';
 
-  constructor(private router: Router, private loginService: LoginServiceService) {}
+  constructor(private router: Router, private loginService: LoginServiceService) { }
 
-  ngOnInit(){
+  ngOnInit() {
     this.nombreUsuario = localStorage.getItem('nombre') || 'Usuario';
     this.apellidoUsuario = localStorage.getItem('apellido') || 'Apellidos';
     this.rol = localStorage.getItem('rol') || '';
   }
 
-  administrarInventarios(){
+  administrarInventarios() {
     // Redirigir a la página de administración de sustancias
     this.router.navigate(['inventarios']);
   }
 
-  listarUsuarios(){
+  listarUsuarios() {
     this.router.navigate(['usuarios']);
   }
 
-  agregarUsuarios(){
+  agregarUsuarios() {
     this.router.navigate(['registro']);
   }
-  sustancias(){
+
+  sustancias() {
     this.router.navigate(['sustancias']);
   }
 
-  logout(){
+  controladas() {
+    this.router.navigate(['controladas']);
+  }
+
+  logout() {
     this.loginService.logout();
   }
 }

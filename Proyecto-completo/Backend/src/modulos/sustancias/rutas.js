@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const controlador = require('./controlador');
 const respuesta = require('../../red/respuestas');
+const verificarToken = require('../../middleware/auth').verificarToken;
+const verificarRol = require('../../middleware/verificarRol');
 
 // Crear sustancia
 router.post('/', async (req, res, next) => {
@@ -14,13 +16,25 @@ router.post('/', async (req, res, next) => {
 });
 
 // Listar Sustancias
-router.get('/', async (req, res, next) => {
+router.get('/', verificarToken, async (req, res, next) => {
     try {
-        const sustancias = await controlador.listarSustancias();
+        const sedeId = req.user.sedeU;
+        const sustancias = await controlador.listarSustancias(sedeId);
         respuesta.success(req, res, sustancias, 200);
     } catch (err) {
         next(err);
     }
+});
+
+// Listar controladas
+router.get('/controladas', verificarToken, async (req, res, next) => {
+  try {
+    const sedeId = req.user.sedeU;
+    const sustancias = await controlador.listarSustanciasPorSede(sedeId);
+    respuesta.success(req, res, sustancias, 200);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Listar sustancia por id
@@ -52,5 +66,18 @@ router.delete('/:id', async (req, res, next) => {
         next(err);
     }
 });
+
+router.post('/:id/autorizacion', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
+  try {
+    const { autorizada } = req.body;
+    const sedeId = req.user.sedeU;
+    console.log("sede detectada:", sedeId);
+    const result = await controlador.actualizarAutorizacion(req.params.id, sedeId, autorizada);
+    respuesta.success(req, res, result, 200);
+  } catch (err) {
+    next(err);
+  }
+});
+
 
 module.exports = router;

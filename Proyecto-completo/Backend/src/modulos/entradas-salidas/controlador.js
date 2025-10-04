@@ -51,9 +51,13 @@ async function registrarMovimiento(data) {
 
 // Listar movimientos de sustancia
 async function listarMovimientos(inventario_sustancia_id) {
-    return db.query(
-        `SELECT * FROM ${TABLA} WHERE inventario_sustancia_id = ? ORDER BY fecha DESC`,
-        {inventario_sustancia_id}
+    return db.query(` 
+        SELECT m.idmovimiento, m.fecha, m.tipo, m.cantidad, m.motivo, m.usuario, s.unidad
+        FROM movimientos_sustancia m
+        INNER JOIN inventario_sustancia i ON m.inventario_sustancia_id = i.idinventario_sustancia
+        INNER JOIN sustancia s ON i.sustancia = s.idsustancia
+        WHERE m.inventario_sustancia_id = ?
+        ORDER BY m.fecha DESC`, {inventario_sustancia_id}
     );
 }
 

@@ -21,6 +21,7 @@ async function crearSustancia(data) {
     estado,
     fechadevencimiento,
     presentacion,
+    unidad,
     PDF
   } = data;
 
@@ -32,8 +33,8 @@ async function crearSustancia(data) {
 
   const query = `
     INSERT INTO ${TABLA} 
-    (numero, codigo, nombreComercial, marca, lote, CAS, clasedepeligrosegunonu, categoriaIARC, estado, fechadevencimiento, presentacion, PDF) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (numero, codigo, nombreComercial, marca, lote, CAS, clasedepeligrosegunonu, categoriaIARC, estado, fechadevencimiento, presentacion, unidad, PDF) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const result = await db.query(query, [
@@ -48,17 +49,25 @@ async function crearSustancia(data) {
     estado || null,
     fechaFormateada,
     presentacion || null,
+    unidad || null,
     PDF || null
   ]);
 
   return { id: result.insertId, ...data };
 }
 
-
-// Listar sustancias
-async function listarSustancias() {
-  return db.query(`SELECT * FROM ${TABLA}`);
+// Listar Sutancias
+async function listarSustancias(sedeId = null) {
+  return db.query(`
+    SELECT s.*, 
+           IFNULL(a.autorizada, 0) AS autorizada
+    FROM sustancia s
+    LEFT JOIN autorizacion_sustancia a 
+      ON a.sustancia_id = s.idsustancia 
+     AND a.sede_id = ?
+  `, [sedeId]);
 }
+
 
 // Listar sustancia por id
 async function obtenerSustancia(id) {
@@ -93,10 +102,35 @@ async function eliminarSustancia(id) {
   return { mensaje: 'Sustancia eliminada con éxito' };
 }
 
+async function listarSustanciasPorSede(sedeId) {
+  return db.query(`
+    SELECT s.*, 
+           IFNULL(a.autorizada, 0) AS autorizada
+    FROM sustancia s
+    LEFT JOIN autorizacion_sustancia a 
+      ON a.sustancia_id = s.idsustancia 
+     AND a.sede_id = ?
+    WHERE s.esControlada = 1
+  `, [sedeId]);
+}
+
+async function actualizarAutorizacion(sustanciaId, sedeId, autorizada) {
+  const query = `
+    INSERT INTO autorizacion_sustancia (sustancia_id, sede_id, autorizada)
+    VALUES (?, ?, ?)
+    ON DUPLICATE KEY UPDATE autorizada = VALUES(autorizada)
+  `;
+  await db.query(query, [sustanciaId, sedeId, autorizada]);
+  return { mensaje: 'Autorización actualizada con éxito' };
+}
+
+
 module.exports = {
   crearSustancia,
   listarSustancias,
   obtenerSustancia,
   actualizarSustancia,
-  eliminarSustancia
+  eliminarSustancia, 
+  listarSustanciasPorSede,
+  actualizarAutorizacion
 };

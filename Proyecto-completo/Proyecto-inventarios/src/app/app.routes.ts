@@ -10,6 +10,7 @@ import { InventarioDetalleComponent } from './components/inventario-detalle/inve
 import { RecuperarComponent } from './components/recuperar/recuperar.component';
 import { RestablecerComponent } from './components/restablecer/restablecer.component';
 import { EditarPerfilComponent } from './components/editar-perfil/editar-perfil.component';
+import { ControladasComponent } from './components/controladas/controladas.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -21,6 +22,7 @@ export const routes: Routes = [
     { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard] },
     { path: 'editar-perfil', component: EditarPerfilComponent, canActivate: [AuthGuard] },
     { path: 'sustancias', component: SustanciasComponent, canActivate: [AuthGuard] },
+    { path: 'controladas', component: ControladasComponent, canActivate: [AuthGuard] },
     { path: 'inventarios', component: InventariosComponent, canActivate: [AuthGuard] },
     { path: 'inventarios/:id', component: InventarioDetalleComponent, canActivate: [AuthGuard] },
     { path: '', redirectTo: '/login', pathMatch: 'full' }

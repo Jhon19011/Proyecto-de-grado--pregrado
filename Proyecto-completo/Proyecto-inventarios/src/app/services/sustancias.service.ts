@@ -30,4 +30,13 @@ export class SustanciasService {
   eliminarSustancia(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  listarControladas(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/controladas`);
+  }
+
+  actualizarAutorizacion(id: number, data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}/autorizacion`, data);
+  }
+
 }

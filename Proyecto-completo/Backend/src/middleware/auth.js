@@ -9,6 +9,7 @@ function verificarToken(req, res, next) {
 
     try {
         const decoded = jwt.verify(token, 'secreto');
+        console.log("Playload del token:", decoded);
         req.user = decoded;
         next();
     } catch (err) {

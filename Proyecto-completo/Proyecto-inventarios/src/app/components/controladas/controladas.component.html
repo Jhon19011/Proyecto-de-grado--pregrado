@@ -1,0 +1,33 @@
+<div class="container mt-4">
+  <h3 class="fw-bold text-dark">Sustancias Controladas</h3>
+  
+  <table class="table table-bordered mt-3">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>Unidad</th>
+        <th>Autorización</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of sustancias">
+        <td>{{ s.codigo }}</td>
+        <td>{{ s.nombreComercial }}</td>
+        <td>{{ s.unidad }}</td>
+        <td>
+          <span class="badge" 
+                [class.bg-success]="s.autorizada == 1" 
+                [class.bg-danger]="s.autorizada == 0">
+            {{ s.autorizada == 1 ? 'Autorizada' : 'No autorizada' }}
+          </span>
+          <button class="btn btn-sm btn-outline-primary ms-2"
+                  (click)="toggleAutorizacion(s)">
+            Cambiar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
