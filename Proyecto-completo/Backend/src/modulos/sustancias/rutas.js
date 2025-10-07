@@ -6,9 +6,10 @@ const verificarToken = require('../../middleware/auth').verificarToken;
 const verificarRol = require('../../middleware/verificarRol');
 
 // Crear sustancia
-router.post('/', async (req, res, next) => {
+router.post('/', verificarToken, async (req, res, next) => {
     try {
-        const nueva = await controlador.crearSustancia(req.body);
+        const sedeId = req.user.sedeU;
+        const nueva = await controlador.crearSustancia(req.body, sedeId);
         respuesta.success(req, res, nueva, 201);
     } catch (err) {
         next(err);

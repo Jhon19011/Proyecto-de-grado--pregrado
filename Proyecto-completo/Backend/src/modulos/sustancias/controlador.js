@@ -8,7 +8,7 @@ function formatDate(fecha) {
 }
 
 // Crear sustancias
-async function crearSustancia(data) {
+async function crearSustancia(data, sedeId) {
   const {
     numero,
     codigo,
@@ -33,8 +33,8 @@ async function crearSustancia(data) {
 
   const query = `
     INSERT INTO ${TABLA} 
-    (numero, codigo, nombreComercial, marca, lote, CAS, clasedepeligrosegunonu, categoriaIARC, estado, fechadevencimiento, presentacion, unidad, PDF) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (numero, codigo, nombreComercial, marca, lote, CAS, clasedepeligrosegunonu, categoriaIARC, estado, fechadevencimiento, presentacion, unidad, PDF, sede_s) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const result = await db.query(query, [
@@ -50,23 +50,29 @@ async function crearSustancia(data) {
     fechaFormateada,
     presentacion || null,
     unidad || null,
-    PDF || null
+    PDF || null,
+    sedeId || null
   ]);
 
-  return { id: result.insertId, ...data };
+  return { id: result.insertId, ...data, sede_s: sedeId };
 }
 
 // Listar Sutancias
-async function listarSustancias(sedeId = null) {
-  return db.query(`
-    SELECT s.*, 
+async function listarSustancias(sedeId) {
+  const sql = `
+    SELECT s.*,
            IFNULL(a.autorizada, 0) AS autorizada
     FROM sustancia s
-    LEFT JOIN autorizacion_sustancia a 
-      ON a.sustancia_id = s.idsustancia 
+    LEFT JOIN autorizacion_sustancia a
+      ON a.sustancia_id = s.idsustancia
      AND a.sede_id = ?
-  `, [sedeId]);
+    WHERE s.sede_s = ? 
+    ORDER BY s.nombreComercial ASC
+  `;
+
+  return db.query(sql, [sedeId, sedeId]);
 }
+
 
 
 // Listar sustancia por id
@@ -103,16 +109,20 @@ async function eliminarSustancia(id) {
 }
 
 async function listarSustanciasPorSede(sedeId) {
-  return db.query(`
-    SELECT s.*, 
+  const sql = `
+    SELECT s.*,
            IFNULL(a.autorizada, 0) AS autorizada
     FROM sustancia s
-    LEFT JOIN autorizacion_sustancia a 
-      ON a.sustancia_id = s.idsustancia 
+    LEFT JOIN autorizacion_sustancia a
+      ON a.sustancia_id = s.idsustancia
      AND a.sede_id = ?
     WHERE s.esControlada = 1
-  `, [sedeId]);
+      AND s.sede_s = ? 
+    ORDER BY s.nombreComercial ASC
+  `;
+  return db.query(sql, [sedeId, sedeId]);
 }
+
 
 async function actualizarAutorizacion(sustanciaId, sedeId, autorizada) {
   const query = `
@@ -130,7 +140,7 @@ module.exports = {
   listarSustancias,
   obtenerSustancia,
   actualizarSustancia,
-  eliminarSustancia, 
+  eliminarSustancia,
   listarSustanciasPorSede,
   actualizarAutorizacion
 };

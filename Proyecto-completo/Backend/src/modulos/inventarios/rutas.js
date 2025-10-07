@@ -8,7 +8,8 @@ const verificarRol = require('../../middleware/verificarRol');
 // listar inventarios
 router.get('/', verificarToken, verificarRol(['Administrador', 'Auxiliar']), async (req, res, next) => {
   try {
-    const inventarios = await controlador.listarInventarios();
+    const sedeId = req.user.sedeU;
+    const inventarios = await controlador.listarInventarios(sedeId);
     respuesta.success(req, res, inventarios, 200);
   } catch (err) {
     next(err);
@@ -28,7 +29,8 @@ router.get('/:id', verificarToken, verificarRol(['Administrador', 'Auxiliar']), 
 // Crear inventario
 router.post('/', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
   try {
-    const nuevoI = await controlador.crearInventario(req.body);
+    const sedeId = req.user.sedeU;
+    const nuevoI = await controlador.crearInventario(req.body, sedeId);
     respuesta.success(req, res, nuevoI, 201);
   } catch (err) {
     next(err.message);

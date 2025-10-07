@@ -17,10 +17,7 @@
       <input type="text" class="form-control" placeholder="Nombre del inventario"
              [(ngModel)]="nombretabla" name="nombretabla">
     </div>
-    <div class="mb-2">
-      <input type="number" class="form-control" placeholder="ID de la sede"
-             [(ngModel)]="sedeT" name="sedeT">
-    </div>
+
     <div class="mb-2 form-check">
       <input type="checkbox" class="form-check-input" [(ngModel)]="principal" name="principal" id="chkPrincipal">
       <label class="form-check-label" for="chkPrincipal">¿Inventario principal?</label>
@@ -37,7 +34,6 @@
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Sede</th>
           <th>Principal</th>
           <th>Acciones</th>
         </tr>
@@ -45,11 +41,10 @@
       <tbody>
         <tr *ngFor="let inv of inventarios">
           <td>{{ inv.nombretabla }}</td>
-          <td>{{ inv.sedeT }}</td>
           <td>{{ inv.principal ? 'Sí' : 'No' }}</td>
           <td>
             <button class="btn btn-primary btn-sm me-2"
-                    (click)="idtablas = inv.idtablas; nombretabla = inv.nombretabla; sedeT = inv.sedeT; principal = inv.principal">
+                    (click)="idtablas = inv.idtablas; nombretabla = inv.nombretabla; principal = inv.principal">
               Editar
             </button>
             <button class="btn btn-danger btn-sm" (click)="eliminarInventario(inv.idtablas)">Eliminar</button>

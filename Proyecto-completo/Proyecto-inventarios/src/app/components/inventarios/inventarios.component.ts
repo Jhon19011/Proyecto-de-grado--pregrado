@@ -17,7 +17,6 @@ export class InventariosComponent {
   // formulario
   idtablas: number | null = null;
   nombretabla = '';
-  sedeT: number | null = null;
   principal: boolean = false;
 
   constructor(private router: Router) { }
@@ -38,7 +37,6 @@ export class InventariosComponent {
   guardarInventario() {
     const data = {
       nombretabla: this.nombretabla,
-      sedeT: this.sedeT,
       principal: this.principal
     };
 
@@ -99,7 +97,6 @@ export class InventariosComponent {
   resetForm() {
     this.idtablas = null;
     this.nombretabla = '';
-    this.sedeT = null;
     this.principal = false;
   }
 

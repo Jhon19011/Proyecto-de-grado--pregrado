@@ -3,37 +3,44 @@ const error = require('../../middleware/errors')
 const TABLA = 'tablas'
 
 // Crear inventario
-async function crearInventario(data) {
-    const { nombretabla, sedeT, principal } = data;
+async function crearInventario(data, sedeId) {
+    const { nombretabla, principal } = data;
 
-    if (!nombretabla || !sedeT) {
-        throw error('Los campos nombre y sede son obligatorios');
+    if (!nombretabla) {
+        throw error('El nombre del inventario es obligatorio', 400);
     }
 
     // Validar que no exista otro inventario con el mismo nombre en la misma sede
-    const existente = await db.query(`SELECT * FROM ${TABLA} WHERE nombretabla = ? AND sedeT = ?`, [nombretabla, sedeT]);
+    const existente = await db.query(`SELECT * FROM ${TABLA} WHERE nombretabla = ? AND sedeT = ?`, [nombretabla, sedeId]);
+
     if (existente.length > 0) {
-        throw error(`El inventario "${nombretabla}" ya existe en la sede ${sedeT}`, 400);
+        throw error(`El inventario "${nombretabla}" ya existe en la sede ${sedeId}`, 400);
     }
 
     // Validar que no exista otro inventario principal en la misma sede
     if (principal) {
-        const existePrincipal = await db.query(`SELECT * FROM ${TABLA} WHERE sedeT = ? AND principal = 1`, [sedeT]);
+        const existePrincipal = await db.query(`SELECT * FROM ${TABLA} WHERE sedeT = ? AND principal = 1`, [sedeId]);
+
         if (existePrincipal.length > 0) {
-            throw error(`Ya existe un inventario principal en la sede ${sedeT}`, 400);
+            throw error(`Ya existe un inventario principal en la sede ${sedeId}`, 400);
         }
     }
 
-
     const query = `INSERT INTO ${TABLA} (nombretabla, sedeT, principal) VALUES (?, ?, ?)`;
-    const result = await db.query(query, [nombretabla, sedeT, principal]);
+    const result = await db.query(query, [nombretabla, sedeId, principal || 0]);
 
-    return { id: result.insertId, ...data };
+    return { id: result.insertId, nombretabla, sedeT: sedeId, principal: principal || 0 };
 }
 
 // Listar inventarios
-async function listarInventarios() {
-    return db.query(`SELECT * FROM ${TABLA}`);
+async function listarInventarios(sedeId) {
+    const query = `
+    SELECT i.*
+    FROM  tablas i
+    WHERE i.sedeT = ?
+    ORDER BY i.nombretabla
+    `;
+    return db.query(query, [sedeId]);
 }
 
 //  Listar inventario por id
