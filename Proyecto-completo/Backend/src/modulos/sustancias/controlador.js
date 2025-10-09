@@ -22,7 +22,8 @@ async function crearSustancia(data, sedeId) {
     fechadevencimiento,
     presentacion,
     unidad,
-    PDF
+    PDF, 
+    esControlada
   } = data;
 
   if (!numero || !codigo || !nombreComercial) {
@@ -33,8 +34,8 @@ async function crearSustancia(data, sedeId) {
 
   const query = `
     INSERT INTO ${TABLA} 
-    (numero, codigo, nombreComercial, marca, lote, CAS, clasedepeligrosegunonu, categoriaIARC, estado, fechadevencimiento, presentacion, unidad, PDF, sede_s) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (numero, codigo, nombreComercial, marca, lote, CAS, clasedepeligrosegunonu, categoriaIARC, estado, fechadevencimiento, presentacion, unidad, PDF, sede_s, esControlada) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const result = await db.query(query, [
@@ -51,7 +52,8 @@ async function crearSustancia(data, sedeId) {
     presentacion || null,
     unidad || null,
     PDF || null,
-    sedeId || null
+    sedeId || null,
+    esControlada ?? 0
   ]);
 
   return { id: result.insertId, ...data, sede_s: sedeId };

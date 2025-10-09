@@ -1,21 +1,23 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class MovimientosService {
-
-  constructor(private http: HttpClient) { }
-
+  private http = inject(HttpClient);
   private apiUrl = 'http://localhost:4000/api/movimientos';
 
-  registrarMovimiento(data: any): Observable<any>{
+  listarMovimientos(idInventarioSustancia: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${idInventarioSustancia}`);
+  }
+
+  registrarMovimiento(data: any): Observable<any> {
+    // para el principal
     return this.http.post(this.apiUrl, data);
   }
 
-  listarMovimientos(invenatiosSustanciaId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${invenatiosSustanciaId}`);
+  registrarMovimientoSecundario(data: any): Observable<any> {
+    // para los secundarios
+    return this.http.post(`${this.apiUrl}/secundario`, data);
   }
 }

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { InventariosService } from '../../services/inventarios.service';
+import { InventarioService } from '../../services/inventarios.service';
 
 @Component({
   selector: 'app-inventarios',
@@ -11,7 +11,7 @@ import { InventariosService } from '../../services/inventarios.service';
   styleUrl: './inventarios.component.css'
 })
 export class InventariosComponent {
-  private servicioInventarios = inject(InventariosService);
+  private servicioInventarios = inject(InventarioService);
   inventarios: any[] = [];
 
   // formulario
@@ -30,7 +30,7 @@ export class InventariosComponent {
       next: (res: any) => {
         this.inventarios = res.body || res;
       },
-      error: (err) => console.error('Error al listar inventarios:', err)
+      error: (err: any) => console.error('Error al listar inventarios:', err)
     });
   }
 
@@ -42,7 +42,7 @@ export class InventariosComponent {
 
     if (this.idtablas) {
       // actualizar inventario
-      this.servicioInventarios.actualizarInventario(this.idtablas, data).subscribe({
+      this.servicioInventarios.editarInventario(this.idtablas, data).subscribe({
         next: () => {
           alert('Inventario actualizado con éxito');
           this.listarInventarios();

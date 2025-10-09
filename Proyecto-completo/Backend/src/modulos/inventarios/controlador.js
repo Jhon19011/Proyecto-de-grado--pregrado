@@ -43,6 +43,18 @@ async function listarInventarios(sedeId) {
     return db.query(query, [sedeId]);
 }
 
+// Listar inventarios secundarios de una sede
+async function listarInventariosSecundarios(sedeId) {
+    const query = `
+    SELECT i.*
+    FROM ${TABLA} i
+    WHERE i.sedeT = ? AND i.principal = 0
+    ORDER BY i.nombretabla
+    `;
+    return db.query(query, [sedeId]);
+}
+
+
 //  Listar inventario por id
 async function obtenerInventario(id) {
     const [inventario] = await db.query(`SELECT * FROM ${TABLA} WHERE idtablas = ?`, [id]);
@@ -68,6 +80,7 @@ async function eliminarInventario(id) {
 module.exports = {
     crearInventario,
     listarInventarios,
+    listarInventariosSecundarios,
     obtenerInventario,
     actualizarInventario,
     eliminarInventario

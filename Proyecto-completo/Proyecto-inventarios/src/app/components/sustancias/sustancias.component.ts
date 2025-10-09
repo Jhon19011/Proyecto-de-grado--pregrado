@@ -31,6 +31,7 @@ export class SustanciasComponent {
   presentacion = '';
   unidad = '';
   PDF = '';
+  esControlada: number | null = null;
 
   constructor(private router: Router) { }
 
@@ -62,7 +63,8 @@ export class SustanciasComponent {
       fechadevencimiento: this.fechadevencimiento,
       presentacion: this.presentacion,
       unidad: this.unidad,
-      PDF: this.PDF
+      PDF: this.PDF,
+      esControlada: Number(this.esControlada)
     };
 
     if (this.idsustancia) {

@@ -1,33 +1,43 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class InventariosService {
-  constructor() { }
+export class InventarioService {
 
-  private http = inject(HttpClient);
-  private apiUrlInventarios = 'http://localhost:4000/api/inventarios';
+  private apiUrl = 'http://localhost:4000/api/inventarios';
 
+  constructor(private http: HttpClient) {}
+
+  // Listar todos los inventarios (principal + secundarios)
   listarInventarios(): Observable<any> {
-    return this.http.get(this.apiUrlInventarios);
+    return this.http.get(this.apiUrl);
   }
 
+  // Listar solo inventarios secundarios
+  listarSecundarios(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/secundarios`);
+  }
+
+  // Obtener un inventario específico (por ID)
   obtenerInventario(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrlInventarios}/${id}`);
+    return this.http.get(`${this.apiUrl}/${id}`);
   }
 
+  // Crear un nuevo inventario
   crearInventario(data: any): Observable<any> {
-    return this.http.post(this.apiUrlInventarios, data);
+    return this.http.post(this.apiUrl, data);
   }
 
-  actualizarInventario(id: number, data: any): Observable<any> {
-    return this.http.put(`${this.apiUrlInventarios}/${id}`, data);
+  // Editar un inventario
+  editarInventario(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, data);
   }
 
+  // Eliminar un inventario
   eliminarInventario(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrlInventarios}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

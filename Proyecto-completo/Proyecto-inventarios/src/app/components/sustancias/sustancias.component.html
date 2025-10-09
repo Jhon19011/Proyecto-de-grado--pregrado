@@ -134,7 +134,12 @@
 
           <div class="row g-2 mt-2">
             <div class="col-md-6">
-              <input type="text" [(ngModel)]="estado" name="estado" placeholder="Estado" class="form-control">
+              <select [(ngModel)]="estado" name="estado" class="form-control" required>
+                <option value="" disabled selected>Seleccione el estado</option>
+                <option value="Sólido">Sólido</option>
+                <option value="Líquido">Líquido</option>
+                <option value="Gas">Gas</option>
+              </select>
             </div>
             <div class="col-md-6">
               <input type="date" [(ngModel)]="fechadevencimiento" name="fechadevencimiento"
@@ -152,12 +157,25 @@
             </div>
           </div>
 
-          <select id="unidad" type="text" [(ngModel)]="unidad" name="unidad" placeholder="Unidad" class="form-control">
-            <option value="g">g</option>
-            <option value="kg">kg</option>
-            <option value="ml">ml</option>
-            <option value="L">L</option>
-          </select>
+          <div class="row g-2 mt-2">
+            <div class="col-md-6">
+              <select id="unidad" [(ngModel)]="unidad" name="unidad" class="form-control" required>
+                <option value="" disabled selected>Seleccione unidad</option>
+                <option value="g">(g)</option>
+                <option value="kg">(kg)</option>
+                <option value="ml">(ml)</option>
+                <option value="L">(L)</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <select [(ngModel)]="esControlada" name="esControlada" class="form-control" required>
+                <option [ngValue]="null" disabled selected>¿Es sustancia controlada?</option>
+                <option [ngValue]="1">Sí</option>
+                <option [ngValue]="0">No</option>
+              </select>
+            </div>
+          </div>
 
           <!-- botones -->
           <div class="modal-footer">

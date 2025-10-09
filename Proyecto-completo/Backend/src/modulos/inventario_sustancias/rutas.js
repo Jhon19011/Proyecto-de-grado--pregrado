@@ -2,17 +2,9 @@ const express = require('express');
 const router = express.Router();
 const controlador = require('./controlador');
 const respuesta = require('../../red/respuestas');
+const { verificarToken } = require('../../middleware/auth');
 
-router.post('/', async (req, res, next) => {
-    try {
-        const asignacion = await controlador.asgnarSustancia(req.body);
-        respuesta.success(req, res, asignacion, 201);
-    } catch (err) {
-        next(err);
-    }
-});
-
-router.get('/:tabla', async (req, res, next) => {
+router.get('/:tabla', verificarToken, async (req, res, next) => {
     try {
         const sustancias = await controlador.listarPorInventario(req.params.tabla);
         respuesta.success(req, res, sustancias, 200);
@@ -21,7 +13,18 @@ router.get('/:tabla', async (req, res, next) => {
     }
 });
 
-router.put('/:id', async (req,res, next) => {
+router.post('/', verificarToken, async (req, res, next) => {
+  try {
+    console.log('📥 Datos recibidos para nueva asignación:', req.body);
+    const nueva = await controlador.asignarSustancia(req.body);
+    respuesta.success(req, res, nueva, 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+router.put('/:id', verificarToken, async (req,res, next) => {
     try {
         const editado = await controlador.editarAsignacion(req.params.id, req.body);
         respuesta.success(req, res, editado, 200);
@@ -30,7 +33,7 @@ router.put('/:id', async (req,res, next) => {
     }
 });
 
-router.delete('/:id', async (req, res, next) =>{
+router.delete('/:id', verificarToken, async (req, res, next) =>{
     try {
         const eliminado = await controlador.eliminarAsignacion(req.params.id);
         respuesta.success(req, res, eliminado, 200);

@@ -1,203 +1,327 @@
-<div class="card p-3">
-    <h4>Detalle del Inventario {{ tabla }}</h4>
-
-    <!-- Formulario para asignar sustancia -->
-    <div class="card card-body mt-3">
-        <h5>Asignar Sustancia</h5>
-
-        <div class="mb-2">
-            <label>Sustancia</label>
-            <select class="form-control" [(ngModel)]="sustancia">
-                <option [ngValue]="null">-- Selecciona una sustancia --</option>
-                <option *ngFor="let s of sustanciasDisponibles" [value]="s.idsustancia">
-                    {{ s.nombreComercial }} - {{ s.marca }}
-                </option>
-            </select>
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+                <i class="bi bi-box-seam"></i>
+                {{ esPrincipal ? 'Inventario Principal' : 'Inventario Secundario' }}
+            </h4>
+            <button class="btn btn-outline-light btn-sm" routerLink="/inventarios">
+                <i class="bi bi-arrow-left"></i> Volver
+            </button>
         </div>
 
-        <div class="mb-2">
-            <input type="number" class="form-control" placeholder="Cantidad" [(ngModel)]="cantidad">
-        </div>
+        <div class="card-body">
+            <!-- Tabla principal -->
+            <div class="table-responsive">
+                <table class="table align-middle table-hover text-center">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre Sustancia</th>
+                            <th>Cantidad</th>
+                            <th>Unidad</th>
+                            <th>Remanente</th>
+                            <th>Ubicación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of sustanciasAsignadas; let i = index">
+                            <td>{{ i + 1 }}</td>
+                            <td>{{ item.nombreComercial }}</td>
+                            <td>{{ item.cantidad }}</td>
+                            <td>{{ item.unidad }}</td>
+                            <td>{{ item.cantidadremanente }}</td>
+                            <td>{{ item.ubicaciondealmacenamiento }}</td>
+                            <td>
+                                <!-- Acciones dinámicas -->
+                                <ng-container *ngIf="esPrincipal; else secundarioBtns">
+                                    <!-- Principal -->
+                                    <button class="btn btn-sm btn-outline-success mx-1" (click)="abrirMovimientos(item)"
+                                        title="Trasladar a inventario secundario">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                    </button>
 
-        <div class="mb-2">
-            <input type="number" class="form-control" placeholder="Cantidad Remanente" [(ngModel)]="cantidadremanente">
-        </div>
+                                    <button class="btn btn-sm btn-outline-warning mx-1" (click)="abrirMovimientos(item)"
+                                        title="Prestar sustancia a usuario">
+                                        <i class="bi bi-person-check"></i>
+                                    </button>
 
-        <div class="mb-2">
-            <input type="number" class="form-control" placeholder="Gasto Total" [(ngModel)]="gastototal">
-        </div>
+                                    <button class="btn btn-sm btn-outline-info mx-1" (click)="abrirMovimientos(item)"
+                                        title="Ver historial de movimientos">
+                                        <i class="bi bi-clock-history"></i>
+                                    </button>
+                                </ng-container>
 
-        <div class="mb-2">
-            <input type="text" class="form-control" placeholder="Ubicación de almacenamiento"
-                [(ngModel)]="ubicaciondealmacenamiento">
-        </div>
+                                <ng-template #secundarioBtns>
+                                    <!-- Secundario -->
+                                    <button class="btn btn-sm btn-outline-primary mx-1" (click)="abrirMovimientos(item)"
+                                        title="Registrar entrada">
+                                        <i class="bi bi-box-arrow-in-down"></i>
+                                    </button>
 
-        <button class="btn btn-success w-100" (click)="asignarSustancia()">
-            Asignar Sustancia
-        </button>
-    </div>
+                                    <button class="btn btn-sm btn-outline-danger mx-1" (click)="abrirMovimientos(item)"
+                                        title="Registrar salida">
+                                        <i class="bi bi-box-arrow-up"></i>
+                                    </button>
 
-    <!-- Tabla de sustancias asignadas -->
-    <div class="card card-body mt-4">
-        <h5>Sustancias Asignadas</h5>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Numero</th>
-                    <th>Código</th>
-                    <th>Nombre Comercial</th>
-                    <th>Marca</th>
-                    <th>Lote</th>
-                    <th>CAS</th>
-                    <th>Clase de Peligro Según la ONU</th>
-                    <th>Categoría IARC</th>
-                    <th>Estado</th>
-                    <th>Fecha de Vencimiento</th>
-                    <th>Presentación</th>
-                    <th>Unidad</th>
-                    <th>Cantidad</th>
-                    <th>Cantidad Remanente</th>
-                    <th>Gasto Total</th>
-                    <th>Ubicación de Almacenamiento</th>
-                    <th>PDF</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let s of sustanciasAsignadas">
-                    <td>{{ s.numero }}</td>
-                    <td>{{ s.codigo }}</td>
-                    <td>{{ s.nombreComercial }}</td>
-                    <td>{{ s.marca }}</td>
-                    <td>{{ s.lote }}</td>
-                    <td>{{ s.CAS }}</td>
-                    <td>{{ s.clasedepeligrosegunonu }}</td>
-                    <td>{{ s.categoriaIARC }}</td>
-                    <td>{{ s.estado }}</td>
-                    <td>{{ s.fechadevencimiento | date:'short'}}</td>
-                    <td>{{ s.presentacion }}</td>
-                    <td>{{ s.unidad }}</td>
-                    <td>{{ s.cantidad }}</td>
-                    <td>{{ s.cantidadremanente }}</td>
-                    <td>{{ s.gastototal }}</td>
-                    <td>{{ s.ubicaciondealmacenamiento }}</td>
-                    <td>{{ s.PDF }}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" (click)="abrirEdicion(s)">Editar</button>
-                        <button class="btn btn-info btn-sm" (click)="abrirMovimientos(s)">Movimientos</button>
-                        <button class="btn btn-danger btn-sm"
-                            (click)="eliminarAsignacion(s.idinventario_sustancia)">Quitar</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+                                    <button class="btn btn-sm btn-outline-info mx-1" (click)="abrirMovimientos(item)"
+                                        title="Ver historial">
+                                        <i class="bi bi-clock-history"></i>
+                                    </button>
+                                </ng-template>
 
-    <!-- Modal de edición -->
-    <div class="modal fade" id="modalEdicion" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Asignación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body" *ngIf="asignacionSeleccionada">
-                    <form>
-                        <div class="mb-2">
-                            <label>Cantidad</label>
-                            <input type="number" [(ngModel)]="asignacionSeleccionada.cantidad" name="cantidad"
-                                class="form-control">
-                        </div>
-                        <div class="mb-2">
-                            <label>Cantidad Remanente</label>
-                            <input type="number" [(ngModel)]="asignacionSeleccionada.cantidadremanente"
-                                name="cantidadremanente" class="form-control">
-                        </div>
-                        <div class="mb-2">
-                            <label>Gasto Total</label>
-                            <input type="number" [(ngModel)]="asignacionSeleccionada.gastototal" name="gastototal"
-                                class="form-control">
-                        </div>
-                        <div class="mb-2">
-                            <label>Ubicación</label>
-                            <input type="text" [(ngModel)]="asignacionSeleccionada.ubicaciondealmacenamiento"
-                                name="ubicaciondealmacenamiento" class="form-control">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-success" (click)="guardarEdicion()">Guardar</button>
-                </div>
+                                <button class="btn btn-sm btn-outline-success mx-1" (click)="abrirTraslado(item)"
+                                    title="Trasladar a inventario secundario">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </button>
+
+
+                                <button class="btn btn-sm btn-outline-secondary mx-1" (click)="abrirEdicion(item)"
+                                    title="Editar asignación">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-dark mx-1"
+                                    (click)="eliminarAsignacion(item.idinventario_sustancia)"
+                                    title="Eliminar asignación">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Botón para agregar nuevas sustancias (solo principal) -->
+            <div class="text-end mt-3" *ngIf="esPrincipal">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAsignacion">
+                    <i class="bi bi-plus-circle"></i> Asignar nueva sustancia
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal de movimientos -->
-    <div class="modal fade" id="modalMov" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Movimientos {{ movimientoSeleccionado?.nombreComercial }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" *ngIf="movimientoSeleccionado">
+<!-- MODAL: Registrar movimiento -->
+<div class="modal fade" id="modalMov" tabindex="-1" aria-labelledby="modalMovLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalMovLabel">
+                    Movimientos de {{ movimientoSeleccionado?.nombre_sustancia || '---' }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
 
-                    <!-- Formulario movimiento -->
-                    <form>
-                        <div class="mb-2">
-                            <label>Tipo</label>
-                            <select class="form-control" [(ngModel)]="movimientoSeleccionado.tipo" name="tipo">
+            <div class="modal-body">
+                <ng-container *ngIf="movimientoSeleccionado">
+
+                    <form *ngIf="movimientoSeleccionado" (ngSubmit)="registrarMovimiento()">
+
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de movimiento:</label>
+                            <select class="form-select" [(ngModel)]="movimientoSeleccionado.tipo" name="tipo" required>
                                 <option value="entrada">Entrada</option>
                                 <option value="salida">Salida</option>
+                                <option *ngIf="esPrincipal" value="prestamo">Préstamo</option>
                             </select>
                         </div>
-                        <div class="mb-2">
-                            <label>Cantidad</label>
-                            <input type="number" [(ngModel)]="movimientoSeleccionado.cantidad" name="cantidad"
-                                class="form-control">
+
+                        <div class="mb-3">
+                            <label class="form-label">Cantidad:</label>
+                            <input type="number" class="form-control" [(ngModel)]="movimientoSeleccionado.cantidad"
+                                name="cantidad" min="1" required />
                         </div>
-                        <div class="mb-2">
-                            <label>Motivo</label>
-                            <input type="text" [(ngModel)]="movimientoSeleccionado.motivo" name="motivo"
-                                class="form-control">
+
+                        <div class="mb-3">
+                            <label class="form-label">Motivo:</label>
+                            <textarea class="form-control" [(ngModel)]="movimientoSeleccionado.motivo" name="motivo"
+                                rows="2" required></textarea>
                         </div>
-                        <div class="mb-2">
-                            <label>Usuario</label>
-                            <input type="text" [(ngModel)]="movimientoSeleccionado.usuario" name="usuario"
-                                class="form-control">
+
+                        <div class="mb-3" *ngIf="esPrincipal">
+                            <label class="form-label">Usuario (si aplica):</label>
+                            <input type="text" class="form-control" [(ngModel)]="movimientoSeleccionado.usuario"
+                                name="usuario" placeholder="Nombre o ID del usuario" />
                         </div>
-                        <button type="button" class="btn btn-success w-100"
-                            (click)="registrarMovimiento()">Registrar</button>
+
+                        <button class="btn btn-primary w-100" type="submit"
+                            [disabled]="!movimientoSeleccionado.cantidad || !movimientoSeleccionado.motivo">
+                            <i class="bi bi-save"></i> Registrar movimiento
+                        </button>
                     </form>
 
-                    <hr>
+                    <hr />
+                    <h6 class="fw-bold text-primary mt-3">Historial</h6>
+                    <div class="table-responsive" *ngIf="movimientos && movimientos.length > 0; else sinHistorial">
+                        <table class="table table-sm table-bordered text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Cantidad</th>
+                                    <th>Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let m of movimientos">
+                                    <td>{{ m.fecha | date: 'short' }}</td>
+                                    <td>
+                                        <span class="badge" [ngClass]="{
+                        'bg-success': m.tipo === 'entrada',
+                        'bg-danger': m.tipo === 'salida',
+                        'bg-warning text-dark': m.tipo === 'prestamo'
+                      }">
+                                            {{ m.tipo | titlecase }}
+                                        </span>
+                                    </td>
+                                    <td>{{ m.cantidad }}</td>
+                                    <td>{{ m.motivo }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <!-- Historial -->
-                    <h6>Historial de Movimientos</h6>
-                    <table class="table table-sm table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Cantidad</th>
-                                <th>Unidad</th>
-                                <th>Fecha</th>
-                                <th>Motivo</th>
-                                <th>Usuario</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let m of movimientos">
-                                <td>{{ m.tipo }}</td>
-                                <td>{{ m.cantidad }}</td>
-                                <td>{{ m.unidad }}</td>
-                                <td>{{ m.fecha | date:'short' }}</td>
-                                <td>{{ m.motivo }}</td>
-                                <td>{{ m.usuario }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                    <ng-template #sinHistorial>
+                        <p class="text-muted text-center">No hay movimientos registrados.</p>
+                    </ng-template>
+                </ng-container>
+
+                <ng-template [ngIf]="!movimientoSeleccionado">
+                    <p class="text-center text-muted">
+                        Cargando datos del movimiento...
+                    </p>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL: Editar asignación -->
+<div class="modal fade" id="modalEdicion" tabindex="-1" aria-labelledby="modalEdicionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="modalEdicionLabel">Editar asignación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form *ngIf="asignacionSeleccionada" (ngSubmit)="guardarEdicion()">
+                    <div class="mb-3">
+                        <label class="form-label">Cantidad:</label>
+                        <input type="number" class="form-control" [(ngModel)]="asignacionSeleccionada.cantidad"
+                            name="cantidad" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Remanente:</label>
+                        <input type="number" class="form-control" [(ngModel)]="asignacionSeleccionada.cantidadremanente"
+                            name="remanente" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Gasto total:</label>
+                        <input type="number" class="form-control" [(ngModel)]="asignacionSeleccionada.gastototal"
+                            name="gasto" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ubicación:</label>
+                        <input type="text" class="form-control"
+                            [(ngModel)]="asignacionSeleccionada.ubicaciondealmacenamiento" name="ubicacion" required />
+                    </div>
+                    <button class="btn btn-success w-100" type="submit">
+                        <i class="bi bi-save"></i> Guardar cambios
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL: Nueva asignación -->
+<div class="modal fade" id="modalAsignacion" tabindex="-1" aria-labelledby="modalAsignacionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalAsignacionLabel">
+                    Asignar nueva sustancia
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form (ngSubmit)="asignarSustancia()">
+                    <div class="mb-3">
+                        <label class="form-label">Sustancia:</label>
+                        <select class="form-select" [(ngModel)]="sustancia" name="sustancia" required>
+                            <option *ngFor="let s of sustanciasDisponibles" [value]="s.idsustancia">
+                                {{ s.nombreComercial }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cantidad:</label>
+                        <input type="number" class="form-control" [(ngModel)]="cantidad" name="cantidad" min="1"
+                            required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cantidad remanente:</label>
+                        <input type="number" class="form-control" [(ngModel)]="cantidadremanente"
+                            name="cantidadremanente" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Gasto total:</label>
+                        <input type="number" class="form-control" [(ngModel)]="gastototal" name="gastototal" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ubicación de almacenamiento:</label>
+                        <input type="text" class="form-control" [(ngModel)]="ubicaciondealmacenamiento" name="ubicacion"
+                            required />
+                    </div>
+                    <button class="btn btn-success w-100" type="submit">
+                        <i class="bi bi-check-circle"></i> Asignar sustancia
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Trasladar a inventario secundario -->
+<div class="modal fade" id="modalTraslado" tabindex="-1" aria-labelledby="modalTrasladoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalTrasladoLabel">
+                    Trasladar sustancia
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form (ngSubmit)="confirmarTraslado()">
+                    <div class="mb-3">
+                        <label class="form-label">Inventario destino:</label>
+                        <select class="form-select" [(ngModel)]="inventarioDestino" name="destino" required>
+                            <option *ngFor="let inv of inventariosSecundarios" [value]="inv.idtablas">
+                                {{ inv.nombretabla }}
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Cantidad a trasladar:</label>
+                        <input type="number" class="form-control" [(ngModel)]="cantidadTraslado" name="cantidad" min="1"
+                            required />
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-arrow-left-right"></i> Confirmar traslado
+                    </button>
+                </form>
             </div>
         </div>
     </div>

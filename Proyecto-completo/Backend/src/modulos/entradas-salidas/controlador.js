@@ -1,52 +1,234 @@
 const db = require('../../DB/mysql');
 const error = require('../../middleware/errors');
-const TABLA = 'movimientos_sustancia';
+const TABLA_MOV = 'movimientos_sustancia';
+const TABLA_INV = 'tablas'
+const TABLA_ASIG = 'inventario_sustancia'
 
-// Registrar movimiento (entrada-salida)
-async function registrarMovimiento(data) {
+// Registrar movimiento (entrada-salida local)
+async function registrarMovimiento(data, user) {
     const { inventario_sustancia_id, tipo, cantidad, motivo, usuario } = data
 
     if (!inventario_sustancia_id || !tipo || !cantidad) {
         throw error('Todos los datos son obligatorios', 400);
     }
 
-    // Traer asignación actual
-    const asignacion = await db.query(
-        `SELECT cantidadremanente FROM inventario_sustancia WHERE idinventario_sustancia = ?`,
+    // Buscar asignación
+    const [asignacion] = await db.query(
+        `SELECT * FROM ${TABLA_ASIG} WHERE idinventario_sustancia = ?`,
         [inventario_sustancia_id]
     );
 
-    if(!asignacion.length) {
-        throw error('La sustancia no existe en el inventario', 404);
-    }
+    if (!asignacion) throw error('Sustancia no encontrada en el inventario', 404);
 
-    let nuevoRemanente = asignacion[0].cantidadremanente;
+    // Obtener inventario
+    const [inventario] = await db.query(
+        `SELECT * FROM ${TABLA_INV} WHERE idinventario = ?`,
+        [asignacion.tabla]
+    );
 
-    if(tipo === 'entrada') {
+    if (!inventario) throw error('Inventario no encontrado', 404);
+
+    let nuevoRemanente = asignacion.cantidadremanente;
+
+    // Cálculo stock
+    if (tipo === 'entrada') {
         nuevoRemanente += cantidad;
     } else if (tipo === 'salida') {
-        if(cantidad > nuevoRemanente) {
-            throw error('No hay suficiente cantidad para la salida', 400);
+        if (cantidad > nuevoRemanente) {
+            throw error('Cantidad insuficiente en el inventario', 404);
         }
         nuevoRemanente -= cantidad;
     } else {
         throw error('Tipo de movimiento inválido', 400);
     }
 
-    // Actualizar cantidad remanente
+    // Actualizar remanente
     await db.query(
-        `UPDATE inventario_sustancia SET cantidadremanente = ? WHERE idinventario_sustancia = ?`,
+        `UPDATE ${TABLA_ASIG} SET cantidadremanente = ? WHERE idinventario_sustancia = ?`,
         [nuevoRemanente, inventario_sustancia_id]
     );
 
-    // Insertar movimiento
-    const result = await db.query(
-        `INSERT INTO ${TABLA} (inventario_sustancia_id, tipo, cantidad, motivo, usuario)
+    // Registrar movimiento
+    await db.query(
+        `INSERT INTO ${TABLA_MOV} (inventario_sustancia_id, tipo, cantidad, motivo, usuario)
         VALUES (?, ?, ?, ?, ?)`,
-        [inventario_sustancia_id, tipo, cantidad, motivo || null, usuario || null]
+        [
+            inventario_sustancia_id,
+            tipo,
+            cantidad,
+            motivo || (tipo === 'entrada' ? 'Devolución usuario' : 'Entrega usuario'),
+            usuario || user.id,
+        ]
     );
 
-    return { idmovimiento: result.insertId, ...data, cantidadremanente: nuevoRemanente };
+    return {
+        mensaje: `Movimiento ${tipo} registrado correctamente en ${inventario.nombretabla}`,
+        remanente: nuevoRemanente,
+    };
+}
+
+// Traslado interno (principal -> secundario)
+async function trasladarSustancia(data, user) {
+    const { destino_id, sustancia_id, cantidad, motivo, usuario } = data;
+    const sedeId = user.sedeU;
+
+    if (!destino_id || !sustancia_id || !cantidad) {
+        throw error('El inventario destino, la sustancia y la cantidad son requeridos', 400);
+    }
+
+    // Buscar inventario principal
+    const [principal] = await db.query(
+        `SELECT * FROM ${TABLA_INV} WHERE principal = 1 AND sedeT = ?`,
+        [sedeId]
+    );
+    if (!principal) throw error('No se encontró inventario principal para esta sede', 404);
+
+    // Buscar asignación origen (principal)
+    const [asigOrigen] = await db.query(
+        `SELECT * FROM ${TABLA_ASIG} WHERE tabla = ? AND sustancia = ?`,
+        [principal.idtablas, sustancia_id]
+    );
+    if (!asigOrigen) throw error('La sustancia no existe en el inventario principal', 400);
+
+    if (asigOrigen.cantidadremanente < cantidad) {
+        throw error('Cantidad insuficiente en el inventario principal', 400);
+    }
+
+    // Buscar o crear asignación destino (secundario)
+    let [asigDestino] = await db.query(
+        `SELECT * FROM ${TABLA_ASIG} WHERE tabla = ? AND sustancia = ?`,
+        [destino_id, sustancia_id]
+    );
+
+    await db.query('START TRANSACTION');
+    try {
+        const cantidadNum = Number(cantidad);
+
+        // Restar del principal
+        const nuevoOrigen = Number(asigOrigen.cantidadremanente) - cantidadNum;
+        await db.query(
+            `UPDATE ${TABLA_ASIG} SET cantidadremanente = ? WHERE idinventario_sustancia = ?`,
+            [nuevoOrigen, asigOrigen.idinventario_sustancia]
+        );
+
+        // Si no existe la asignación en el destino, crearla
+        if (!asigDestino) {
+            const insertResult = await db.query(
+                `INSERT INTO ${TABLA_ASIG} (tabla, sustancia, cantidad, cantidadremanente, gastototal, ubicaciondealmacenamiento)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [destino_id, sustancia_id, cantidadNum, cantidadNum, 0, '']
+            );
+
+            // Recuperar el registro recién creado
+            const [nuevoDestino] = await db.query(
+                `SELECT * FROM ${TABLA_ASIG} WHERE idinventario_sustancia = ?`,
+                [insertResult.insertId]
+            );
+            asigDestino = nuevoDestino;
+        } else {
+            // Si ya existe, solo actualizar cantidades
+            const nuevoDestino = Number(asigDestino.cantidadremanente || 0) + cantidadNum;
+            await db.query(
+                `UPDATE ${TABLA_ASIG} SET cantidadremanente = ? WHERE idinventario_sustancia = ?`,
+                [nuevoDestino, asigDestino.idinventario_sustancia]
+            );
+
+            // Actualizar objeto local para usar su ID
+            asigDestino.cantidadremanente = nuevoDestino;
+        }
+
+        // Registrar movimiento de salida (principal)
+        await db.query(
+            `INSERT INTO ${TABLA_MOV} (inventario_sustancia_id, tipo, cantidad, motivo, usuario)
+             VALUES (?, 'salida', ?, ?, ?)`,
+            [asigOrigen.idinventario_sustancia, cantidadNum, motivo || 'Traslado interno', usuario || user.id]
+        );
+
+        // Registrar movimiento de entrada (secundario)
+        await db.query(
+            `INSERT INTO ${TABLA_MOV} (inventario_sustancia_id, tipo, cantidad, motivo, usuario)
+             VALUES (?, 'entrada', ?, ?, ?)`,
+            [asigDestino.idinventario_sustancia, cantidadNum, motivo || 'Traslado interno', usuario || user.id]
+        );
+
+        await db.query('COMMIT');
+        return { mensaje: 'Traslado interno realizado correctamente' };
+    } catch (err) {
+        await db.query('ROLLBACK');
+        console.error('Error en traslado interno:', err);
+        throw error('Error al realizar el traslado interno', 500);
+    }
+}
+
+
+
+
+// Movimiento local en secundario
+async function registrarMovimientoSecundario(data, user) {
+    const { inventario_sustancia_id, tipo, cantidad, motivo, usuario } = data;
+
+    if (!inventario_sustancia_id || !tipo || !cantidad) {
+        throw error('Inventario, tipo y cantidad son requeridos', 400);
+    }
+
+    // Verificar asignación
+    const [asignacion] = await db.query(
+        `SELECT * FROM ${TABLA_ASIG} WHERE idinventario_sustancia = ?`,
+        [inventario_sustancia_id]
+    );
+
+    if (!asignacion) throw error('Sustancia no encontrada en este inventario', 404);
+
+    // Obtener info del inventario
+    const [inventario] = await db.query(
+        `SELECT * FROM ${TABLA_INV} WHERE idtablas = ?`,
+        [asignacion.tabla]
+    );
+
+    if (!inventario) throw error('Inventario no encontrado', 404);
+
+    if (inventario.principal === 1) {
+        throw error('Este método es exclusivo para inventario secundarios', 400);
+    }
+
+    let nuevoRemanente = asignacion.cantidadremanente;
+
+    // Cálculo del movimiento
+    if (tipo === 'entrada') {
+        nuevoRemanente += cantidad;
+    } else if (tipo === 'salida') {
+        if (cantidad > nuevoRemanente) {
+            throw error('No hay suficiente cantidad de esta sustancia en el inventario', 400);
+        }
+        nuevoRemanente -= cantidad;
+    } else {
+        throw error('Tipo de movimiento inválido', 400);
+    }
+
+    // Actualizar el stock
+    await db.query(
+        `UPDATE ${TABLA_ASIG} SET cantidadremanente = ? WHERE idinventario_sustancia = ?`,
+        [nuevoRemanente, inventario_sustancia_id]
+    );
+
+    // Registrar movimiento en historial
+    await db.query(
+        `INSERT INTO ${TABLA_MOV}
+        (inventario_sustancia_id, tipo, cantidad, motivo, usuario)
+        VALUES (?, ?, ?, ?, ?)`,
+        [
+            inventario_sustancia_id,
+            tipo,
+            cantidad,
+            motivo || (tipo === 'salida' ? 'Uso en práctica' : 'Devolución interna'),
+            usuario || user.id
+        ]
+    );
+
+    return {
+        mensaje: `Movimiento ${tipo} registrado en el inventario ${inventario.nombretabla}`,
+        remanente: nuevoRemanente,
+    };
 }
 
 // Listar movimientos de sustancia
@@ -57,11 +239,13 @@ async function listarMovimientos(inventario_sustancia_id) {
         INNER JOIN inventario_sustancia i ON m.inventario_sustancia_id = i.idinventario_sustancia
         INNER JOIN sustancia s ON i.sustancia = s.idsustancia
         WHERE m.inventario_sustancia_id = ?
-        ORDER BY m.fecha DESC`, {inventario_sustancia_id}
+        ORDER BY m.fecha DESC`, [ inventario_sustancia_id ]
     );
 }
 
 module.exports = {
+    trasladarSustancia,
     registrarMovimiento,
+    registrarMovimientoSecundario,
     listarMovimientos
 }

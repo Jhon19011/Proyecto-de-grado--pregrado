@@ -16,6 +16,17 @@ router.get('/', verificarToken, verificarRol(['Administrador', 'Auxiliar']), asy
   }
 });
 
+// Listar inventarios secundarios
+router.get('/secundarios', verificarToken, verificarRol(['Administrador', 'Auxiliar']), async (req, res, next) => {
+  try {
+    const sedeId = req.user.sedeU;
+    const inventarios = await controlador.listarInventariosSecundarios(sedeId);
+    respuesta.success(req, res, inventarios, 200);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Listar inventarios por id
 router.get('/:id', verificarToken, verificarRol(['Administrador', 'Auxiliar']), async (req, res, next) => {
   try {
