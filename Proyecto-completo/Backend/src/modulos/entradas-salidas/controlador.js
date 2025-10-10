@@ -6,9 +6,9 @@ const TABLA_ASIG = 'inventario_sustancia'
 
 // Registrar movimiento (entrada-salida local)
 async function registrarMovimiento(data, user) {
-    const { inventario_sustancia_id, tipo, cantidad, motivo, usuario } = data
+    const { inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha } = data
 
-    if (!inventario_sustancia_id || !tipo || !cantidad) {
+    if (!inventario_sustancia_id || !tipo || !cantidad || !fecha) {
         throw error('Todos los datos son obligatorios', 400);
     }
 
@@ -50,14 +50,15 @@ async function registrarMovimiento(data, user) {
 
     // Registrar movimiento
     await db.query(
-        `INSERT INTO ${TABLA_MOV} (inventario_sustancia_id, tipo, cantidad, motivo, usuario)
-        VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO ${TABLA_MOV} (inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha)
+        VALUES (?, ?, ?, ?, ?, ?)`,
         [
             inventario_sustancia_id,
             tipo,
             cantidad,
             motivo || (tipo === 'entrada' ? 'Devolución usuario' : 'Entrega usuario'),
             usuario || user.id,
+            fecha
         ]
     );
 
@@ -165,9 +166,9 @@ async function trasladarSustancia(data, user) {
 
 // Movimiento local en secundario
 async function registrarMovimientoSecundario(data, user) {
-    const { inventario_sustancia_id, tipo, cantidad, motivo, usuario } = data;
+    const { inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha } = data;
 
-    if (!inventario_sustancia_id || !tipo || !cantidad) {
+    if (!inventario_sustancia_id || !tipo || !cantidad || !fecha) {
         throw error('Inventario, tipo y cantidad son requeridos', 400);
     }
 
@@ -214,14 +215,15 @@ async function registrarMovimientoSecundario(data, user) {
     // Registrar movimiento en historial
     await db.query(
         `INSERT INTO ${TABLA_MOV}
-        (inventario_sustancia_id, tipo, cantidad, motivo, usuario)
-        VALUES (?, ?, ?, ?, ?)`,
+        (inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha)
+        VALUES (?, ?, ?, ?, ?, ?)`,
         [
             inventario_sustancia_id,
             tipo,
             cantidad,
             motivo || (tipo === 'salida' ? 'Uso en práctica' : 'Devolución interna'),
-            usuario || user.id
+            usuario || user.id,
+            fecha
         ]
     );
 

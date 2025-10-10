@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MovimientosService } from '../../services/movimientos.service';
 import { InventarioService } from '../../services/inventarios.service';
+
 declare var bootstrap: any;
 
 @Component({
@@ -19,9 +20,13 @@ export class InventarioDetalleComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private servicioAsignacion: InventarioSustanciaService, private servicioSustancias: SustanciasService, private servicioMovimientos: MovimientosService, private servicioInventario: InventarioService) { }
 
+  rol = localStorage.getItem('rol') || '';
   tabla!: number;
   inventariosSecundarios: any[] = [];
   inventarioDestino: number | null = null;
+  historial: any[] = [];
+  historialSustancia: any = null;
+  modalHistorial: any;
   cantidadTraslado: number | null = null;
   sustanciaSeleccionada: any = null;
   sustanciasAsignadas: any[] = [];
@@ -80,20 +85,20 @@ export class InventarioDetalleComponent implements OnInit {
 
 
   cargarDisponibles() {
-  this.servicioSustancias.listarSustancias().subscribe({
-    next: (res: any) => {
-      const todas = res.body || res;
-      console.log('🌐 Sustancias registradas en la sede:', todas);
+    this.servicioSustancias.listarSustancias().subscribe({
+      next: (res: any) => {
+        const todas = res.body || res;
+        console.log('🌐 Sustancias registradas en la sede:', todas);
 
-      // Filtrar las que ya están asignadas al inventario actual
-      const idsAsignadas = this.sustanciasAsignadas.map(s => s.idsustancia);
-      this.sustanciasDisponibles = todas.filter((s: any) => !idsAsignadas.includes(s.idsustancia));
+        // Filtrar las que ya están asignadas al inventario actual
+        const idsAsignadas = this.sustanciasAsignadas.map(s => s.idsustancia);
+        this.sustanciasDisponibles = todas.filter((s: any) => !idsAsignadas.includes(s.idsustancia));
 
-      console.log('Sustancias disponibles para asignar:', this.sustanciasDisponibles);
-    },
-    error: (err: any) => console.error('Error al listar sustancias disponibles:', err)
-  });
-}
+        console.log('Sustancias disponibles para asignar:', this.sustanciasDisponibles);
+      },
+      error: (err: any) => console.error('Error al listar sustancias disponibles:', err)
+    });
+  }
 
 
   asignarSustancia() {
@@ -183,7 +188,8 @@ export class InventarioDetalleComponent implements OnInit {
       tipo: this.movimientoSeleccionado.tipo,
       cantidad: this.movimientoSeleccionado.cantidad,
       motivo: this.movimientoSeleccionado.motivo,
-      usuario: this.movimientoSeleccionado.usuario
+      usuario: this.movimientoSeleccionado.usuario,
+      fecha: this.movimientoSeleccionado.fecha
     };
 
     const observable = this.esPrincipal
@@ -349,5 +355,25 @@ export class InventarioDetalleComponent implements OnInit {
     });
   }
 
+  abrirHistorial(asignacion: any) {
+    if (!asignacion) return;
+
+    this.historialSustancia = asignacion;
+
+    this.servicioMovimientos.listarMovimientos(asignacion.idinventario_sustancia).subscribe({
+      next: (res: any) => {
+        this.historial = res.body || res;
+        const modalEl = document.getElementById('modalHistorial');
+        if (modalEl) {
+          this.modalHistorial = new bootstrap.Modal(modalEl);
+          this.modalHistorial.show();
+        }
+      },
+      error: (err: any) => {
+        console.error('Error al cargar historial:', err);
+        alert('No se pudo cargar el historial de movimientos');
+      }
+    });
+  }
 
 }
