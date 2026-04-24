@@ -1,0 +1,419 @@
+<div class="container-fluid py-4 px-5">
+  <div class="col-auto">
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-body d-flex justify-content-between align-items-center">
+
+        <!-- Izquierda -->
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-light btn-sm" (click)="volver()">
+            <i class="bi bi-arrow-left"></i>
+          </button>
+
+          <div>
+            <h5 class="mb-0 fw-bold">Sustancias</h5>
+            <small class="text-muted">Gestión de inventario químico</small>
+          </div>
+        </div>
+
+        <!-- Derecha -->
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary" (click)="toggleFiltros()">
+            <i class="bi bi-funnel me-1"></i>
+            {{ mostrarFiltros ? 'Ocultar' : 'Filtros' }}
+          </button>
+
+          <button class="btn btn-primary" (click)="resetForm()" data-bs-toggle="modal"
+            data-bs-target="#crearSustanciaModal">
+            <i class="bi bi-plus-circle me-1"></i>
+            Nueva
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3" *ngIf="mostrarFiltros">
+      <div class="card-body">
+
+        <h6 class="mb-3 fw-semibold text-muted">
+          <i class="bi bi-funnel me-2"></i>Filtros de búsqueda
+        </h6>
+
+        <div class="row g-2">
+
+          <div class="col-md-2">
+            <input class="form-control" placeholder="Número" [(ngModel)]="filtro.numero" (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-3">
+            <input class="form-control" placeholder="Nombre" [(ngModel)]="filtro.nombreComercial"
+              (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-2">
+            <input class="form-control" placeholder="Código" [(ngModel)]="filtro.codigo" (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-2">
+            <input class="form-control" placeholder="CAS" [(ngModel)]="filtro.CAS" (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-3">
+            <input class="form-control" placeholder="Marca" [(ngModel)]="filtro.marca" (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-4">
+            <input class="form-control" placeholder="Clase ONU" [(ngModel)]="filtro.clasedepeligrosegunonu"
+              (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-3">
+            <input class="form-control" placeholder="IARC" [(ngModel)]="filtro.categoriaIARC"
+              (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-3">
+            <select class="form-select" [(ngModel)]="filtro.estado" (change)="buscarConFiltros()">
+              <option value="">Estado</option>
+              <option>Sólido</option>
+              <option>Líquido</option>
+              <option>Gaseoso</option>
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <input class="form-control" placeholder="Presentación" [(ngModel)]="filtro.presentacion"
+              (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-2">
+            <select class="form-select" [(ngModel)]="filtro.unidad" (change)="buscarConFiltros()">
+              <option value="">Unidad</option>
+              <option>g</option>
+              <option>kg</option>
+              <option>µL</option>
+              <option>L</option>
+              <option>ml</option>
+              <option>Sobre</option>
+              <option>Tubo</option>
+              
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <select class="form-select" [(ngModel)]="filtro.esControlada" (change)="buscarConFiltros()">
+              <option value="">Controlada</option>
+              <option [ngValue]="1">Sí</option>
+              <option [ngValue]="0">No</option>
+            </select>
+          </div>
+
+          <!-- BOTÓN -->
+          <div class="col-md-2 d-flex">
+            <button class="btn btn-outline-danger w-100" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>
+              Limpiar
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle text-center">
+            <thead class="table-light">
+              <tr>
+                <th>Numero</th>
+                <th>Código</th>
+                <th>Nombre Comercial</th>
+                <th>Sustancia de control</th>
+                <th>Marca</th>
+                <th>Clase de Peligro Según ONU</th>
+                <th>Categoría IARC</th>
+                <th>CAS</th>
+                <th>Estado</th>
+                <th>Presentación</th>
+                <th>Unidad</th>
+                <th>FDS</th>
+                <th>COA</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of sustancias">
+                <td>{{s.numero}}</td>
+                <td>{{s.codigo}}</td>
+                <td>{{s.nombreComercial}}</td>
+                <td>
+                  <span class="badge rounded-pill" [ngClass]="s.esControlada ? 'bg-warning text-dark' : 'bg-secondary'">
+                    {{s.esControlada ? 'sí' : 'No'}}
+                  </span>
+                </td>
+                <td>{{s.marca}}</td>
+                <td>{{s.clasedepeligrosegunonu}}</td>
+                <td>{{s.categoriaIARC}}</td>
+                <td>{{s.CAS}}</td>
+                <td>{{s.estado}}</td>
+                <td>{{s.presentacion}}</td>
+                <td>{{s.unidad}}</td>
+                <td>
+                  <a *ngIf="s.pdf_seguridad" [href]="baseUrl + s.pdf_seguridad" target="_blank"
+                    class="btn btn-sm btn-outline-primary">
+                    Ver PDF
+                  </a>
+                  <span *ngIf="!s.pdf_seguridad">-</span>
+                </td>
+
+                <td>
+                  <a *ngIf="s.pdf_tecnico" [href]="baseUrl + s.pdf_tecnico" target="_blank"
+                    class="btn btn-sm btn-outline-success">
+                    Ver PDF
+                  </a>
+                  <span *ngIf="!s.pdf_tecnico">-</span>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-primary me-2" (click)="editarSustancia(s)" data-bs-toggle="modal"
+                    data-bs-target="#crearSustanciaModal">
+                    Editar
+                  </button>
+
+                  <button class="btn btn-sm btn-danger" (click)="eliminarSustancia(s.idsustancia)">Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="crearSustanciaModal" tabindex="-1" aria-labelledby="crearSustanciaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <!-- Encabezado -->
+        <div class="modal-header custom-modal-header">
+          <div class="d-flex align-items-center gap-3">
+
+            <div class="icon-box">
+              <i class="bi" [ngClass]="idsustancia ? 'bi-pencil-square' : 'bi-plus-circle'">
+              </i>
+            </div>
+
+            <div>
+              <h5 class="mb-0 fw-bold">
+                {{ idsustancia ? 'Editar sustancia' : 'Nueva sustancia' }}
+              </h5>
+              <small class="text-light opacity-75">
+                {{ idsustancia ? 'Modifica la información existente' : 'Registra una nueva sustancia' }}
+              </small>
+            </div>
+
+          </div>
+
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- Cuerpo con formulario -->
+        <div class="modal-body pt-2">
+          <form class="form-modern" (ngSubmit)="guardarSustancia()" #formSustancia="ngForm">
+            <!-- 🔹 INFORMACIÓN BÁSICA -->
+            <h6 class="form-section-title">Información Básica</h6>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Número</label>
+                <input type="text" [(ngModel)]="numero" name="numero" class="form-control">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Código</label>
+                <input type="text" [(ngModel)]="codigo" name="codigo" class="form-control">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Nombre comercial</label>
+                <input type="text" [(ngModel)]="nombreComercial" name="nombreComercial" class="form-control">
+              </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+              <div class="col-md-6">
+                <label class="form-label">Marca</label>
+                <input type="text" [(ngModel)]="marca" name="marca" class="form-control">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Lote</label>
+                <input type="text" [(ngModel)]="lote" name="lote" class="form-control">
+              </div>
+            </div>
+            <!-- 🔹 IDENTIFICACIÓN QUÍMICA -->
+            <h6 class="form-section-title mt-4">Identificación Química</h6>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">CAS</label>
+                <input type="text" [(ngModel)]="CAS" name="CAS" class="form-control">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Clase ONU</label>
+                <input type="text" [(ngModel)]="clasedepeligrosegunonu" name="clasedepeligrosegunonu"
+                  class="form-control">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Categoría IARC</label>
+                <input type="text" [(ngModel)]="categoriaIARC" name="categoriaIARC" class="form-control">
+              </div>
+            </div>
+
+            <!-- 🔹 CARACTERÍSTICAS -->
+            <h6 class="form-section-title mt-4">Características</h6>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Estado</label>
+                <select [(ngModel)]="estado" name="estado" class="form-select" required>
+                  <option value="" disabled selected>Seleccionar</option>
+                  <option value="Sólido">Sólido</option>
+                  <option value="Líquido">Líquido</option>
+                  <option value="Gas">Gas</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Presentación</label>
+                <input type="text" [(ngModel)]="presentacion" name="presentacion" class="form-control">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Unidad</label>
+                <select [(ngModel)]="unidad" name="unidad" class="form-select" required>
+                  <option value="" disabled selected>Seleccionar</option>
+                  <option value="g">Gramos (g)</option>
+                  <option value="kg">Kilogramos (kg)</option>
+                  <option value="μL">Microlitros (μL)</option>
+                  <option value="L">Litros (L)</option>
+                  <option value="mL">Mililitros (mL)</option>
+                  <option value="Sobre">Sobres</option>
+                  <option value="Tubo">Tubos</option>
+                </select>
+              </div>
+            </div>
+            <!-- 🔹 CONTROL -->
+            <h6 class="form-section-title mt-4">Control</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Fecha de vencimiento</label>
+                <input type="date" [(ngModel)]="fechadevencimiento" name="fechadevencimiento" class="form-control">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">¿Sustancia controlada?</label>
+                <select [(ngModel)]="esControlada" name="esControlada" class="form-select" required>
+                  <option [ngValue]="null" disabled selected>Seleccionar</option>
+                  <option [ngValue]="1">Sí</option>
+                  <option [ngValue]="0">No</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-3 mt-2">
+              <div class="col-md-6">
+
+                <label class="form-label fw-semibold">PDF de seguridad</label>
+
+                <div class="pdf-box">
+
+                  <input #pdfSeguridadInput type="file" class="form-control mb-2" accept="application/pdf"
+                    (change)="onPdfSeguridadChange($event)">
+
+                  <!-- PDF actual -->
+                  <div *ngIf="idsustancia && pdfSeguridadActual" class="pdf-info position-relative">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <button type="button" class="btn btn-sm btn-danger btn-delete"
+                        (click)="confirmarEliminarPdf('seguridad')">
+                        <i class="bi bi-trash"></i>
+                      </button>
+
+                      <small class="text-muted">
+                        Archivo actual:
+                        <a [href]="baseUrl + pdfSeguridadActual" target="_blank">
+                          Ver PDF
+                        </a>
+                      </small>
+
+                    </div>
+
+                    <small class="text-muted d-block mt-1">
+                      Si subes uno nuevo, reemplazará el actual
+                    </small>
+                  </div>
+
+                  <!-- PDF nuevo -->
+                  <div *ngIf="pdfSeguridadNombre" class="pdf-new">
+                    <small class="text-success">
+                      {{ pdfSeguridadNombre }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+
+                <label class="form-label fw-semibold">PDF técnico</label>
+
+                <div class="pdf-box">
+
+                  <input #pdfTecnicoInput type="file" class="form-control mb-2" accept="application/pdf"
+                    (change)="onPdfTecnicoChange($event)">
+
+                  <!-- PDF actual -->
+                  <div *ngIf="idsustancia && pdfTecnicoActual" class="pdf-info position-relative">
+
+                    <button type="button" class="btn btn-sm btn-danger btn-delete"
+                      (click)="confirmarEliminarPdf('tecnico')">
+                      <i class="bi bi-trash"></i>
+                    </button>
+
+                    <small class="text-muted d-block">
+                      Archivo actual:
+                      <a [href]="baseUrl + pdfTecnicoActual" target="_blank">
+                        Ver PDF
+                      </a>
+                    </small>
+
+                    <small class="text-muted d-block mt-1">
+                      Si subes uno nuevo, reemplazará el actual
+                    </small>
+
+                  </div>
+
+                  <!-- PDF nuevo -->
+                  <div *ngIf="pdfTecnicoNombre" class="pdf-new">
+                    <small class="text-success">
+                      {{ pdfTecnicoNombre }}
+                    </small>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- botones -->
+            <div class="modal-footer border-0 pt-0">
+              <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                <i class="bi bi-check-circle me-1"></i>
+                {{ idsustancia ? 'Actualizar sustancia' : 'Guardar sustancia' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

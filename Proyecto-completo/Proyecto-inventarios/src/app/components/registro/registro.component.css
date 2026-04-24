@@ -1,0 +1,39 @@
+.card {
+  border-radius: 12px;
+}
+
+.btn {
+  border-radius: 8px;
+}
+
+
+.btn {
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.form-section-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #6c757d;
+  border-left: 3px solid #0d6efd;
+  padding-left: 10px;
+}
+
+.form-modern .form-control,
+.form-modern .form-select {
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+  padding: 10px;
+  transition: all 0.2s ease;
+}
+
+.form-modern .form-control:focus,
+.form-modern .form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 2px rgba(13,110,253,0.15);
+}

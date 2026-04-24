@@ -1,0 +1,124 @@
+<div class="container-fluid py-4 px-5">
+
+  <!-- 🔹 TOP BAR -->
+  <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body d-flex justify-content-between align-items-center">
+
+      <!-- Izquierda -->
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light btn-sm" (click)="volver()">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+
+        <div>
+          <h5 class="mb-0 fw-bold">Usuarios</h5>
+          <small class="text-muted">Gestión de usuarios del sistema</small>
+        </div>
+      </div>
+
+      <!-- Derecha -->
+      <button class="btn btn-outline-secondary" (click)="toggleFiltros()">
+        <i class="bi bi-funnel me-1"></i>
+        {{ mostrarFiltros ? 'Ocultar' : 'Filtros' }}
+      </button>
+
+    </div>
+  </div>
+
+  <!-- 🔹 FILTROS -->
+  <div class="card shadow-sm border-0 mb-3" *ngIf="mostrarFiltros">
+    <div class="card-body">
+
+      <h6 class="mb-3 fw-semibold text-muted">
+        <i class="bi bi-funnel me-2"></i>Filtros de búsqueda
+      </h6>
+
+      <div class="row g-2">
+
+        <div class="col-md-2">
+          <input class="form-control" placeholder="Nombres" [(ngModel)]="filtro.nombres" (input)="buscarUsuarios()">
+        </div>
+
+        <div class="col-md-2">
+          <input class="form-control" placeholder="Apellidos" [(ngModel)]="filtro.apellidos" (input)="buscarUsuarios()">
+        </div>
+
+        <div class="col-md-2">
+          <input class="form-control" placeholder="Correo" [(ngModel)]="filtro.correo" (input)="buscarUsuarios()">
+        </div>
+
+        <div class="col-md-2">
+          <input class="form-control" placeholder="Teléfono" [(ngModel)]="filtro.telefono" (input)="buscarUsuarios()">
+        </div>
+
+        <div class="col-md-2">
+          <input class="form-control" placeholder="Rol" [(ngModel)]="filtro.rol" (input)="buscarUsuarios()">
+        </div>
+
+        <div class="col-md-2">
+          <input class="form-control" placeholder="Sede" [(ngModel)]="filtro.sede" (input)="buscarUsuarios()">
+        </div>
+
+        <!-- Botón limpiar -->
+        <div class="col-md-2 d-flex">
+          <button class="btn btn-outline-danger w-100" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1"></i>
+            Limpiar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 TABLA -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle text-center">
+
+          <thead class="table-light">
+            <tr>
+              <th>Nombres</th>
+              <th>Apellidos</th>
+              <th>Correo</th>
+              <th>Teléfono</th>
+              <th>Rol</th>
+              <th>Sede</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let usuario of usuarios">
+
+              <td>{{ usuario.nombres }}</td>
+              <td>{{ usuario.apellidos }}</td>
+              <td>{{ usuario.correo }}</td>
+              <td>{{ usuario.telefono }}</td>
+
+              <td>{{ usuario.nombreRol }}</td>
+
+              <td>{{ usuario.nombreSede }}</td>
+
+              <td>
+                <button class="btn btn-sm btn-primary me-2" [routerLink]="['/registro', usuario.idusuario]">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+
+                <button class="btn btn-sm btn-danger" (click)="eliminarUsuario(usuario.idusuario)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>

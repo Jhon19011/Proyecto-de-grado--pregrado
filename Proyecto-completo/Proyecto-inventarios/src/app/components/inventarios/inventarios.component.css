@@ -1,0 +1,161 @@
+.form-check-input {
+  cursor: pointer;
+}
+
+.form-check-label {
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.btn {
+  border-radius: 8px;
+}
+
+input, select {
+  border-radius: 8px !important;
+}
+
+.table tbody tr {
+  transition: all 0.2s ease;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  border-radius: 10px;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+}
+
+.btn {
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+input:focus, select:focus {
+  border-color: #0d6efd !important;
+  box-shadow: 0 0 0 0.15rem rgba(13,110,253,.25);
+  transition: 0.2s;
+}
+
+.card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+i {
+  transition: transform 0.2s ease;
+}
+
+i:hover {
+  transform: scale(1.2);
+}
+
+.badge {
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 20px;
+}
+
+body {
+  background-color: #f4f6f9;
+}
+
+td, th {
+  text-align: center;
+  vertical-align: middle;
+}
+
+table {
+  table-layout: auto;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  font-size: 14px;
+}
+
+td, th {
+  white-space: nowrap;
+}
+
+td {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-responsive {
+  position: relative;
+  padding-bottom: 5px;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #0d6efd;
+  border-radius: 20px;
+  border: 2px solid #fff;
+}
+
+.table thead th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table td, .table th {
+  vertical-align: middle;
+  padding: 12px 10px;
+}
+
+.acciones-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.acciones-container button {
+  white-space: nowrap;
+}
+
+td:last-child {
+  max-width: none;
+  overflow: visible;
+}
+
+@media (max-width: 768px) {
+  .acciones-container {
+    flex-direction: column;
+  }
+}

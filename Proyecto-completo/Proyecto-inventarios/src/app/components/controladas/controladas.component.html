@@ -1,0 +1,133 @@
+<div class="container-fluid py-4 px-5">
+  <div class="col-auto">
+
+    <!-- 🔹 TOP BAR -->
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-body d-flex justify-content-between align-items-center">
+
+        <!-- Izquierda -->
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-light btn-sm" (click)="volver()">
+            <i class="bi bi-arrow-left"></i>
+          </button>
+
+          <div>
+            <h5 class="mb-0 fw-bold">Sustancias Controladas</h5>
+            <small class="text-muted">Gestión y autorización</small>
+          </div>
+        </div>
+
+        <!-- Derecha -->
+        <div>
+          <button class="btn btn-outline-secondary" (click)="toggleFiltros()">
+            <i class="bi bi-funnel me-1"></i>
+            {{ mostrarFiltros ? 'Ocultar' : 'Filtros' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 🔹 FILTROS -->
+    <div class="card shadow-sm border-0 mb-3" *ngIf="mostrarFiltros">
+      <div class="card-body">
+
+        <h6 class="mb-3 fw-semibold text-muted">
+          <i class="bi bi-funnel me-2"></i>Filtros de búsqueda
+        </h6>
+
+        <div class="row g-2">
+
+          <div class="col-md-3">
+            <input class="form-control" placeholder="Código" [(ngModel)]="filtro.codigo" (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-4">
+            <input class="form-control" placeholder="Nombre" [(ngModel)]="filtro.nombreComercial"
+              (input)="buscarConFiltros()">
+          </div>
+
+          <div class="col-md-2">
+            <select class="form-select" [(ngModel)]="filtro.unidad" (change)="buscarConFiltros()">
+              <option value="">Unidad</option>
+              <option>g</option>
+              <option>kg</option>
+              <option>ml</option>
+              <option>L</option>
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <select class="form-select" [(ngModel)]="filtro.autorizada" (change)="buscarConFiltros()">
+              <option value="">Autorización</option>
+              <option [ngValue]="1">Autorizada</option>
+              <option [ngValue]="0">No autorizada</option>
+            </select>
+          </div>
+
+          <!-- BOTÓN LIMPIAR -->
+          <div class="col-md-1 d-flex">
+            <button class="btn btn-outline-danger w-100" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔹 TABLA -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-0">
+
+            <div class="table-responsive">
+              <table class="table table-hover align-middle text-center">
+
+                <thead class="table-light">
+                  <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Unidad</th>
+                    <th>Autorización</th>
+                    <th>Cambiar Autorización</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let s of sustancias">
+
+                    <td>{{ s.codigo }}</td>
+                    <td>{{ s.nombreComercial }}</td>
+                    <td>{{ s.unidad }}</td>
+
+                    <td>
+                      <span class="badge" [ngClass]="s.autorizada ? 'bg-success' : 'bg-danger'">
+                        {{ s.autorizada ? 'Autorizada' : 'No autorizada' }}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div class="switch-container" (click)="toggleAutorizacion(s)">
+                        <div class="switch" [class.active]="s.autorizada">
+                          <div class="circle"></div>
+                        </div>
+                      </div>
+                    </td>
+
+                  </tr>
+                </tbody>
+
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

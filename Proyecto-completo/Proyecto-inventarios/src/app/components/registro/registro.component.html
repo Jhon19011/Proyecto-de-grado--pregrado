@@ -1,0 +1,108 @@
+<div class="container-fluid py-4 px-5">
+
+  <!-- 🔹 TOP BAR -->
+  <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body d-flex justify-content-between align-items-center">
+
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light btn-sm" (click)="volver()">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+
+        <div>
+          <h5 class="mb-0 fw-bold">
+            {{ modoEdicion ? 'Editar usuario' : 'Nuevo usuario' }}
+          </h5>
+          <small class="text-muted">
+            {{ modoEdicion ? 'Modifica la información del usuario' : 'Registra un nuevo usuario en el sistema' }}
+          </small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 🔹 FORMULARIO -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+
+      <form (ngSubmit)="registrar()" class="form-modern">
+
+        <!-- 🔹 INFORMACIÓN PERSONAL -->
+        <h6 class="form-section-title">Información personal</h6>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombres</label>
+            <input type="text" class="form-control"
+              [(ngModel)]="nombres" name="nombres" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Apellidos</label>
+            <input type="text" class="form-control"
+              [(ngModel)]="apellidos" name="apellidos" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Correo</label>
+            <input type="email" class="form-control"
+              [(ngModel)]="correo" name="correo" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Teléfono</label>
+            <input type="number" class="form-control"
+              [(ngModel)]="telefono" name="telefono">
+          </div>
+        </div>
+
+        <!-- 🔹 ACCESO -->
+        <h6 class="form-section-title mt-4">Acceso</h6>
+
+        <div class="row g-3">
+
+          <div class="col-md-6" *ngIf="!modoEdicion">
+            <label class="form-label">Contraseña</label>
+            <input type="password" class="form-control"
+              [(ngModel)]="password" name="password" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Rol</label>
+            <select class="form-select"
+              [(ngModel)]="rol" name="rol" required>
+              <option [ngValue]="null" disabled>Seleccionar</option>
+              <option [ngValue]="1">Administrador</option>
+              <option [ngValue]="4">Auxiliar</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Sede</label>
+            <select class="form-select"
+              [(ngModel)]="sedeU" name="sedeU" required>
+              <option [ngValue]="null" disabled>Seleccionar</option>
+              <option [ngValue]="1">Principal Bogotá D.C.</option>
+              <option [ngValue]="21">Bucaramanga</option>
+              <option [ngValue]="3">Villavicencio</option>
+              <option [ngValue]="4">Medellín</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- 🔹 BOTÓN -->
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary w-100 fw-semibold">
+            <i class="bi bi-check-circle me-1"></i>
+            {{ modoEdicion ? 'Actualizar usuario' : 'Registrar usuario' }}
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
