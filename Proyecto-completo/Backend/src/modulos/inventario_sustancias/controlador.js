@@ -19,7 +19,8 @@ async function listarPorInventario(tabla) {
       s.categoriaIARC, 
       s.estado,
       s.presentacion,
-      s.unidad, 
+      s.unidad,
+      u.nombre AS unidad_nombre, 
       s.PDF, 
       isus.cantidad, 
       isus.cantidadremanente, 
@@ -33,15 +34,16 @@ async function listarPorInventario(tabla) {
       t.nombretabla
     FROM ${TABLA_ASIG} isus
     JOIN sustancia s ON s.idsustancia = isus.sustancia
+    LEFT JOIN unidades u ON u.idunidad = s.unidad 
     JOIN tablas t ON t.idtablas = isus.tabla
     WHERE isus.tabla = ? AND isus.estado = 1
   `, [tabla]);
 }
 
 async function asignarSustancia(data) {
-  const { tabla, sustancia, cantidad, ubicaciondealmacenamiento } = data;
+  const { tabla, sustancia, cantidad, ubicaciondealmacenamiento, lote, fechadevencimiento } = data;
 
-  if (!tabla || !sustancia || !cantidad) {
+  if (!tabla || !sustancia || !cantidad || !lote || !fechadevencimiento) {
     throw error('Todos los campos son obligatorios', 400);
   }
 
@@ -49,38 +51,39 @@ async function asignarSustancia(data) {
 
   const query = `
     INSERT INTO ${TABLA_ASIG} (
-    tabla, 
-    sustancia, 
-    cantidad, 
-    cantidadremanente, 
-    gastototal, 
-    ubicaciondealmacenamiento, 
-    estado,
-    lote,
-    fechadevencimiento
+      tabla, 
+      sustancia, 
+      cantidad, 
+      cantidadremanente, 
+      gastototal, 
+      ubicaciondealmacenamiento, 
+      estado,
+      lote,
+      fechadevencimiento
     )
     VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
   `;
 
-  const insertResult = await db.query(`INSERT INTO ${TABLA_ASIG} (...) VALUES (...)`);
-
-  const idNuevo = insertResult.insertId;
-
-  await db.query(
-    `UPDATE ${TABLA_ASIG} SET cedula_principal = ? WHERE idinventario_sustancia = ?`,
-    [idNuevo, idNuevo]
-  );
-
-  await db.query(query, [
+  const insertResult = await db.query(query, [
     tabla,
     sustancia,
     cantidadNum,
-    cantidadNum, // cada lote inicia completo
-    0,           // gasto inicia en 0
+    cantidadNum,
+    0,
     ubicaciondealmacenamiento || '',
     lote,
-    fecha_vencimiento
+    fechadevencimiento
   ]);
+
+  const idNuevo = insertResult.insertId;
+
+  // asignar cédula principal
+  await db.query(
+    `UPDATE ${TABLA_ASIG} 
+     SET cedula_principal = ? 
+     WHERE idinventario_sustancia = ?`,
+    [idNuevo, idNuevo]
+  );
 
   return { mensaje: 'Sustancia registrada' };
 }
@@ -132,10 +135,12 @@ async function buscarSustanciasInventario(filtros) {
     SELECT 
       i.*,
       s.nombreComercial,
-      s.unidad
+      s.unidad,
+      u.nombre AS unidad_nombre
     FROM inventario_sustancia i
     INNER JOIN sustancia s 
       ON s.idsustancia = i.sustancia
+    LEFT JOIN unidades u ON u.idunidad = s.unidad
     WHERE i.tabla = ? AND i.estado = 1
   `;
 

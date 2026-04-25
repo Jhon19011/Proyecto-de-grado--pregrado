@@ -107,7 +107,7 @@
                 <td>{{ item.cantidad }}</td>
                 <td>{{ item.cantidadremanente }}</td>
                 <td>{{ item.gastototal }}</td>
-                <td>{{ item.unidad }}</td>
+                <td>{{ item.unidad_nombre }}</td>
                 <td>{{ item.lote || '—' }}</td>
                 <td>
                   <span [ngClass]="getClaseVencimiento(item.fechadevencimiento)">
@@ -432,13 +432,14 @@
           <!-- LOTE -->
           <div class="mb-3">
             <label class="form-label">Lote</label>
-            <input type="text" class="form-control" [(ngModel)]="formAsignacion.lote" placeholder="Ej: L-2026-001">
+            <input type="text" class="form-control" [(ngModel)]="formAsignacion.lote" name="lote">
           </div>
 
           <!-- FECHA DE VENCIMIENTO -->
           <div class="mb-3">
             <label class="form-label">Fecha de vencimiento</label>
-            <input type="date" class="form-control" [(ngModel)]="formAsignacion.fechadevencimiento">
+            <input type="date" class="form-control" [(ngModel)]="formAsignacion.fecha_vencimiento"
+              name="fecha_vencimiento">
           </div>
 
           <div class="mb-3">
@@ -456,9 +457,8 @@
             <label class="form-label">Ubicación de almacenamiento:</label>
             <input type="text" class="form-control" [(ngModel)]="ubicaciondealmacenamiento" name="ubicacion" required />
           </div>
-          <button class="btn btn-success"
-            [disabled]="!formAsignacion.lote || !formAsignacion.fechadevencimiento || !formAsignacion.cantidad"
-            (click)="asignarSustancia()">
+          <button class="btn btn-success" type="submit"
+            [disabled]="!formAsignacion.lote || !formAsignacion.fecha_vencimiento || !cantidad">
             Asignar
           </button>
         </form>

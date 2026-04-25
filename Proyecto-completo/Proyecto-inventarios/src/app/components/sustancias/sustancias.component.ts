@@ -3,6 +3,7 @@ import { Component, inject, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SustanciasService } from '../../services/sustancias.service';
+import { UnidadesService } from '../../services/unidades.service';
 import { environment } from '../../../environments/environment';
 
 declare var bootstrap: any;
@@ -27,6 +28,9 @@ export class SustanciasComponent {
   pdfTecnicoActual: string = '';
   eliminarPdfSeguridad: boolean = false;
   eliminarPdfTecnico: boolean = false;
+  unidades: any[] = [];
+  nuevaUnidad: string = '';
+  mostrarInputUnidad: boolean = false;
 
   filtro: any = {
     numero: '',
@@ -59,16 +63,17 @@ export class SustanciasComponent {
   estado = '';
   fechadevencimiento = '';
   presentacion = '';
-  unidad = '';
+  unidad: number | null = null;
   pdfSeguridadFile: File | null = null;
   pdfTecnicoFile: File | null = null;
   PDF = '';
   esControlada: number | null = null;
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private servcicioUnidades: UnidadesService) { }
 
   ngOnInit(): void {
     this.listarSustancias();
+    this.cargarUnidades();
   }
 
   listarSustancias() {
@@ -140,7 +145,7 @@ export class SustanciasComponent {
     formData.append('estado', this.estado);
     formData.append('fechadevencimiento', this.fechadevencimiento);
     formData.append('presentacion', this.presentacion);
-    formData.append('unidad', this.unidad);
+    formData.append('unidad', this.unidad ? this.unidad.toString() : '');
     formData.append('PDF', this.PDF);
     formData.append('esControlada', Number(this.esControlada).toString());
 
@@ -260,7 +265,7 @@ export class SustanciasComponent {
     this.estado = '';
     this.fechadevencimiento = '';
     this.presentacion = '';
-    this.unidad = '';
+    this.unidad = null;
     this.pdfSeguridadFile = null;
     this.pdfTecnicoFile = null
     this.pdfTecnicoNombre = '';
@@ -277,6 +282,49 @@ export class SustanciasComponent {
     if (this.pdfTecnicoInput) {
       this.pdfTecnicoInput.nativeElement.value = '';
     }
+  }
+
+  crearUnidad() {
+    this.servcicioUnidades.crear({ nombre: this.nuevaUnidad })
+      .subscribe({
+        next: () => {
+          alert('Unidad creada');
+          this.cargarUnidades();
+          this.nuevaUnidad = '';
+          this.mostrarInputUnidad = false;
+        },
+        error: err => console.error(err)
+      });
+  }
+
+  cargarUnidades() {
+    this.servcicioUnidades.listar().subscribe({
+      next: (res: any) => {
+        console.log(this.unidades);
+        this.unidades = res.body || res;
+      },
+      error: (err) => console.error('Error al cargar unidades:', err)
+    });
+  }
+
+  eliminarUnidad(id: number) {
+    if (!confirm('¿Eliminar esta unidad?')) return;
+
+    this.servcicioUnidades.eliminar(id).subscribe({
+      next: () => {
+        // recargar lista
+        this.cargarUnidades();
+
+        // si la unidad eliminada estaba seleccionada
+        if (this.unidad === id) {
+          this.unidad = null;
+        }
+      },
+      error: err => {
+        console.error(err);
+        alert(err.error?.body || 'Error al eliminar');
+      }
+    });
   }
 
   eliminarPdf(tipo: 'seguridad' | 'tecnico') {

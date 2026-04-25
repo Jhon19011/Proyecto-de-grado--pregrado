@@ -87,16 +87,10 @@
           </div>
 
           <div class="col-md-2">
-            <select class="form-select" [(ngModel)]="filtro.unidad" (change)="buscarConFiltros()">
-              <option value="">Unidad</option>
-              <option>g</option>
-              <option>kg</option>
-              <option>µL</option>
-              <option>L</option>
-              <option>ml</option>
-              <option>Sobre</option>
-              <option>Tubo</option>
-              
+            <select [(ngModel)]="unidad" name="unidad" class="form-select">
+              <option *ngFor="let u of unidades" [value]="u.idunidad">
+                {{ u.nombre }}
+              </option>
             </select>
           </div>
 
@@ -158,7 +152,7 @@
                 <td>{{s.CAS}}</td>
                 <td>{{s.estado}}</td>
                 <td>{{s.presentacion}}</td>
-                <td>{{s.unidad}}</td>
+                <td>{{s.unidad_nombre}}</td>
                 <td>
                   <a *ngIf="s.pdf_seguridad" [href]="baseUrl + s.pdf_seguridad" target="_blank"
                     class="btn btn-sm btn-outline-primary">
@@ -247,10 +241,6 @@
                 <input type="text" [(ngModel)]="marca" name="marca" class="form-control">
               </div>
 
-              <div class="col-md-6">
-                <label class="form-label">Lote</label>
-                <input type="text" [(ngModel)]="lote" name="lote" class="form-control">
-              </div>
             </div>
             <!-- 🔹 IDENTIFICACIÓN QUÍMICA -->
             <h6 class="form-section-title mt-4">Identificación Química</h6>
@@ -291,26 +281,56 @@
               </div>
 
               <div class="col-md-4">
-                <label class="form-label">Unidad</label>
-                <select [(ngModel)]="unidad" name="unidad" class="form-select" required>
-                  <option value="" disabled selected>Seleccionar</option>
-                  <option value="g">Gramos (g)</option>
-                  <option value="kg">Kilogramos (kg)</option>
-                  <option value="μL">Microlitros (μL)</option>
-                  <option value="L">Litros (L)</option>
-                  <option value="mL">Mililitros (mL)</option>
-                  <option value="Sobre">Sobres</option>
-                  <option value="Tubo">Tubos</option>
-                </select>
+                <label class="form-label fw-semibold">Unidad</label>
+
+                <!-- SELECT + BOTÓN -->
+                <div class="input-group">
+                  <select [(ngModel)]="unidad" name="unidad" class="form-select">
+                    <option value="">Seleccionar</option>
+                    <option *ngFor="let u of unidades" [value]="u.idunidad">
+                      {{ u.nombre }}
+                    </option>
+                  </select>
+
+                  <button type="button" class="btn btn-outline-primary"
+                    (click)="mostrarInputUnidad = !mostrarInputUnidad">
+                    + Nueva/Eliminar
+                  </button>
+                </div>
+
+                <div *ngIf="mostrarInputUnidad" class="mt-3">
+
+                  <!-- INPUT NUEVA UNIDAD -->
+                  <div class="input-group mb-2">
+                    <input type="text" [(ngModel)]="nuevaUnidad" [ngModelOptions]="{standalone: true}"
+                      class="form-control">
+
+                    <button type="button" class="btn btn-primary" (click)="crearUnidad()">
+                      Crear
+                    </button>
+                  </div>
+
+                  <!-- LISTA DE UNIDADES -->
+                  <ul class="list-group shadow-sm">
+                    <li *ngFor="let u of unidades"
+                      class="list-group-item d-flex justify-content-between align-items-center">
+
+                      {{ u.nombre }}
+
+                      <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarUnidad(u.idunidad)">
+                        ✕
+                      </button>
+                    </li>
+                  </ul>
+
+                </div>
               </div>
+              
+
             </div>
             <!-- 🔹 CONTROL -->
             <h6 class="form-section-title mt-4">Control</h6>
             <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Fecha de vencimiento</label>
-                <input type="date" [(ngModel)]="fechadevencimiento" name="fechadevencimiento" class="form-control">
-              </div>
 
               <div class="col-md-6">
                 <label class="form-label">¿Sustancia controlada?</label>

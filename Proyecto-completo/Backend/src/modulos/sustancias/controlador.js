@@ -3,12 +3,6 @@ const TABLA = 'sustancia';
 const fs = require('fs');
 const path = require('path');
 
-//formatear la fecha
-function formatDate(fecha) {
-  if (!fecha) return null;
-  return fecha.split('T')[0];
-}
-
 // Crear sustancias
 async function crearSustancia(data, sedeId) {
   const {
@@ -16,12 +10,10 @@ async function crearSustancia(data, sedeId) {
     codigo,
     nombreComercial,
     marca,
-    lote,
     CAS,
     clasedepeligrosegunonu,
     categoriaIARC,
     estado,
-    fechadevencimiento,
     presentacion,
     unidad,
     pdf_seguridad,
@@ -34,12 +26,10 @@ async function crearSustancia(data, sedeId) {
     throw new Error('Numero, código y nombre comercial son obligatorios');
   }
 
-  const fechaFormateada = formatDate(fechadevencimiento);
-
   const query = `
     INSERT INTO ${TABLA} 
-    (numero, codigo, nombreComercial, marca, lote, CAS, clasedepeligrosegunonu, categoriaIARC, estado, fechadevencimiento, presentacion, unidad, pdf_seguridad, pdf_tecnico, PDF, sede_s, esControlada) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (numero, codigo, nombreComercial, marca, CAS, clasedepeligrosegunonu, categoriaIARC, estado, presentacion, unidad, pdf_seguridad, pdf_tecnico, PDF, sede_s, esControlada) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const result = await db.query(query, [
@@ -47,12 +37,10 @@ async function crearSustancia(data, sedeId) {
     codigo,
     nombreComercial,
     marca || null,
-    lote || null,
     CAS || null,
     clasedepeligrosegunonu || null,
     categoriaIARC || null,
     estado || null,
-    fechaFormateada,
     presentacion || null,
     unidad || null,
     pdf_seguridad || null,
@@ -69,8 +57,10 @@ async function crearSustancia(data, sedeId) {
 async function listarSustancias(sedeId) {
   const sql = `
     SELECT s.*,
-           IFNULL(a.autorizada, 0) AS autorizada
+          u.nombre AS unidad_nombre,
+          IFNULL(a.autorizada, 0) AS autorizada
     FROM sustancia s
+    LEFT JOIN unidades u ON u.idunidad = s.unidad
     LEFT JOIN autorizacion_sustancia a
       ON a.sustancia_id = s.idsustancia
      AND a.sede_id = ?
@@ -95,10 +85,6 @@ async function obtenerSustancia(id) {
 
 // Actualizar sustancia
 async function actualizarSustancia(id, data) {
-
-  if (data.fechadevencimiento) {
-    data.fechadevencimiento = formatDate(data.fechadevencimiento);
-  }
 
   // Obtener sustancia actual (para saber qué PDF tiene)
   const [actual] = await db.query(
@@ -164,14 +150,16 @@ async function eliminarSustancia(id) {
 
 async function listarSustanciasPorSede(sedeId) {
   const sql = `
-    SELECT s.*,
-           IFNULL(a.autorizada, 0) AS autorizada
+    SELECT 
+      s.*,
+      u.nombre AS unidad_nombre,
+      IFNULL(a.autorizada, 0) AS autorizada
     FROM sustancia s
+    LEFT JOIN unidades u ON u.idunidad = s.unidad
     LEFT JOIN autorizacion_sustancia a
       ON a.sustancia_id = s.idsustancia
-     AND a.sede_id = ?
-    WHERE s.esControlada = 1
-      AND s.sede_s = ? 
+    AND a.sede_id = ?
+    WHERE s.sede_s = ?
     ORDER BY s.nombreComercial ASC
   `;
   return db.query(sql, [sedeId, sedeId]);
@@ -191,13 +179,16 @@ async function actualizarAutorizacion(sustanciaId, sedeId, autorizada) {
 // Buscar sustancias con filtros
 async function buscarSustancias(filtros, sedeId) {
   let sql = `
-    SELECT s.*,
-           IFNULL(a.autorizada, 0) AS autorizada
-    FROM sustancia s
-    LEFT JOIN autorizacion_sustancia a
-      ON a.sustancia_id = s.idsustancia
-     AND a.sede_id = ?
-    WHERE s.sede_s = ?
+          SELECT 
+        s.*,
+        u.nombre AS unidad_nombre,
+        IFNULL(a.autorizada, 0) AS autorizada
+      FROM sustancia s
+      LEFT JOIN unidades u ON u.idunidad = s.unidad
+      LEFT JOIN autorizacion_sustancia a
+        ON a.sustancia_id = s.idsustancia
+      AND a.sede_id = ?
+      WHERE s.sede_s = ?
   `;
 
   const params = [sedeId, sedeId];
@@ -216,11 +207,6 @@ async function buscarSustancias(filtros, sedeId) {
   if (filtros.esControlada !== undefined && filtros.esControlada !== '') {
     sql += ` AND s.esControlada = ?`;
     params.push(filtros.esControlada);
-  }
-
-  if (filtros.fechadevencimiento) {
-    sql += ` AND DATE(s.fechadevencimiento) = ?`;
-    params.push(filtros.fechadevencimiento);
   }
 
   if (filtros.unidad) {
@@ -249,11 +235,6 @@ async function buscarSustancias(filtros, sedeId) {
     params.push(`%${filtros.marca}%`);
   }
 
-  if (filtros.lote) {
-    sql += ` AND s.lote LIKE ?`;
-    params.push(`%${filtros.lote}%`);
-  }
-
   if (filtros.clasedepeligrosegunonu) {
     sql += ` AND s.clasedepeligrosegunonu LIKE ?`;
     params.push(`%${filtros.clasedepeligrosegunonu}%`);
@@ -278,8 +259,10 @@ async function buscarSustancias(filtros, sedeId) {
 async function buscarSustanciasControladas(filtros, sedeId) {
   let sql = `
     SELECT s.*,
-           IFNULL(a.autorizada, 0) AS autorizada
+          u.nombre AS unidad_nombre,
+          IFNULL(a.autorizada, 0) AS autorizada
     FROM sustancia s
+    LEFT JOIN unidades u ON u.idunidad = s.unidad
     LEFT JOIN autorizacion_sustancia a
       ON a.sustancia_id = s.idsustancia
      AND a.sede_id = ?

@@ -39,6 +39,7 @@ export class InventarioDetalleComponent implements OnInit {
     ubicaciondealmacenamiento: ''
   };
 
+  todasLasSustancias: any[] = [];
   movimientos: any[] = [];
   movimientoSeleccionado: any = {
     idinventario_sustancia: 0,
@@ -54,7 +55,7 @@ export class InventarioDetalleComponent implements OnInit {
     cantidad: null,
     ubicaciondealmacenamiento: '',
     lote: '',
-    fechadevencimiento: ''
+    fecha_vencimiento: ''
   };
 
   modalMov: any;
@@ -116,9 +117,18 @@ export class InventarioDetalleComponent implements OnInit {
       next: (res: any) => {
         const todas = res.body || res;
 
-        // Filtrar las que ya están asignadas al inventario actual
-        const idsAsignadas = this.sustanciasAsignadas.map(s => s.idsustancia);
-        this.sustanciasDisponibles = todas.filter((s: any) => !idsAsignadas.includes(s.idsustancia));
+        this.todasLasSustancias = todas;
+
+        // lista única para el select
+        const mapa = new Map();
+
+        todas.forEach((s: any) => {
+          if (!mapa.has(s.nombreComercial)) {
+            mapa.set(s.nombreComercial, s);
+          }
+        });
+
+        this.sustanciasDisponibles = Array.from(mapa.values());
 
         console.log('Sustancias disponibles para asignar:', this.sustanciasDisponibles);
       },
@@ -129,7 +139,8 @@ export class InventarioDetalleComponent implements OnInit {
 
   asignarSustancia() {
 
-    if (!this.sustancia || !this.cantidad || !this.ubicaciondealmacenamiento) {
+    if (!this.sustancia || !this.cantidad || !this.ubicaciondealmacenamiento
+      || !this.formAsignacion.lote || !this.formAsignacion.fecha_vencimiento) {
       alert('Todos los campos son obligatorios');
       return;
     }
@@ -138,18 +149,16 @@ export class InventarioDetalleComponent implements OnInit {
       tabla: this.tabla,
       sustancia: this.sustancia,
       cantidad: this.cantidad,
-      cantidadremanente: this.cantidadremanente,
-      gastototal: this.gastototal,
-      ubicaciondealmacenamiento: this.ubicaciondealmacenamiento
+      ubicaciondealmacenamiento: this.ubicaciondealmacenamiento,
+      lote: this.formAsignacion.lote,
+      fechadevencimiento: this.formAsignacion.fecha_vencimiento
     }).subscribe({
       next: () => {
         alert('Sustancia asignada con éxito');
 
         this.cargarSustancias();
-
         this.resetFormularioAsignacion();
 
-        // cerrar modal correctamente
         const modalEl = document.getElementById('modalAsignacion');
         const modal = bootstrap.Modal.getInstance(modalEl);
         modal?.hide();
@@ -167,8 +176,8 @@ export class InventarioDetalleComponent implements OnInit {
 
     const nombre =
       asignacion.nombre_sustancia ||
-      asignacion.nombreComercial
-    '(sin nombre)';
+      asignacion.nombreComercial ||
+      '(sin nombre)';
 
     this.movimientoSeleccionado = {
       idinventario_sustancia: asignacion.idinventario_sustancia,
@@ -219,7 +228,6 @@ export class InventarioDetalleComponent implements OnInit {
       next: (res: any) => {
         alert(res.mensaje || 'Movimiento registrado con éxito');
         this.cargarSustancias();
-        this.abrirMovimientos(this.movimientoSeleccionado);
         if (this.modalMov) {
           this.modalMov.hide();
           document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
@@ -418,7 +426,7 @@ export class InventarioDetalleComponent implements OnInit {
   }
 
   filtrarPorNombreModalAsignacion() {
-    this.sustanciasFiltradas = this.sustanciasDisponibles.filter(
+    this.sustanciasFiltradas = this.todasLasSustancias.filter(
       s => s.nombreComercial === this.nombreSeleccionado
     );
 
@@ -443,6 +451,10 @@ export class InventarioDetalleComponent implements OnInit {
     this.cantidadremanente = null;
     this.gastototal = null;
     this.ubicaciondealmacenamiento = '';
+
+    // 🔥 IMPORTANTE
+    this.formAsignacion.lote = '';
+    this.formAsignacion.fecha_vencimiento = '';
   }
 
   ngAfterViewInit() {
@@ -501,7 +513,7 @@ export class InventarioDetalleComponent implements OnInit {
       cantidad: null,
       ubicaciondealmacenamiento: '',
       lote: '',
-      fechadevencimiento: ''
+      fecha_vencimiento: ''
     };
   }
 
