@@ -21,7 +21,7 @@ router.get('/:tabla', verificarToken, async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
-    // 🔥 EXTRAER FILTROS
+    // EXTRAER FILTROS
     const { page: _, limit: __, ...filtros } = req.query;
 
     const data = await controlador.listarPorInventario(

@@ -26,10 +26,21 @@ export class InventarioSustanciaService {
       limit
     };
 
-    // 🔥 CORRECTO
     if (filtros.sustancia) params.sustancia = filtros.sustancia;
     if (filtros.codigo) params.codigo = filtros.codigo;
     if (filtros.ubicacion) params.ubicacion = filtros.ubicacion;
+    if (filtros.cedula) params.cedula = filtros.cedula;
+    if (filtros.estado_uso) params.estado_uso = filtros.estado_uso;
+    if (filtros.unidad) params.unidad = filtros.unidad;
+    if (filtros.lote) params.lote = filtros.lote;
+    if (filtros.fecha_vencimiento) params.fecha_vencimiento = filtros.fecha_vencimiento;
+    if (
+      filtros.esControlada !== undefined &&
+      filtros.esControlada !== null &&
+      filtros.esControlada !== ''
+    ) {
+      params.esControlada = filtros.esControlada;
+    }
 
     return this.http.get(`${this.apiUrl}/${inventarioId}`, { params });
   }

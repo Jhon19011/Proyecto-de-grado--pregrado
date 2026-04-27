@@ -81,7 +81,7 @@ async function registrarMovimiento(data, user) {
 
 // Traslado interno (principal -> secundario)
 async function trasladarSustancia(data, user) {
-  const { destino_id, asignacion_id, cantidad, motivo, usuario, origen_id, ubicaciondealmacenamiento } = data;
+  const { destino_id, asignacion_id, cantidad, motivo, usuario, origen_id, ubicaciondealmacenamiento, observaciones } = data;
   const sedeId = user.sedeU;
   const nombreUsuario = `${user.nombres} ${user.apellidos}`;
   const { inventario_sustancia_id } = data;
@@ -145,8 +145,8 @@ async function trasladarSustancia(data, user) {
     // 🔺 DESTINO (SIEMPRE NUEVO)
     const insert = await db.query(
       `INSERT INTO ${TABLA_ASIG}
-      (tabla, sustancia, cantidad, cantidadremanente, gastototal, ubicaciondealmacenamiento, estado, cedula_principal, estado_uso, lote, fechadevencimiento)
-      VALUES (?, ?, ?, ?, 0, ?, 1, ?, 'Nuevo', ?, ?)`,
+      (tabla, sustancia, cantidad, cantidadremanente, gastototal, ubicaciondealmacenamiento, estado, cedula_principal, estado_uso, lote, fechadevencimiento, observaciones)
+      VALUES (?, ?, ?, ?, 0, ?, 1, ?, 'Nuevo', ?, ?, ?)`,
       [
         destino_id,
         asigOrigen.sustancia,
@@ -155,7 +155,8 @@ async function trasladarSustancia(data, user) {
         ubicaciondealmacenamiento || '',
         cedula,
         asigOrigen.lote,
-        asigOrigen.fechadevencimiento
+        asigOrigen.fechadevencimiento,
+        observaciones || ''
       ]
     );
 

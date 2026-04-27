@@ -27,7 +27,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
       s.categoriaIARC, 
       s.estado,
       s.presentacion,
-      s.unidad,
+      s.esControlada,
       u.nombre AS unidad_nombre, 
       s.PDF, 
       isus.cantidad, 
@@ -38,6 +38,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
       isus.estado_uso,
       isus.lote,
       isus.fechadevencimiento,
+      isus.observaciones,
       t.principal,
       t.nombretabla
     FROM inventario_sustancia isus
@@ -50,9 +51,15 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
   let params = [tabla];
 
   // FILTROS
+
   if (filtros.sustancia) {
     query += ` AND s.nombreComercial LIKE ?`;
     params.push(`%${filtros.sustancia}%`);
+  }
+
+  if (filtros.cedula) {
+    query += ` AND isus.cedula_principal LIKE ?`;
+    params.push(`%${filtros.cedula}%`);
   }
 
   if (filtros.codigo) {
@@ -60,10 +67,103 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     params.push(`%${filtros.codigo}%`);
   }
 
+  if (filtros.estado_uso) {
+    query += ` AND isus.estado_uso = ?`;
+    params.push(filtros.estado_uso);
+  }
+
+  if (filtros.unidad) {
+    query += ` AND u.nombre LIKE ?`;
+    params.push(`%${filtros.unidad}%`);
+  }
+
+  if (filtros.lote) {
+    query += ` AND isus.lote LIKE ?`;
+    params.push(`%${filtros.lote}%`);
+  }
+
+  if (filtros.fecha_vencimiento) {
+    query += ` AND DATE(isus.fechadevencimiento) = ?`;
+    params.push(filtros.fecha_vencimiento);
+  }
+
   if (filtros.ubicacion) {
     query += ` AND isus.ubicaciondealmacenamiento LIKE ?`;
     params.push(`%${filtros.ubicacion}%`);
   }
+
+  if (
+    filtros.esControlada !== undefined &&
+    filtros.esControlada !== null &&
+    filtros.esControlada !== ''
+  ) {
+    query += ` AND s.esControlada = ?`;
+    params.push(Number(filtros.esControlada));
+  }
+
+  let sumQuery = `
+  SELECT COALESCE(SUM(isus.cantidadremanente), 0) AS totalRemanente
+  FROM inventario_sustancia isus
+  JOIN sustancia s ON s.idsustancia = isus.sustancia
+  LEFT JOIN unidades u ON u.idunidad = s.unidad
+  WHERE isus.tabla = ? AND isus.estado = 1
+`;
+
+  //Suma Remanente Total
+
+  let sumParams = [tabla];
+
+  if (filtros.sustancia) {
+    sumQuery += ` AND s.nombreComercial LIKE ?`;
+    sumParams.push(`%${filtros.sustancia}%`);
+  }
+
+  if (filtros.cedula) {
+    sumQuery += ` AND isus.cedula_principal LIKE ?`;
+    sumParams.push(`%${filtros.cedula}%`);
+  }
+
+  if (filtros.codigo) {
+    sumQuery += ` AND s.codigo LIKE ?`;
+    sumParams.push(`%${filtros.codigo}%`);
+  }
+
+  if (filtros.estado_uso) {
+    sumQuery += ` AND isus.estado_uso = ?`;
+    sumParams.push(filtros.estado_uso);
+  }
+
+  if (filtros.unidad) {
+    sumQuery += ` AND u.nombre LIKE ?`;
+    sumParams.push(`%${filtros.unidad}%`);
+  }
+
+  if (filtros.lote) {
+    sumQuery += ` AND isus.lote LIKE ?`;
+    sumParams.push(`%${filtros.lote}%`);
+  }
+
+  if (filtros.fecha_vencimiento) {
+    sumQuery += ` AND DATE(isus.fechadevencimiento) = ?`;
+    sumParams.push(filtros.fecha_vencimiento);
+  }
+
+  if (filtros.ubicacion) {
+    sumQuery += ` AND isus.ubicaciondealmacenamiento LIKE ?`;
+    sumParams.push(`%${filtros.ubicacion}%`);
+  }
+
+  if (
+    filtros.esControlada !== undefined &&
+    filtros.esControlada !== null &&
+    filtros.esControlada !== ''
+  ) {
+    sumQuery += ` AND s.esControlada = ?`;
+    sumParams.push(Number(filtros.esControlada));
+  }
+
+  const sumRes = await db.query(sumQuery, sumParams);
+  const totalRemanente = Number(sumRes[0].totalRemanente || 0);
 
   // PAGINADO
   query += ` LIMIT ? OFFSET ?`;
@@ -76,6 +176,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     SELECT COUNT(*) as total
     FROM inventario_sustancia isus
     JOIN sustancia s ON s.idsustancia = isus.sustancia
+    LEFT JOIN unidades u ON u.idunidad = s.unidad
     WHERE isus.tabla = ? AND isus.estado = 1
   `;
 
@@ -96,6 +197,40 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     countParams.push(`%${filtros.ubicacion}%`);
   }
 
+  if (filtros.cedula) {
+    countQuery += ` AND isus.cedula_principal LIKE ?`;
+    countParams.push(`%${filtros.cedula}%`);
+  }
+
+  if (filtros.estado_uso) {
+    countQuery += ` AND isus.estado_uso = ?`;
+    countParams.push(filtros.estado_uso);
+  }
+
+  if (filtros.unidad) {
+    countQuery += ` AND u.nombre LIKE ?`;
+    countParams.push(`%${filtros.unidad}%`);
+  }
+
+  if (filtros.lote) {
+    countQuery += ` AND isus.lote LIKE ?`;
+    countParams.push(`%${filtros.lote}%`);
+  }
+
+  if (filtros.fecha_vencimiento) {
+    countQuery += ` AND DATE(isus.fechadevencimiento) = ?`;
+    countParams.push(filtros.fecha_vencimiento);
+  }
+
+  if (
+    filtros.esControlada !== undefined &&
+    filtros.esControlada !== null &&
+    filtros.esControlada !== ''
+  ) {
+    countQuery += ` AND s.esControlada = ?`;
+    countParams.push(Number(filtros.esControlada));
+  }
+
   const totalRes = await db.query(countQuery, countParams);
   const total = totalRes[0].total;
 
@@ -104,12 +239,13 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     total,
     totalPages: Math.ceil(total / limit),
     page,
-    limit
+    limit,
+    totalRemanente
   };
 }
 
 async function asignarSustancia(data) {
-  const { tabla, sustancia, cantidad, ubicaciondealmacenamiento, lote, fechadevencimiento } = data;
+  const { tabla, sustancia, cantidad, ubicaciondealmacenamiento, lote, fechadevencimiento, observaciones } = data;
 
   if (!tabla || !sustancia || !cantidad || !lote || !fechadevencimiento) {
     throw error('Todos los campos son obligatorios', 400);
@@ -127,9 +263,10 @@ async function asignarSustancia(data) {
       ubicaciondealmacenamiento, 
       estado,
       lote,
-      fechadevencimiento
+      fechadevencimiento,
+      observaciones
     )
-    VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
   `;
 
   const insertResult = await db.query(query, [
@@ -140,7 +277,8 @@ async function asignarSustancia(data) {
     0,
     ubicaciondealmacenamiento || '',
     lote,
-    fechadevencimiento
+    fechadevencimiento,
+    observaciones || ''
   ]);
 
   const idNuevo = insertResult.insertId;
@@ -158,18 +296,18 @@ async function asignarSustancia(data) {
 
 
 async function editarAsignacion(id, data) {
-  const { cantidad, cantidadremanente, gastototal, ubicaciondealmacenamiento } = data;
+  const { ubicaciondealmacenamiento, observaciones } = data;
 
-  if (cantidad == null || cantidadremanente == null || gastototal == null || !ubicaciondealmacenamiento) {
+  if (!ubicaciondealmacenamiento || !observaciones) {
     throw error('Todos los campos son obligatorios', 400);
   }
 
   const query = `
         UPDATE ${TABLA_ASIG}
-        SET cantidad = ?, cantidadremanente = ?, gastototal = ?, ubicaciondealmacenamiento = ?
+        SET ubicaciondealmacenamiento = ?, observaciones = ?
         WHERE idinventario_sustancia = ?`;
 
-  await db.query(query, [cantidad, cantidadremanente, gastototal, ubicaciondealmacenamiento, id]);
+  await db.query(query, [ubicaciondealmacenamiento, observaciones, id]);
   return { mensaje: 'Asignación actualizada con éxito' };
 }
 
@@ -208,22 +346,56 @@ async function buscarSustanciasInventario(filtros) {
     FROM inventario_sustancia i
     INNER JOIN sustancia s 
       ON s.idsustancia = i.sustancia
-    LEFT JOIN unidades u ON u.idunidad = s.unidad
+    LEFT JOIN unidades u 
+      ON u.idunidad = s.unidad
     WHERE i.tabla = ? AND i.estado = 1
   `;
 
   let params = [filtros.inventarioId];
 
+  // Nombre
   if (filtros.sustancia) {
     query += ` AND s.nombreComercial LIKE ?`;
     params.push(`%${filtros.sustancia}%`);
   }
 
+  // ID (cédula)
+  if (filtros.cedula) {
+    query += ` AND i.cedula_principal LIKE ?`;
+    params.push(`%${filtros.cedula}%`);
+  }
+
+  // Código
+  if (filtros.codigo) {
+    query += ` AND s.codigo LIKE ?`;
+    params.push(`%${filtros.codigo}%`);
+  }
+
+  // Estado (Nuevo, En uso, Agotado)
+  if (filtros.estado_uso) {
+    query += ` AND i.estado_uso = ?`;
+    params.push(filtros.estado_uso);
+  }
+
+  // Unidad (CORREGIDO)
   if (filtros.unidad) {
-    query += ` AND s.unidad LIKE ?`;
+    query += ` AND u.nombre LIKE ?`;
     params.push(`%${filtros.unidad}%`);
   }
 
+  // Lote
+  if (filtros.lote) {
+    query += ` AND i.lote LIKE ?`;
+    params.push(`%${filtros.lote}%`);
+  }
+
+  // Fecha de vencimiento
+  if (filtros.fecha_vencimiento) {
+    query += ` AND DATE(i.fechadevencimiento) = ?`;
+    params.push(filtros.fecha_vencimiento);
+  }
+
+  // Ubicación
   if (filtros.ubicacion) {
     query += ` AND i.ubicaciondealmacenamiento LIKE ?`;
     params.push(`%${filtros.ubicacion}%`);

@@ -43,27 +43,95 @@
     <div class="card shadow-sm border-0 mb-3" *ngIf="mostrarFiltros">
       <div class="card-body">
 
-        <h6 class="mb-3 fw-semibold text-muted">
-          <i class="bi bi-funnel me-2"></i>Filtros de búsqueda
-        </h6>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0 fw-semibold text-muted">
+            <i class="bi bi-funnel me-2"></i>Filtros de búsqueda
+          </h6>
 
-        <div class="row g-2">
-
-          <div class="col-md-4">
-            <input class="form-control" placeholder="Buscar por nombre" [(ngModel)]="filtro.sustancia"
-              (input)="buscarSustancias()">
-          </div>
-
-          <div class="col-md-3">
-            <input class="form-control" placeholder="Unidad" [(ngModel)]="filtro.unidad" (input)="buscarSustancias()">
-          </div>
-
-          <div class="col-md-3">
-            <input class="form-control" placeholder="Ubicación" [(ngModel)]="filtro.ubicacion"
-              (input)="buscarSustancias()">
-          </div>
-
+          <button class="btn btn-sm btn-outline-secondary" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1"></i>
+            Limpiar filtros
+          </button>
         </div>
+
+        <!-- DATOS DE IDENTIFICACIÓN -->
+        <div class="filter-section mb-4">
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Nombre comercial</label>
+              <input class="form-control" placeholder="Ej: Alcohol, Agua, Cloro" [(ngModel)]="filtro.sustancia"
+                (input)="buscarSustancias()">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">ID / Cédula</label>
+              <input class="form-control" placeholder="Ej: 25" [(ngModel)]="filtro.cedula" (input)="buscarSustancias()">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Código</label>
+              <input class="form-control" placeholder="Ej: H2O, ALC-01" [(ngModel)]="filtro.codigo"
+                (input)="buscarSustancias()">
+            </div>
+          </div>
+        </div>
+
+        <!-- ESTADO Y CONTROL -->
+        <div class="filter-section mb-4">
+
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Condición</label>
+              <select class="form-select" [(ngModel)]="filtro.estado_uso" (change)="buscarSustancias()">
+                <option value="">Todas las condiciones</option>
+                <option value="Nuevo">Nuevo</option>
+                <option value="En uso">En uso</option>
+                <option value="Agotado">Agotado</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Sustancia controlada</label>
+              <select class="form-select" [(ngModel)]="filtro.esControlada" (change)="buscarSustancias()">
+                <option value="">Todas</option>
+                <option value="1">Solo controladas</option>
+                <option value="0">Solo no controladas</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Unidad</label>
+              <input class="form-control" placeholder="Ej: mL, g, kg, L" [(ngModel)]="filtro.unidad"
+                (input)="buscarSustancias()">
+            </div>
+          </div>
+        </div>
+
+        <!-- DATOS DE INVENTARIO -->
+        <div class="filter-section">
+
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Lote</label>
+              <input class="form-control" placeholder="Ej: L-2024-01" [(ngModel)]="filtro.lote"
+                (input)="buscarSustancias()">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Fecha de vencimiento</label>
+              <input type="date" class="form-control" [(ngModel)]="filtro.fecha_vencimiento"
+                (change)="buscarSustancias()">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Ubicación</label>
+              <input class="form-control" placeholder="Ej: Estante 2, Bodega, Laboratorio 1"
+                [(ngModel)]="filtro.ubicacion" (input)="buscarSustancias()">
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -85,6 +153,7 @@
                 <th>Lote</th>
                 <th>Fecha de Vencimiento</th>
                 <th>Ubicación</th>
+                <th>Observaciones</th>
                 <th *ngIf="!esPrincipal || rol === 'Administrador'">Acciones</th>
               </tr>
             </thead>
@@ -111,9 +180,9 @@
                     {{ item.estado_uso }}
                   </span>
                 </td>
-                <td>{{ item.cantidad }}</td>
-                <td>{{ item.cantidadremanente }}</td>
-                <td>{{ item.gastototal }}</td>
+                <td>{{ item.cantidad | number:'1.2-2' }}</td>
+                <td>{{ item.cantidadremanente | number:'1.2-2' }}</td>
+                <td>{{ item.gastototal | number:'1.2-2' }}</td>
                 <td>{{ item.unidad_nombre }}</td>
                 <td>{{ item.lote || '—' }}</td>
                 <td>
@@ -122,6 +191,7 @@
                   </span>
                 </td>
                 <td>{{ item.ubicaciondealmacenamiento }}</td>
+                <td>{{ item.observaciones || '-' }}</td>
                 <td *ngIf="!esPrincipal || rol === 'Administrador'">
                   <!-- Acciones dinámicas -->
                   <!-- Si es principal y administrador -->
@@ -180,6 +250,17 @@
               </tr>
             </tbody>
           </table>
+
+          <div class="alert alert-info d-flex justify-content-between align-items-center mt-3">
+            <span>
+              <i class="bi bi-calculator me-1"></i>
+              Total remanente filtrado:
+            </span>
+
+            <strong>
+              {{ totalRemanenteFiltrado | number:'1.2-2' }}
+            </strong>
+          </div>
 
           <nav *ngIf="totalPages > 1">
             <ul class="pagination justify-content-center mt-3">
@@ -261,8 +342,8 @@
             <label class="form-label">Cantidad:</label>
 
             <div class="input-group">
-              <input type="number" class="form-control" [(ngModel)]="movimientoSeleccionado.cantidad" name="cantidad"
-                min="1" required />
+              <input type="number" step="0.01" min="0.01" class="form-control"
+                [(ngModel)]="movimientoSeleccionado.cantidad" name="cantidad" required />
 
               <span class="input-group-text">
                 {{ movimientoSeleccionado?.unidad || '---' }}
@@ -274,7 +355,7 @@
           <div class="mb-3">
             <label class="form-label">Motivo:</label>
             <textarea class="form-control" [(ngModel)]="movimientoSeleccionado.motivo" name="motivo" rows="2"
-              required></textarea>
+              name="motivo" required></textarea>
           </div>
 
           <div class="mb-3">
@@ -384,6 +465,12 @@
               name="ubicacion">
           </div>
 
+          <div class="mb-3">
+            <label class="form-label">Observaciones</label>
+            <textarea class="form-control" [(ngModel)]="asignacionSeleccionada.observaciones" name="observaciones">
+            </textarea>
+          </div>
+
           <button class="btn btn-primary w-100">
             <i class="bi bi-save me-1"></i> Guardar cambios
           </button>
@@ -490,6 +577,11 @@
             <label class="form-label">Ubicación de almacenamiento:</label>
             <input type="text" class="form-control" [(ngModel)]="ubicaciondealmacenamiento" name="ubicacion" required />
           </div>
+          <div class="mb-3">
+            <label>Observaciones</label>
+            <textarea class="form-control" [(ngModel)]="formAsignacion.observaciones" name="observaciones">
+            </textarea>
+          </div>
           <button class="btn btn-success" type="submit"
             [disabled]="!formAsignacion.lote || !formAsignacion.fecha_vencimiento || !cantidad">
             Asignar
@@ -500,7 +592,7 @@
   </div>
 </div>
 
-<!-- MODAL: Trasladar a inventario secundario -->
+<!-- MODAL: Trasladar -->
 <div class="modal fade" id="modalTraslado">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
@@ -536,8 +628,8 @@
             <label class="form-label">Cantidad</label>
 
             <div class="input-group">
-              <input type="number" class="form-control" [(ngModel)]="cantidadTraslado" name="cantidad" min="1"
-                required />
+              <input type="number" step="0.01" min="0.01" class="form-control" [(ngModel)]="cantidadTraslado"
+                name="cantidad" required />
 
               <span class="input-group-text">
                 {{ sustanciaSeleccionada?.unidad || '---' }}
@@ -549,6 +641,12 @@
           <div class="mb-3">
             <label class="form-label">Ubicación de almacenamiento</label>
             <input type="text" class="form-control" [(ngModel)]="ubicacionTraslado" name="ubicacionTraslado" required />
+          </div>
+
+          <div class="mb-3">
+            <label>Observación del traslado</label>
+            <textarea class="form-control" [(ngModel)]="observacionTraslado" name="observacionTraslado">
+            </textarea>
           </div>
 
           <button class="btn btn-primary w-100">

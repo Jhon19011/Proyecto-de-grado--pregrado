@@ -62,7 +62,8 @@ export class InventarioDetalleComponent implements OnInit {
     cantidad: null,
     ubicaciondealmacenamiento: '',
     lote: '',
-    fecha_vencimiento: ''
+    fecha_vencimiento: '',
+    observaciones: ''
   };
 
   modalMov: any;
@@ -78,7 +79,9 @@ export class InventarioDetalleComponent implements OnInit {
   sustanciasFiltradas: any[] = [];
 
   idInventario: number = 0;
-  filtro: any = {};
+  filtro: any = {
+    esControlada: null
+  };
   mostrarFiltros = false;
   nombreInventario: string = '';
 
@@ -87,6 +90,9 @@ export class InventarioDetalleComponent implements OnInit {
   sustanciasFiltradasDropdown: any[] = [];
   sustanciaSeleccionadaObj: any = null;
   ubicacionTraslado: string = '';
+  observacionTraslado: string = '';
+
+  totalRemanenteFiltrado = 0;
 
   page = 1;
   limit = 10;
@@ -102,7 +108,7 @@ export class InventarioDetalleComponent implements OnInit {
       this.cargarSustancias();
 
       this.cargarDisponibles();
-      console.log(this.sustanciasAsignadas);
+      console.log('Estas son:', this.sustanciasAsignadas);
     });
 
   }
@@ -113,8 +119,6 @@ export class InventarioDetalleComponent implements OnInit {
       Object.entries(this.filtro).filter(([_, v]) => v != null && v !== '')
     );
 
-    console.log("ENVIANDO FILTROS:", filtrosLimpios); // 🔥 DEBUG
-
     this.servicioAsignacion
       .listarPorInventario(this.tabla, this.page, this.limit, filtrosLimpios)
       .subscribe({
@@ -123,8 +127,8 @@ export class InventarioDetalleComponent implements OnInit {
 
           this.sustanciasAsignadas = body.data;
           this.totalPages = body.totalPages;
+          this.totalRemanenteFiltrado = body.totalRemanente || 0;
 
-          console.log("PAGE FRONT:", this.page);
         },
         error: (err: any) =>
           console.error('Error al listar sustancias:', err)
@@ -179,7 +183,8 @@ export class InventarioDetalleComponent implements OnInit {
       cantidad: this.cantidad,
       ubicaciondealmacenamiento: this.ubicaciondealmacenamiento,
       lote: this.formAsignacion.lote,
-      fechadevencimiento: this.formAsignacion.fecha_vencimiento
+      fechadevencimiento: this.formAsignacion.fecha_vencimiento,
+      observaciones: this.formAsignacion.observaciones
     }).subscribe({
       next: () => {
         alert('Sustancia asignada con éxito');
@@ -210,16 +215,12 @@ export class InventarioDetalleComponent implements OnInit {
     this.movimientoSeleccionado = {
       idinventario_sustancia: asignacion.idinventario_sustancia,
       nombre_sustancia: nombre,
-      unidad: asignacion.unidad,
+      unidad: asignacion.unidad_nombre,
       tipo: 'entrada',
       cantidad: 0,
       motivo: '',
       usuario: ''
     };
-
-    console.log('🧩 Movimientos de ID inventario_sustancia:', asignacion.idinventario_sustancia);
-
-
 
     setTimeout(() => {
       const modalEl = document.getElementById('modalMov');
@@ -239,6 +240,15 @@ export class InventarioDetalleComponent implements OnInit {
   }
 
   registrarMovimiento() {
+    this.movimientoSeleccionado.cantidad = Number(
+      parseFloat(this.movimientoSeleccionado.cantidad).toFixed(2)
+    );
+
+    if (this.movimientoSeleccionado.cantidad <= 0) {
+      alert('Cantidad inválida');
+      return;
+    }
+
     const mov = {
       inventario_sustancia_id: this.movimientoSeleccionado.idinventario_sustancia,
       tipo: this.movimientoSeleccionado.tipo,
@@ -293,7 +303,8 @@ export class InventarioDetalleComponent implements OnInit {
       cantidad: this.asignacionSeleccionada.cantidad,
       cantidadremanente: this.asignacionSeleccionada.cantidadremanente,
       gastototal: this.asignacionSeleccionada.gastototal,
-      ubicaciondealmacenamiento: this.asignacionSeleccionada.ubicaciondealmacenamiento
+      ubicaciondealmacenamiento: this.asignacionSeleccionada.ubicaciondealmacenamiento,
+      observaciones: this.asignacionSeleccionada.observaciones
     }).subscribe({
       next: () => {
         alert('Asignación actualizada con éxito');
@@ -331,7 +342,10 @@ export class InventarioDetalleComponent implements OnInit {
 
   // Abrir modal de traslado
   abrirTraslado(item: any) {
-    this.sustanciaSeleccionada = item;
+    this.sustanciaSeleccionada = {
+      ...item,
+      unidad: item.unidad_nombre
+    };
     this.inventarioDestino = null;
     this.cantidadTraslado = null;
     this.ubicacionTraslado = '';
@@ -375,13 +389,23 @@ export class InventarioDetalleComponent implements OnInit {
       return;
     }
 
+    this.cantidadTraslado = Number(
+      this.cantidadTraslado!.toFixed(2)
+    );
+
     const datos = {
       origen_id: this.tabla,
       destino_id: this.inventarioDestino,
       asignacion_id: idAsignacion,
       cantidad: this.cantidadTraslado,
-      ubicaciondealmacenamiento: this.ubicacionTraslado
+      ubicaciondealmacenamiento: this.ubicacionTraslado,
+      observaciones: this.observacionTraslado
     };
+
+    if (this.cantidadTraslado <= 0) {
+      alert('Cantidad inválida');
+      return;
+    }
 
     console.log('Enviando al backend:', datos);
 
@@ -470,7 +494,6 @@ export class InventarioDetalleComponent implements OnInit {
     this.gastototal = null;
     this.ubicaciondealmacenamiento = '';
 
-    // 🔥 IMPORTANTE
     this.formAsignacion.lote = '';
     this.formAsignacion.fecha_vencimiento = '';
   }
@@ -545,12 +568,15 @@ export class InventarioDetalleComponent implements OnInit {
       cantidad: null,
       ubicaciondealmacenamiento: '',
       lote: '',
-      fecha_vencimiento: ''
+      fecha_vencimiento: '',
+      observaciones: ''
     };
   }
 
   limpiarFiltros() {
-    this.filtro = {};
+    this.filtro = {
+      esControlada: ''
+    };
     this.page = 1;
     this.cargarSustancias();
   }
