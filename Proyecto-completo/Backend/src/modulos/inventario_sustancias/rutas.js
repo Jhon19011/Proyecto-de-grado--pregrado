@@ -17,7 +17,7 @@ router.get('/buscar', verificarToken, async (req, res, next) => {
 
 router.get('/:tabla', verificarToken, async (req, res, next) => {
     try {
-        const sustancias = await controlador.listarPorInventario(req.params.tabla);
+        const sustancias = await controlador.listarPorInventario(req.params.tabla, req.user.sedeU);
         respuesta.success(req, res, sustancias, 200);
     } catch (err){
         next(err);

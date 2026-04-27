@@ -14,7 +14,44 @@
 
   <!-- DERECHA -->
   <div class="d-flex align-items-center gap-3 border-start ps-3">
+
+    <!-- CAMPANA -->
+    <div class="position-relative alert-wrapper">
+
+      <button class="btn btn-light position-relative" (click)="toggleAlertas()">
+        <i class="bi bi-bell fs-5"></i>
+
+        <!-- contador -->
+        <span *ngIf="alertasNoLeidas.length > 0"
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          {{ alertasNoLeidas.length }}
+        </span>
+      </button>
+
+      <!-- 🔽 DROPDOWN ALERTAS -->
+      <div *ngIf="mostrarAlertas" class="alert-dropdown shadow">
+
+        <div *ngIf="alertas.length === 0" class="text-muted p-2">
+          Sin notificaciones
+        </div>
+
+        <div *ngFor="let a of alertasNoLeidas" (click)="marcarLeida(a)" class="alert-item" [ngClass]="{
+       'no-leida': true,
+       'alert-danger': a.tipo === 'vencido' || a.tipo === 'agotado',
+       'alert-warning': a.tipo === 'proximo'
+     }">
+
+          <strong>{{ a.nombreComercial }}</strong><br>
+          <small>{{ a.nombretabla }}</small><br>
+          {{ a.mensaje }}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- LOGO -->
     <img src="Simbolo USTA con nombre.png" class="logo-usta" alt="USTA">
+
   </div>
 </div>
 

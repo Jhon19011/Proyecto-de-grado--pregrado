@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MovimientosService } from '../../services/movimientos.service';
 import { InventarioService } from '../../services/inventarios.service';
+import { ReportesService } from '../../services/reportes.service';
 
 declare var bootstrap: any;
 
@@ -18,7 +19,13 @@ declare var bootstrap: any;
 })
 export class InventarioDetalleComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute, private router: Router, private servicioAsignacion: InventarioSustanciaService, private servicioSustancias: SustanciasService, private servicioMovimientos: MovimientosService, private servicioInventario: InventarioService) { }
+  constructor(private route: ActivatedRoute, 
+    private router: Router, 
+    private servicioAsignacion: InventarioSustanciaService, 
+    private servicioSustancias: SustanciasService, 
+    private servicioMovimientos: MovimientosService, 
+    private servicioInventario: InventarioService,
+    private reportesService: ReportesService) { }
 
   rol = localStorage.getItem('rol') || '';
   tabla!: number;
@@ -505,6 +512,20 @@ export class InventarioDetalleComponent implements OnInit {
     if (diffDias < 0) return 'text-danger';      // vencido
     if (diffDias <= 30) return 'text-warning';   // por vencer
     return 'text-success';                       // vigente
+  }
+
+  exportarExcel() {
+    this.reportesService.exportarInventario().subscribe((file: Blob) => {
+
+      const url = window.URL.createObjectURL(file);
+      const a = document.createElement('a');
+
+      a.href = url;
+      a.download = 'inventario.xlsx';
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    });
   }
 
   abrirModalAsignar() {

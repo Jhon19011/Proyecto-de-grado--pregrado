@@ -1,11 +1,15 @@
 const db = require('../../DB/mysql');
 const error = require('../../middleware/errors');
+const { generarAlertas } = require('../alertas/generador');
 const TABLA_ASIG = 'inventario_sustancia';
 const TABLA_INV = 'tablas';
 const TABLA_MOV = 'movimientos_sustancia'
 
 // Listar sustancias de un inventario
-async function listarPorInventario(tabla) {
+async function listarPorInventario(tabla, sedeId) {
+
+  await generarAlertas(sedeId);
+
   return db.query(`
     SELECT 
       isus.idinventario_sustancia AS idinventario_sustancia,

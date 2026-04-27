@@ -9,6 +9,8 @@ const inventariosRoutes = require('./modulos/inventarios/rutas');
 const inventarioSustancias = require('./modulos/inventario_sustancias/rutas');
 const movimientos = require('./modulos/entradas-salidas/rutas');
 const unidadesRoutes = require('./modulos/unidades/rutas');
+const alertasRoutes = require('./modulos/alertas/rutas');
+const reportes = require('./modulos/reportes/rutas');
 const error = require('./red/errors');
 const cors = require('cors');
 const path = require('path');
@@ -38,6 +40,8 @@ app.use('/api/inventarios', inventariosRoutes);
 app.use('/api/inventario_sustancias', inventarioSustancias);
 app.use('/api/movimientos', movimientos);
 app.use('/api/unidades', unidadesRoutes);
+app.use('/api/alertas', alertasRoutes);
+app.use('/api/reportes', reportes);
 
 app.use(error);
 

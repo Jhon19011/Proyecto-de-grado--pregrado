@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { LoginServiceService } from '../../services/login-service.service';
+import { AlertasService } from '../../services/alertas.service';
 
 @Component({
   selector: 'app-inicio',
@@ -14,13 +15,16 @@ export class InicioComponent {
   nombreUsuario = '';
   apellidoUsuario = '';
   rol = '';
+  alertas: any[] = [];
+  mostrarAlertas = false;
 
-  constructor(private router: Router, private loginService: LoginServiceService) { }
+  constructor(private router: Router, private loginService: LoginServiceService, private alertasService: AlertasService) { }
 
   ngOnInit() {
     this.nombreUsuario = localStorage.getItem('nombre') || 'Usuario';
     this.apellidoUsuario = localStorage.getItem('apellido') || 'Apellidos';
     this.rol = localStorage.getItem('rol') || '';
+    this.cargarAlertas();
   }
 
   administrarInventarios() {
@@ -42,6 +46,31 @@ export class InicioComponent {
 
   controladas() {
     this.router.navigate(['controladas']);
+  }
+  cargarAlertas() {
+    this.alertasService.listar().subscribe({
+      next: (res: any) => {
+        this.alertas = res;
+      },
+      error: err => console.error(err)
+    });
+  }
+
+  marcarLeida(alerta: any) {
+    if (alerta.leida) return;
+
+    this.alertasService.marcarLeida(alerta.idalerta).subscribe(() => {
+      alerta.leida = true;
+    });
+  }
+
+
+  toggleAlertas() {
+    this.mostrarAlertas = !this.mostrarAlertas;
+  }
+
+  get alertasNoLeidas() {
+    return this.alertas.filter(a => !a.leida);
   }
 
   logout() {
