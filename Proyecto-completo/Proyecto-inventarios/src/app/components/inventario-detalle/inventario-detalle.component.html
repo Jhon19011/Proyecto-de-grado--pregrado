@@ -1,6 +1,6 @@
 <div class="container-fluid py-4 px-5">
   <div class="col-auto">
-    <div class="card shadow-sm border-0 mb-3">
+    <div class="card shadow-sm border-0">
       <div class="card-body d-flex justify-content-between align-items-center">
 
         <!-- IZQUIERDA -->
@@ -23,19 +23,22 @@
       </div>
     </div>
 
-    <!-- Botón para agregar nuevas sustancias (solo principal) -->
-    <div class=" mt-3" *ngIf="esPrincipal && rol === 'Administrador'">
-      <div class="mb-3 mt-3">
-        <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAsignacion">
-          <i class="bi bi-plus-circle me-1"></i>
-          Asignar sustancia
-        </button>
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Botón para agregar nuevas sustancias (solo principal) -->
+      <div *ngIf="esPrincipal && rol === 'Administrador'">
+        <div class="mb-3 mt-3">
+          <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAsignacion">
+            <i class="bi bi-plus-circle me-1"></i>
+            Asignar sustancia
+          </button>
+        </div>
       </div>
-    </div>
 
-    <button class="btn btn-success" (click)="exportarExcel()">
-      Exportar Excel
-    </button>
+      <button class="btn btn-success" (click)="exportarExcel()">
+        Exportar Excel
+      </button>
+
+    </div>
 
     <div class="card shadow-sm border-0 mb-3" *ngIf="mostrarFiltros">
       <div class="card-body">
@@ -177,6 +180,32 @@
               </tr>
             </tbody>
           </table>
+
+          <nav *ngIf="totalPages > 1">
+            <ul class="pagination justify-content-center mt-3">
+
+              <li class="page-item" [class.disabled]="page === 1">
+                <button class="page-link" (click)="cambiarPagina(page - 1)">
+                  Anterior
+                </button>
+              </li>
+
+              <li class="page-item" *ngFor="let p of [].constructor(totalPages); let i = index"
+                [class.active]="page === i + 1">
+
+                <button class="page-link" (click)="cambiarPagina(i + 1)">
+                  {{ i + 1 }}
+                </button>
+              </li>
+
+              <li class="page-item" [class.disabled]="page === totalPages">
+                <button class="page-link" (click)="cambiarPagina(page + 1)">
+                  Siguiente
+                </button>
+              </li>
+
+            </ul>
+          </nav>
         </div>
       </div>
     </div>

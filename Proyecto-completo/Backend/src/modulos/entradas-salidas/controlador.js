@@ -81,11 +81,12 @@ async function registrarMovimiento(data, user) {
 
 // Traslado interno (principal -> secundario)
 async function trasladarSustancia(data, user) {
-  const { destino_id, sustancia_id, cantidad, motivo, usuario, origen_id, ubicaciondealmacenamiento } = data;
+  const { destino_id, asignacion_id, cantidad, motivo, usuario, origen_id, ubicaciondealmacenamiento } = data;
   const sedeId = user.sedeU;
   const nombreUsuario = `${user.nombres} ${user.apellidos}`;
+  const { inventario_sustancia_id } = data;
 
-  if (!destino_id || !sustancia_id || !cantidad || !origen_id) {
+  if (!destino_id || !asignacion_id || !cantidad || !origen_id) {
     throw error('Datos incompletos', 400);
   }
 
@@ -106,8 +107,9 @@ async function trasladarSustancia(data, user) {
   if (!invOrigen || !invDestino) throw error('Inventario inválido', 404);
 
   const [asigOrigen] = await db.query(
-    `SELECT * FROM ${TABLA_ASIG} WHERE tabla = ? AND sustancia = ? AND estado = 1`,
-    [origen_id, sustancia_id]
+    `SELECT * FROM ${TABLA_ASIG} 
+   WHERE idinventario_sustancia = ? AND estado = 1`,
+    [asignacion_id]
   );
 
   if (!asigOrigen) throw error('No existe en origen', 400);
@@ -147,7 +149,7 @@ async function trasladarSustancia(data, user) {
       VALUES (?, ?, ?, ?, 0, ?, 1, ?, 'Nuevo', ?, ?)`,
       [
         destino_id,
-        sustancia_id,
+        asigOrigen.sustancia,
         cantidadNum,
         cantidadNum,
         ubicaciondealmacenamiento || '',
@@ -213,7 +215,7 @@ async function trasladarSustancia(data, user) {
 async function registrarMovimientoSecundario(data, user) {
   const { inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha } = data;
   const nombreUsuario = `${user.nombres} ${user.apellidos}`;
-  const estadoUso = calcularEstadoUso(nuevaCantidad, nuevoRemanente);
+  
 
   if (!inventario_sustancia_id || !tipo || !cantidad || !fecha) {
     throw error('Inventario, tipo y cantidad son requeridos', 400);
@@ -262,6 +264,8 @@ async function registrarMovimientoSecundario(data, user) {
   } else {
     throw error('Tipo de movimiento inválido', 400);
   }
+
+  const estadoUso = calcularEstadoUso(nuevaCantidad, nuevoRemanente);
 
   // Actualizar el stock
   await db.query(

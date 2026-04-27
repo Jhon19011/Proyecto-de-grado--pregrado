@@ -12,10 +12,26 @@ export class InventarioSustanciaService {
   baseUrl = environment.apiUrl;
   private apiUrl = 'http://localhost:4000/api/inventario_sustancias';
   private apiUrlMov = 'http://localhost:4000/api/movimientos';
-  
 
-  listarPorInventario(inventarioId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${inventarioId}`);
+
+  listarPorInventario(
+    inventarioId: number,
+    page: number,
+    limit: number,
+    filtros: any = {}
+  ): Observable<any> {
+
+    let params: any = {
+      page,
+      limit
+    };
+
+    // 🔥 CORRECTO
+    if (filtros.sustancia) params.sustancia = filtros.sustancia;
+    if (filtros.codigo) params.codigo = filtros.codigo;
+    if (filtros.ubicacion) params.ubicacion = filtros.ubicacion;
+
+    return this.http.get(`${this.apiUrl}/${inventarioId}`, { params });
   }
 
   crearAsignacion(data: any) {
@@ -32,9 +48,5 @@ export class InventarioSustanciaService {
 
   eliminarAsignacion(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
-  }
-
-  buscarSustanciasInventario(filtros: any) {
-    return this.http.get(`${this.apiUrl}/buscar`, { params: filtros });
   }
 }

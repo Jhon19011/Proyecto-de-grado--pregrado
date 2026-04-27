@@ -19,11 +19,11 @@ declare var bootstrap: any;
 })
 export class InventarioDetalleComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute, 
-    private router: Router, 
-    private servicioAsignacion: InventarioSustanciaService, 
-    private servicioSustancias: SustanciasService, 
-    private servicioMovimientos: MovimientosService, 
+  constructor(private route: ActivatedRoute,
+    private router: Router,
+    private servicioAsignacion: InventarioSustanciaService,
+    private servicioSustancias: SustanciasService,
+    private servicioMovimientos: MovimientosService,
     private servicioInventario: InventarioService,
     private reportesService: ReportesService) { }
 
@@ -88,6 +88,11 @@ export class InventarioDetalleComponent implements OnInit {
   sustanciaSeleccionadaObj: any = null;
   ubicacionTraslado: string = '';
 
+  page = 1;
+  limit = 10;
+  totalPages = 0;
+  pages: number[] = [];
+
   ngOnInit(): void {
     this.idInventario = Number(this.route.snapshot.paramMap.get('id'));
     this.route.paramMap.subscribe(params => {
@@ -103,18 +108,34 @@ export class InventarioDetalleComponent implements OnInit {
   }
 
   cargarSustancias() {
-    this.servicioAsignacion.listarPorInventario(this.tabla).subscribe({
-      next: (res: any) => {
-        const lista = res.body || res;
-        console.log('DATA BACKEND:', lista);
-        this.sustanciasAsignadas = [...lista];
 
-        if (lista.length > 0) {
-          this.esPrincipal = lista[0].principal === 1;
-        }
-      },
-      error: (err: any) => console.error('Error al listar sustancias asignadas:', err)
-    });
+    const filtrosLimpios = Object.fromEntries(
+      Object.entries(this.filtro).filter(([_, v]) => v != null && v !== '')
+    );
+
+    console.log("ENVIANDO FILTROS:", filtrosLimpios); // 🔥 DEBUG
+
+    this.servicioAsignacion
+      .listarPorInventario(this.tabla, this.page, this.limit, filtrosLimpios)
+      .subscribe({
+        next: (res: any) => {
+          const body = res.body || res;
+
+          this.sustanciasAsignadas = body.data;
+          this.totalPages = body.totalPages;
+
+          console.log("PAGE FRONT:", this.page);
+        },
+        error: (err: any) =>
+          console.error('Error al listar sustancias:', err)
+      });
+  }
+
+  cambiarPagina(p: number) {
+    if (p < 1 || p > this.totalPages) return;
+
+    this.page = p;
+    this.cargarSustancias();
   }
 
 
@@ -346,10 +367,10 @@ export class InventarioDetalleComponent implements OnInit {
     }
 
     // Detectar ID correcto de sustancia
-    const idSustancia = this.sustanciaSeleccionada.idsustancia;
+    const idAsignacion = this.sustanciaSeleccionada.idinventario_sustancia;
 
-    if (!idSustancia) {
-      alert('No se encontró el ID de la sustancia.');
+    if (!idAsignacion) {
+      alert('No se encontró el ID de la Asignación.');
       console.log('Objeto sustanciaSeleccionada:', this.sustanciaSeleccionada);
       return;
     }
@@ -357,7 +378,7 @@ export class InventarioDetalleComponent implements OnInit {
     const datos = {
       origen_id: this.tabla,
       destino_id: this.inventarioDestino,
-      sustancia_id: idSustancia,
+      asignacion_id: idAsignacion,
       cantidad: this.cantidadTraslado,
       ubicaciondealmacenamiento: this.ubicacionTraslado
     };
@@ -406,18 +427,8 @@ export class InventarioDetalleComponent implements OnInit {
   }
 
   buscarSustancias() {
-    const filtrosLimpios = Object.fromEntries(
-      Object.entries(this.filtro).filter(([_, v]) => v != null && v !== '')
-    );
-
-    filtrosLimpios['inventarioId'] = this.idInventario;
-
-    this.servicioAsignacion.buscarSustanciasInventario(filtrosLimpios).subscribe({
-      next: (res: any) => {
-        this.sustanciasAsignadas = res.body || res;
-      },
-      error: (err) => console.error('Error al buscar sustancias del inventario:', err)
-    });
+    this.page = 1;
+    this.cargarSustancias();
   }
 
   cargarInfoInventario() {
@@ -536,6 +547,12 @@ export class InventarioDetalleComponent implements OnInit {
       lote: '',
       fecha_vencimiento: ''
     };
+  }
+
+  limpiarFiltros() {
+    this.filtro = {};
+    this.page = 1;
+    this.cargarSustancias();
   }
 
   toggleFiltros() {
