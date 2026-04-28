@@ -3,6 +3,7 @@ const router = express.Router();
 const controlador = require('./controlador');
 const respuesta = require('../../red/respuestas');
 const { verificarToken } = require('../../middleware/auth');
+const verificarRol = require('../../middleware/verificarRol');
 
 router.post('/', verificarToken, async (req, res, next) => {
   try {
@@ -40,7 +41,7 @@ router.get('/:tabla', verificarToken, async (req, res, next) => {
 });
 
 
-router.put('/:id', verificarToken, async (req, res, next) => {
+router.put('/:id', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
   try {
     const editado = await controlador.editarAsignacion(req.params.id, req.body);
     respuesta.success(req, res, editado, 200);
@@ -49,7 +50,7 @@ router.put('/:id', verificarToken, async (req, res, next) => {
   }
 });
 
-router.delete('/:id', verificarToken, async (req, res, next) => {
+router.delete('/:id', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
   try {
     const eliminado = await controlador.eliminarAsignacion(req.params.id);
     respuesta.success(req, res, eliminado, 200);

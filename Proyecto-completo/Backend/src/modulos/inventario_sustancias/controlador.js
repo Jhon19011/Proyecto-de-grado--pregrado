@@ -13,6 +13,10 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
   console.log("FILTROS BACK:", filtros);
 
   const offset = (page - 1) * limit;
+  const mostrarAgotadas = filtros.estado_uso === 'Agotado';
+  const condicionVisibilidad = mostrarAgotadas
+    ? `AND (isus.estado_uso = 'Agotado' OR isus.cantidadremanente <= 0)`
+    : `AND isus.estado = 1 AND isus.estado_uso <> 'Agotado' AND isus.cantidadremanente > 0`;
 
   let query = `
     SELECT 
@@ -39,13 +43,19 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
       isus.lote,
       isus.fechadevencimiento,
       isus.observaciones,
+      (
+        SELECT MAX(m.fecha)
+        FROM movimientos_sustancia m
+        WHERE m.inventario_sustancia_id = isus.idinventario_sustancia
+          AND m.tipo = 'salida'
+      ) AS fecha_agotado,
       t.principal,
       t.nombretabla
     FROM inventario_sustancia isus
     JOIN sustancia s ON s.idsustancia = isus.sustancia
     LEFT JOIN unidades u ON u.idunidad = s.unidad 
     JOIN tablas t ON t.idtablas = isus.tabla
-    WHERE isus.tabla = ? AND isus.estado = 1
+    WHERE isus.tabla = ? ${condicionVisibilidad}
   `;
 
   let params = [tabla];
@@ -67,7 +77,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     params.push(`%${filtros.codigo}%`);
   }
 
-  if (filtros.estado_uso) {
+  if (filtros.estado_uso && !mostrarAgotadas) {
     query += ` AND isus.estado_uso = ?`;
     params.push(filtros.estado_uso);
   }
@@ -106,7 +116,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
   FROM inventario_sustancia isus
   JOIN sustancia s ON s.idsustancia = isus.sustancia
   LEFT JOIN unidades u ON u.idunidad = s.unidad
-  WHERE isus.tabla = ? AND isus.estado = 1
+  WHERE isus.tabla = ? ${condicionVisibilidad}
 `;
 
   //Suma Remanente Total
@@ -128,7 +138,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     sumParams.push(`%${filtros.codigo}%`);
   }
 
-  if (filtros.estado_uso) {
+  if (filtros.estado_uso && !mostrarAgotadas) {
     sumQuery += ` AND isus.estado_uso = ?`;
     sumParams.push(filtros.estado_uso);
   }
@@ -166,7 +176,11 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
   const totalRemanente = Number(sumRes[0].totalRemanente || 0);
 
   // PAGINADO
-  query += ` LIMIT ? OFFSET ?`;
+  if (mostrarAgotadas) {
+    query += ` ORDER BY fecha_agotado DESC, isus.idinventario_sustancia DESC LIMIT ? OFFSET ?`;
+  } else {
+    query += ` ORDER BY isus.cedula_principal ASC, isus.idinventario_sustancia ASC LIMIT ? OFFSET ?`;
+  }
   params.push(limit, offset);
 
   const data = await db.query(query, params);
@@ -177,7 +191,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     FROM inventario_sustancia isus
     JOIN sustancia s ON s.idsustancia = isus.sustancia
     LEFT JOIN unidades u ON u.idunidad = s.unidad
-    WHERE isus.tabla = ? AND isus.estado = 1
+    WHERE isus.tabla = ? ${condicionVisibilidad}
   `;
 
   let countParams = [tabla];
@@ -202,7 +216,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     countParams.push(`%${filtros.cedula}%`);
   }
 
-  if (filtros.estado_uso) {
+  if (filtros.estado_uso && !mostrarAgotadas) {
     countQuery += ` AND isus.estado_uso = ?`;
     countParams.push(filtros.estado_uso);
   }
@@ -313,42 +327,64 @@ async function editarAsignacion(id, data) {
 
 async function eliminarAsignacion(id) {
 
-  // 1. Verificar remanente
   const resultado = await db.query(`
-    SELECT cantidadremanente 
+    SELECT idinventario_sustancia
     FROM ${TABLA_ASIG} 
     WHERE idinventario_sustancia = ?
   `, [id]);
 
-  const remanente = resultado[0].cantidadremanente;
-
-  if (remanente > 0) {
-    throw error('Debe trasladar o consumir todo el remanente antes de eliminar la sustancia', 400);
+  if (resultado.length === 0) {
+    throw error('Sustancia no encontrada en el inventario', 404);
   }
 
-  // 2. Eliminación lógica
+  const historial = await db.query(`
+    SELECT idmovimiento
+    FROM ${TABLA_MOV}
+    WHERE inventario_sustancia_id = ?
+    LIMIT 1
+  `, [id]);
+
+  if (historial.length > 0) {
+    throw error('No se puede eliminar porque la sustancia ya tiene historial de movimientos', 400);
+  }
+
   await db.query(`
-    UPDATE ${TABLA_ASIG}
-    SET estado = 0
+    DELETE FROM alertas
     WHERE idinventario_sustancia = ?
   `, [id]);
 
-  return { mensaje: 'Sustancia desactivada correctamente' };
+  await db.query(`
+    DELETE FROM ${TABLA_ASIG}
+    WHERE idinventario_sustancia = ?
+  `, [id]);
+
+  return { mensaje: 'Sustancia eliminada correctamente' };
 }
 
 async function buscarSustanciasInventario(filtros) {
+  const mostrarAgotadas = filtros.estado_uso === 'Agotado';
+  const condicionVisibilidad = mostrarAgotadas
+    ? `AND (i.estado_uso = 'Agotado' OR i.cantidadremanente <= 0)`
+    : `AND i.estado = 1 AND i.estado_uso <> 'Agotado' AND i.cantidadremanente > 0`;
+
   let query = `
     SELECT 
       i.*,
       s.nombreComercial,
       s.unidad,
-      u.nombre AS unidad_nombre
+      u.nombre AS unidad_nombre,
+      (
+        SELECT MAX(m.fecha)
+        FROM movimientos_sustancia m
+        WHERE m.inventario_sustancia_id = i.idinventario_sustancia
+          AND m.tipo = 'salida'
+      ) AS fecha_agotado
     FROM inventario_sustancia i
     INNER JOIN sustancia s 
       ON s.idsustancia = i.sustancia
     LEFT JOIN unidades u 
       ON u.idunidad = s.unidad
-    WHERE i.tabla = ? AND i.estado = 1
+    WHERE i.tabla = ? ${condicionVisibilidad}
   `;
 
   let params = [filtros.inventarioId];
@@ -372,7 +408,7 @@ async function buscarSustanciasInventario(filtros) {
   }
 
   // Estado (Nuevo, En uso, Agotado)
-  if (filtros.estado_uso) {
+  if (filtros.estado_uso && !mostrarAgotadas) {
     query += ` AND i.estado_uso = ?`;
     params.push(filtros.estado_uso);
   }
@@ -401,7 +437,11 @@ async function buscarSustanciasInventario(filtros) {
     params.push(`%${filtros.ubicacion}%`);
   }
 
-  query += ` ORDER BY s.nombreComercial ASC`;
+  if (mostrarAgotadas) {
+    query += ` ORDER BY fecha_agotado DESC, i.idinventario_sustancia DESC`;
+  } else {
+    query += ` ORDER BY s.nombreComercial ASC`;
+  }
 
   const filas = await db.query(query, params);
   return filas;

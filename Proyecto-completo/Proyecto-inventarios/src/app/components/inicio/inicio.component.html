@@ -16,7 +16,7 @@
   <div class="d-flex align-items-center gap-3 border-start ps-3">
 
     <!-- CAMPANA -->
-    <div class="position-relative alert-wrapper">
+    <div class="position-relative alert-wrapper" *ngIf="esAdministrador">
 
       <button class="btn btn-light position-relative" (click)="toggleAlertas()">
         <i class="bi bi-bell fs-5"></i>
@@ -41,9 +41,19 @@
        'alert-warning': a.tipo === 'proximo'
      }">
 
-          <strong>{{ a.nombreComercial }}</strong><br>
-          <small>{{ a.nombretabla }}</small><br>
-          {{ a.mensaje }}
+          <div class="d-flex justify-content-between gap-2">
+            <strong>{{ a.nombreComercial }}</strong>
+            <span class="badge bg-light text-dark" *ngIf="a.cedula_principal">
+              COD-{{ a.cedula_principal }}
+            </span>
+          </div>
+
+          <small class="d-block">{{ a.nombretabla }}</small>
+          <small class="d-block text-muted">
+            {{ a.fecha ? (a.fecha | date:'yyyy-MM-dd HH:mm') : 'Sin fecha' }}
+          </small>
+
+          <div class="mt-1">{{ a.mensaje }}</div>
         </div>
 
       </div>

@@ -15,6 +15,10 @@ export class SustanciasService {
     return this.http.get(this.apiUrl);
   }
 
+  listarSustanciasPaginadas(page: number, limit: number): Observable<any> {
+    return this.http.get(this.apiUrl, { params: { page, limit } });
+  }
+
   obtenerSustancia(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${id}`);
   }
@@ -41,6 +45,16 @@ export class SustanciasService {
 
   buscarSustancias(filtros: any): Observable<any> {
     return this.http.get(`${this.apiUrl}/buscar`, { params: filtros });
+  }
+
+  buscarSustanciasPaginadas(filtros: any, page: number, limit: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/buscar`, {
+      params: {
+        ...filtros,
+        page,
+        limit
+      }
+    });
   }
 
   buscarControladas(filtros: any): Observable<any> {

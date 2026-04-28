@@ -26,6 +26,7 @@ async function listar(sedeId) {
     SELECT 
       a.*,
       s.nombreComercial,
+      i.cedula_principal,
       t.nombretabla
     FROM alertas a
     LEFT JOIN sustancia s ON s.idsustancia = a.idsustancia

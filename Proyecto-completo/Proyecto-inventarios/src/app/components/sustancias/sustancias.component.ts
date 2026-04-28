@@ -21,7 +21,7 @@ export class SustanciasComponent {
 
   private servicioSustancias = inject(SustanciasService);
   sustancias: any[] = [];
-  baseUrl = environment.apiUrl;
+  baseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
   pdfSeguridadNombre = '';
   pdfTecnicoNombre = '';
   pdfSeguridadActual: string = '';
@@ -69,6 +69,11 @@ export class SustanciasComponent {
   PDF = '';
   esControlada: number | null = null;
 
+  page = 1;
+  limit = 5;
+  totalPages = 1;
+  totalRegistros = 0;
+
   constructor(private router: Router, private servcicioUnidades: UnidadesService) { }
 
   ngOnInit(): void {
@@ -77,15 +82,20 @@ export class SustanciasComponent {
   }
 
   listarSustancias() {
-    this.servicioSustancias.listarSustancias().subscribe({
+    this.servicioSustancias.listarSustanciasPaginadas(this.page, this.limit).subscribe({
       next: (res: any) => {
-        this.sustancias = res.body || res;
+        this.aplicarRespuestaPaginada(res);
       },
       error: (err) => console.error('Error al listar sustancias:', err)
     });
   }
 
   buscarConFiltros() {
+    this.page = 1;
+    this.cargarSustancias();
+  }
+
+  cargarSustancias() {
     const filtrosLimpios = Object.fromEntries(
       Object.entries(this.filtro).filter(([_, v]) => v !== null && v !== '')
     );
@@ -96,13 +106,40 @@ export class SustanciasComponent {
       return;
     }
 
-    this.servicioSustancias.buscarSustancias(filtrosLimpios).subscribe({
+    this.servicioSustancias.buscarSustanciasPaginadas(filtrosLimpios, this.page, this.limit).subscribe({
       next: (res: any) => {
-        this.sustancias = res.body || res;
+        this.aplicarRespuestaPaginada(res);
         console.log("Resultado filtro:", this.sustancias);
       },
       error: (err) => console.error('Error al buscar sustancias:', err)
     });
+  }
+
+  private aplicarRespuestaPaginada(res: any) {
+    const body = res?.body || res;
+    const respuestaEsArreglo = Array.isArray(body);
+    const dataCompleta = respuestaEsArreglo ? body : body?.data || [];
+    const total = body?.total ?? dataCompleta.length;
+    const offset = (this.page - 1) * this.limit;
+
+    this.sustancias = respuestaEsArreglo
+      ? dataCompleta.slice(offset, offset + this.limit)
+      : dataCompleta;
+    this.totalRegistros = total;
+    this.totalPages = body?.totalPages || Math.ceil(total / this.limit) || 1;
+    this.page = body?.page || this.page;
+  }
+
+  cambiarPagina(p: number) {
+    if (p < 1 || p > this.totalPages) return;
+
+    this.page = p;
+    this.cargarSustancias();
+  }
+
+  cambiarLimite() {
+    this.page = 1;
+    this.cargarSustancias();
   }
 
   limpiarFiltros() {
@@ -122,6 +159,7 @@ export class SustanciasComponent {
       esControlada: ''
     };
 
+    this.page = 1;
     this.listarSustancias();
   }
 

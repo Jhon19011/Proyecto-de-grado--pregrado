@@ -34,6 +34,7 @@ export class InventarioDetalleComponent implements OnInit {
   historial: any[] = [];
   historialSustancia: any = null;
   modalHistorial: any;
+  fechaGeneracionHistorial = '';
   cantidadTraslado: number | null = null;
   sustanciaSeleccionada: any = null;
   sustanciasAsignadas: any[] = [];
@@ -93,10 +94,13 @@ export class InventarioDetalleComponent implements OnInit {
   observacionTraslado: string = '';
 
   totalRemanenteFiltrado = 0;
+  totalAgotadas = 0;
+  agotadasResumen: any[] = [];
 
   page = 1;
   limit = 10;
-  totalPages = 0;
+  totalPages = 1;
+  totalRegistros = 0;
   pages: number[] = [];
 
   ngOnInit(): void {
@@ -108,7 +112,6 @@ export class InventarioDetalleComponent implements OnInit {
       this.cargarSustancias();
 
       this.cargarDisponibles();
-      console.log('Estas son:', this.sustanciasAsignadas);
     });
 
   }
@@ -127,11 +130,28 @@ export class InventarioDetalleComponent implements OnInit {
 
           this.sustanciasAsignadas = body.data;
           this.totalPages = body.totalPages;
+          this.totalRegistros = body.total || 0;
           this.totalRemanenteFiltrado = body.totalRemanente || 0;
+          this.cargarResumenAgotadas();
 
         },
         error: (err: any) =>
           console.error('Error al listar sustancias:', err)
+      });
+  }
+
+  cargarResumenAgotadas() {
+    this.servicioAsignacion
+      .listarPorInventario(this.tabla, 1, 3, { estado_uso: 'Agotado' })
+      .subscribe({
+        next: (res: any) => {
+          const body = res.body || res;
+
+          this.agotadasResumen = body.data || [];
+          this.totalAgotadas = body.total || 0;
+        },
+        error: (err: any) =>
+          console.error('Error al listar sustancias agotadas:', err)
       });
   }
 
@@ -142,7 +162,10 @@ export class InventarioDetalleComponent implements OnInit {
     this.cargarSustancias();
   }
 
-
+  cambiarLimite() {
+    this.page = 1;
+    this.cargarSustancias();
+  }
 
   cargarDisponibles() {
     this.servicioSustancias.listarSustancias().subscribe({
@@ -162,12 +185,10 @@ export class InventarioDetalleComponent implements OnInit {
 
         this.sustanciasDisponibles = Array.from(mapa.values());
 
-        console.log('Sustancias disponibles para asignar:', this.sustanciasDisponibles);
       },
       error: (err: any) => console.error('Error al listar sustancias disponibles:', err)
     });
   }
-
 
   asignarSustancia() {
 
@@ -206,7 +227,6 @@ export class InventarioDetalleComponent implements OnInit {
   abrirMovimientos(asignacion: any) {
     if (!asignacion) return;
 
-
     const nombre =
       asignacion.nombre_sustancia ||
       asignacion.nombreComercial ||
@@ -228,7 +248,6 @@ export class InventarioDetalleComponent implements OnInit {
       this.modalMov = new bootstrap.Modal(modalEl);
       this.modalMov.show();
     }, 10);
-
 
     this.servicioMovimientos
       .listarMovimientos(asignacion.idinventario_sustancia)
@@ -293,7 +312,7 @@ export class InventarioDetalleComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Error al actualizar asignación:', err);
-        alert(err.error.body || 'Error al actalizar asignación');
+        alert(err.error.body || 'Error al actualizar asignación');
       }
     });
   }
@@ -364,7 +383,6 @@ export class InventarioDetalleComponent implements OnInit {
           (inv: any) => inv.idtablas !== this.tabla
         );
 
-        console.log('Inventarios disponibles para traslado:', this.inventariosSecundarios);
       },
       error: (err: any) => {
         console.error('Error al listar inventarios:', err);
@@ -385,7 +403,6 @@ export class InventarioDetalleComponent implements OnInit {
 
     if (!idAsignacion) {
       alert('No se encontró el ID de la Asignación.');
-      console.log('Objeto sustanciaSeleccionada:', this.sustanciaSeleccionada);
       return;
     }
 
@@ -406,8 +423,6 @@ export class InventarioDetalleComponent implements OnInit {
       alert('Cantidad inválida');
       return;
     }
-
-    console.log('Enviando al backend:', datos);
 
     this.servicioAsignacion.trasladarSustancia(datos).subscribe({
       next: (res: any) => {
@@ -448,6 +463,18 @@ export class InventarioDetalleComponent implements OnInit {
         alert('No se pudo cargar el historial de movimientos');
       }
     });
+  }
+
+  exportarHistorialPdf() {
+    if (!this.historial || this.historial.length === 0) {
+      alert('No hay movimientos para exportar');
+      return;
+    }
+
+    this.fechaGeneracionHistorial = new Date().toLocaleString('es-CO');
+    this.modalHistorial?.hide();
+
+    setTimeout(() => window.print(), 250);
   }
 
   buscarSustancias() {
@@ -535,30 +562,93 @@ export class InventarioDetalleComponent implements OnInit {
     this.mostrarDropdown = false;
   }
 
-  getClaseVencimiento(fecha: string): string {
+  getEstadoVencimiento(fecha: string): string {
     if (!fecha) return '';
 
     const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
     const venc = new Date(fecha);
+    venc.setHours(0, 0, 0, 0);
 
-    const diffDias = (venc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24);
+    const diffDias = Math.ceil((venc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
 
-    if (diffDias < 0) return 'text-danger';      // vencido
-    if (diffDias <= 30) return 'text-warning';   // por vencer
-    return 'text-success';                       // vigente
+    if (diffDias < 0) return 'vencido';
+    if (diffDias <= 30) return 'proximo';
+    return 'vigente';
+  }
+
+  getClaseVencimiento(fecha: string): string {
+    const estado = this.getEstadoVencimiento(fecha);
+    return estado ? `vencimiento-badge ${estado}` : 'vencimiento-badge sin-fecha';
+  }
+
+  getClaseFilaVencimiento(fecha: string): string {
+    const estado = this.getEstadoVencimiento(fecha);
+
+    if (estado === 'vencido') return 'row-vencido';
+    if (estado === 'proximo') return 'row-proximo';
+    return '';
+  }
+
+  getClaseFilaInventario(item: any): string {
+    if (this.esSustanciaAgotada(item)) return 'row-agotado';
+    return this.getClaseFilaVencimiento(item.fechadevencimiento);
+  }
+
+  esSustanciaAgotada(item: any): boolean {
+    return item?.estado_uso === 'Agotado' || Number(item?.cantidadremanente || 0) <= 0;
+  }
+
+  getTextoVencimiento(fecha: string): string {
+    const estado = this.getEstadoVencimiento(fecha);
+
+    if (estado === 'vencido') return 'Vencida';
+    if (estado === 'proximo') return 'Por vencer';
+    if (estado === 'vigente') return 'Vigente';
+    return 'Sin fecha';
+  }
+
+  getIconoVencimiento(fecha: string): string {
+    const estado = this.getEstadoVencimiento(fecha);
+
+    if (estado === 'vencido') return 'bi-exclamation-octagon-fill';
+    if (estado === 'proximo') return 'bi-exclamation-triangle-fill';
+    if (estado === 'vigente') return 'bi-check-circle-fill';
+    return 'bi-dash-circle';
   }
 
   exportarExcel() {
-    this.reportesService.exportarInventario().subscribe((file: Blob) => {
+    const filtrosLimpios = Object.fromEntries(
+      Object.entries(this.filtro).filter(([_, v]) => v != null && v !== '')
+    );
 
-      const url = window.URL.createObjectURL(file);
-      const a = document.createElement('a');
+    const params = {
+      tabla: this.tabla,
+      page: this.page,
+      limit: this.limit,
+      ...filtrosLimpios
+    };
 
-      a.href = url;
-      a.download = 'inventario.xlsx';
-      a.click();
+    this.reportesService.exportarInventario(params).subscribe({
+      next: (file: Blob) => {
+        const url = window.URL.createObjectURL(file);
+        const a = document.createElement('a');
 
-      window.URL.revokeObjectURL(url);
+        a.href = url;
+        a.download = `inventario-${this.nombreInventario || this.tabla}.xlsx`;
+        a.style.display = 'none';
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        setTimeout(() => window.URL.revokeObjectURL(url), 100);
+      },
+      error: (err) => {
+        console.error('Error al exportar Excel:', err);
+        alert(err.error?.message || err.error?.body || 'No se pudo exportar el Excel');
+      }
     });
   }
 
@@ -581,6 +671,28 @@ export class InventarioDetalleComponent implements OnInit {
     this.cargarSustancias();
   }
 
+  mostrarAgotadas() {
+    this.filtro = {
+      ...this.filtro,
+      estado_uso: 'Agotado'
+    };
+    this.page = 1;
+    this.cargarSustancias();
+  }
+
+  ocultarAgotadas() {
+    this.filtro = {
+      ...this.filtro,
+      estado_uso: ''
+    };
+    this.page = 1;
+    this.cargarSustancias();
+  }
+
+  estaMostrandoAgotadas(): boolean {
+    return this.filtro?.estado_uso === 'Agotado';
+  }
+
   toggleFiltros() {
     this.mostrarFiltros = !this.mostrarFiltros;
   }
@@ -590,3 +702,4 @@ export class InventarioDetalleComponent implements OnInit {
   }
 
 }
+

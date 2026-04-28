@@ -87,8 +87,18 @@ async function actualizarPerfil(id, data) {
 
 async function buscarUsuarios(filtros) {
     let query = `
-    SELECT u.*, s.nombre_sede AS nombreSede
+    SELECT 
+        u.idusuario,
+        u.nombres,
+        u.apellidos,
+        u.correo,
+        u.telefono,
+        u.rol,
+        u.sedeU,
+        r.nombre_rol AS nombreRol,
+        s.nombre_sede AS nombreSede
     FROM usuario u
+    LEFT JOIN rol r ON u.rol = r.idrol
     LEFT JOIN sede s ON u.sedeU = s.idsede
     WHERE 1=1
   `;
@@ -99,8 +109,7 @@ async function buscarUsuarios(filtros) {
         nombres: filtros.nombres,
         apellidos: filtros.apellidos,
         correo: filtros.correo,
-        telefono: filtros.telefono,
-        rol: filtros.rol
+        telefono: filtros.telefono
     };
 
     for (const [columna, valor] of Object.entries(parciales)) {
@@ -113,6 +122,11 @@ async function buscarUsuarios(filtros) {
     if (filtros.sede !== undefined && filtros.sede !== null && filtros.sede !== '') {
         query += ` AND s.nombre_sede LIKE ?`;
         params.push(`%${filtros.sede}%`);
+    }
+
+    if (filtros.rol !== undefined && filtros.rol !== null && filtros.rol !== '') {
+        query += ` AND r.nombre_rol LIKE ?`;
+        params.push(`%${filtros.rol}%`);
     }
 
     query += ` ORDER BY u.nombres ASC`;

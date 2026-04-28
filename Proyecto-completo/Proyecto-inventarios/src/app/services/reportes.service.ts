@@ -10,8 +10,9 @@ export class ReportesService {
 
   constructor(private http: HttpClient) { }
 
-  exportarInventario() {
+  exportarInventario(params: any = {}) {
     return this.http.get(`${this.apiUrl}/inventario`, {
+      params,
       responseType: 'blob'
     });
   }

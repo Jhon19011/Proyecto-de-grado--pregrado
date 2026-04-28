@@ -3,6 +3,7 @@ const router = express.Router();
 const respuesta = require('../../red/respuestas');
 const controlador = require('./controlador');
 const { verificarToken } = require('../../middleware/auth');
+const verificarRol = require('../../middleware/verificarRol');
 
 // Registrar movimiento local
 router.post('/', verificarToken, async (req, res, next) => {
@@ -11,7 +12,10 @@ router.post('/', verificarToken, async (req, res, next) => {
         const data = req.body;
 
         if(data.destino_id) {
-            const resultado = await controlador.trasladarSustancia(data.user);
+            if (req.user.rol !== 'Administrador') {
+                return res.status(403).json({ error: 'Acceso denegado' });
+            }
+            const resultado = await controlador.trasladarSustancia(data, user);
             res.json(resultado);
         } else {
             const resultado = await controlador.registrarMovimiento(data, user);
@@ -22,7 +26,7 @@ router.post('/', verificarToken, async (req, res, next) => {
     }
 });
 
-router.post('/trasladar', verificarToken, async (req, res, next) => {
+router.post('/trasladar', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
     try {
         console.log('Datos recibidos para traslado:', req.body);
         const asignacion = await controlador.trasladarSustancia(req.body, req.user);

@@ -59,7 +59,8 @@ router.post('/', verificarToken, upload.fields([
 router.get('/', verificarToken, async (req, res, next) => {
     try {
         const sedeId = req.user.sedeU;
-        const sustancias = await controlador.listarSustancias(sedeId);
+        const { page, limit } = req.query;
+        const sustancias = await controlador.listarSustancias(sedeId, page, limit);
         respuesta.success(req, res, sustancias, 200);
     } catch (err) {
         next(err);
@@ -81,9 +82,9 @@ router.get('/controladas', verificarToken, async (req, res, next) => {
 router.get('/buscar', verificarToken, async (req, res, next) => {
     try {
         const sedeId = req.user.sedeU;
-        const filtros = req.query;
+        const { page, limit, ...filtros } = req.query;
 
-        const sustancias = await controlador.buscarSustancias(filtros, sedeId);
+        const sustancias = await controlador.buscarSustancias(filtros, sedeId, page, limit);
         respuesta.success(req, res, sustancias, 200);
     } catch (err) {
         next(err);

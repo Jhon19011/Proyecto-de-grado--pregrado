@@ -17,11 +17,16 @@
           </div>
         </div>
 
+        <button class="btn btn-primary" *ngIf="rol === 'Administrador'" type="button" (click)="abrirCrearInventario()">
+          <i class="bi bi-plus-circle me-1"></i>
+          Nuevo Inventario
+        </button>
+
       </div>
     </div>
 
-    <!-- 🔹 FORMULARIO -->
-    <div class="card shadow-sm border-0 mb-3">
+    <!-- FORMULARIO -->
+    <div class="card shadow-sm border-0 mb-3 d-none">
       <div class="card-body">
 
         <h6 class="form-section-title">
@@ -87,14 +92,15 @@
                   <div class="acciones-container">
 
                     <!-- Editar -->
-                    <button class="btn btn-sm btn-outline-primary"
-                      (click)="idtablas = inv.idtablas; nombretabla = inv.nombretabla; principal = inv.principal">
+                    <button class="btn btn-sm btn-outline-primary" *ngIf="rol === 'Administrador'"
+                      (click)="abrirEditarInventario(inv)">
                       <i class="bi bi-pencil me-1"></i>
                       Editar
                     </button>
 
                     <!-- Eliminar -->
-                    <button class="btn btn-sm btn-outline-danger" (click)="eliminarInventario(inv.idtablas)">
+                    <button class="btn btn-sm btn-outline-danger" *ngIf="rol === 'Administrador'"
+                      (click)="eliminarInventario(inv.idtablas)">
                       <i class="bi bi-trash me-1"></i>
                       Eliminar
                     </button>
@@ -116,5 +122,56 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- Modal Crear/Editar inventario -->
+<div class="modal fade" id="modalInventario" tabindex="-1" aria-labelledby="modalInventarioLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+
+      <div class="modal-header custom-modal-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-box">
+            <i class="bi" [ngClass]="idtablas ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+          </div>
+
+          <div>
+            <h5 class="mb-0 fw-bold" id="modalInventarioLabel">
+              {{ idtablas ? 'Editar Inventario' : 'Nuevo Inventario' }}
+            </h5>
+            <small class="text-light opacity-75">
+              {{ idtablas ? 'Modifica la información existente' : 'Crea un inventario de laboratorio' }}
+            </small>
+          </div>
+        </div>
+
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form (ngSubmit)="guardarInventario()">
+          <div class="mb-3">
+            <label class="form-label">Nombre del inventario</label>
+            <input type="text" class="form-control" placeholder="Ej: Inventario laboratorio quÃ­mica"
+              [(ngModel)]="nombretabla" name="nombretabla" required>
+          </div>
+
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" [(ngModel)]="principal" name="principal"
+              id="modalChkPrincipal">
+            <label class="form-check-label" for="modalChkPrincipal">
+              Inventario principal
+            </label>
+          </div>
+
+          <button class="btn btn-primary w-100 fw-semibold" type="submit">
+            <i class="bi bi-check-circle me-1"></i>
+            {{ idtablas ? 'Actualizar inventario' : 'Crear inventario' }}
+          </button>
+        </form>
+      </div>
+
+    </div>
   </div>
 </div>

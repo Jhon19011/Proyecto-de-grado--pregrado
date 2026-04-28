@@ -24,7 +24,10 @@ export class InicioComponent {
     this.nombreUsuario = localStorage.getItem('nombre') || 'Usuario';
     this.apellidoUsuario = localStorage.getItem('apellido') || 'Apellidos';
     this.rol = localStorage.getItem('rol') || '';
-    this.cargarAlertas();
+
+    if (this.esAdministrador) {
+      this.cargarAlertas();
+    }
   }
 
   administrarInventarios() {
@@ -48,6 +51,8 @@ export class InicioComponent {
     this.router.navigate(['controladas']);
   }
   cargarAlertas() {
+    if (!this.esAdministrador) return;
+
     this.alertasService.listar().subscribe({
       next: (res: any) => {
         this.alertas = res;
@@ -66,11 +71,17 @@ export class InicioComponent {
 
 
   toggleAlertas() {
+    if (!this.esAdministrador) return;
+
     this.mostrarAlertas = !this.mostrarAlertas;
   }
 
   get alertasNoLeidas() {
     return this.alertas.filter(a => !a.leida);
+  }
+
+  get esAdministrador() {
+    return this.rol === 'Administrador';
   }
 
   logout() {

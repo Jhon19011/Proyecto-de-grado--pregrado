@@ -53,9 +53,20 @@ async function crearSustancia(data, sedeId) {
   return { id: result.insertId, ...data, sede_s: sedeId };
 }
 
+function normalizarPaginado(page = 1, limit = 10) {
+  const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+  const limitNum = Math.max(parseInt(limit, 10) || 10, 1);
+  const offset = (pageNum - 1) * limitNum;
+
+  return { pageNum, limitNum, offset };
+}
+
 // Listar Sutancias
-async function listarSustancias(sedeId) {
-  const sql = `
+async function listarSustancias(sedeId, page = null, limit = null) {
+  const usarPaginado = (page !== null && page !== undefined) || (limit !== null && limit !== undefined);
+  const { pageNum, limitNum, offset } = normalizarPaginado(page, limit);
+
+  let sql = `
     SELECT s.*,
           u.nombre AS unidad_nombre,
           IFNULL(a.autorizada, 0) AS autorizada
@@ -68,7 +79,29 @@ async function listarSustancias(sedeId) {
     ORDER BY s.nombreComercial ASC
   `;
 
-  return db.query(sql, [sedeId, sedeId]);
+  const params = [sedeId, sedeId];
+
+  if (!usarPaginado) {
+    return db.query(sql, params);
+  }
+
+  sql += ` LIMIT ? OFFSET ?`;
+  params.push(limitNum, offset);
+
+  const data = await db.query(sql, params);
+  const totalRes = await db.query(
+    `SELECT COUNT(*) AS total FROM sustancia WHERE sede_s = ?`,
+    [sedeId]
+  );
+  const total = totalRes[0].total;
+
+  return {
+    data,
+    total,
+    totalPages: Math.ceil(total / limitNum),
+    page: pageNum,
+    limit: limitNum
+  };
 }
 
 
@@ -177,7 +210,10 @@ async function actualizarAutorizacion(sustanciaId, sedeId, autorizada) {
 }
 
 // Buscar sustancias con filtros
-async function buscarSustancias(filtros, sedeId) {
+async function buscarSustancias(filtros, sedeId, page = null, limit = null) {
+  const usarPaginado = (page !== null && page !== undefined) || (limit !== null && limit !== undefined);
+  const { pageNum, limitNum, offset } = normalizarPaginado(page, limit);
+
   let sql = `
           SELECT 
         s.*,
@@ -192,67 +228,91 @@ async function buscarSustancias(filtros, sedeId) {
   `;
 
   const params = [sedeId, sedeId];
+  let countSql = `
+      SELECT COUNT(*) AS total
+      FROM sustancia s
+      LEFT JOIN unidades u ON u.idunidad = s.unidad
+      LEFT JOIN autorizacion_sustancia a
+        ON a.sustancia_id = s.idsustancia
+      AND a.sede_id = ?
+      WHERE s.sede_s = ?
+  `;
+
+  const countParams = [sedeId, sedeId];
+
+  const agregarFiltro = (condicion, valor) => {
+    sql += condicion;
+    countSql += condicion;
+    params.push(valor);
+    countParams.push(valor);
+  };
 
   // Filtros exactos
   if (filtros.numero) {
-    sql += ` AND s.numero = ?`;
-    params.push(filtros.numero);
+    agregarFiltro(` AND s.numero = ?`, filtros.numero);
   }
 
   if (filtros.estado) {
-    sql += ` AND s.estado = ?`;
-    params.push(filtros.estado);
+    agregarFiltro(` AND s.estado = ?`, filtros.estado);
   }
 
   if (filtros.esControlada !== undefined && filtros.esControlada !== '') {
-    sql += ` AND s.esControlada = ?`;
-    params.push(filtros.esControlada);
+    agregarFiltro(` AND s.esControlada = ?`, filtros.esControlada);
   }
 
   if (filtros.unidad) {
-    sql += ` AND s.unidad = ?`;
-    params.push(filtros.unidad);
+    agregarFiltro(` AND s.unidad = ?`, filtros.unidad);
   }
 
   // Filtros parciales
   if (filtros.nombreComercial) {
-    sql += ` AND s.nombreComercial LIKE ?`;
-    params.push(`%${filtros.nombreComercial}%`);
+    agregarFiltro(` AND s.nombreComercial LIKE ?`, `%${filtros.nombreComercial}%`);
   }
 
   if (filtros.codigo) {
-    sql += ` AND s.codigo LIKE ?`;
-    params.push(`%${filtros.codigo}%`);
+    agregarFiltro(` AND s.codigo LIKE ?`, `%${filtros.codigo}%`);
   }
 
   if (filtros.CAS) {
-    sql += ` AND s.CAS LIKE ?`;
-    params.push(`%${filtros.CAS}%`);
+    agregarFiltro(` AND s.CAS LIKE ?`, `%${filtros.CAS}%`);
   }
 
   if (filtros.marca) {
-    sql += ` AND s.marca LIKE ?`;
-    params.push(`%${filtros.marca}%`);
+    agregarFiltro(` AND s.marca LIKE ?`, `%${filtros.marca}%`);
   }
 
   if (filtros.clasedepeligrosegunonu) {
-    sql += ` AND s.clasedepeligrosegunonu LIKE ?`;
-    params.push(`%${filtros.clasedepeligrosegunonu}%`);
+    agregarFiltro(` AND s.clasedepeligrosegunonu LIKE ?`, `%${filtros.clasedepeligrosegunonu}%`);
   }
 
   if (filtros.categoriaIARC) {
-    sql += ` AND s.categoriaIARC LIKE ?`;
-    params.push(`%${filtros.categoriaIARC}%`);
+    agregarFiltro(` AND s.categoriaIARC LIKE ?`, `%${filtros.categoriaIARC}%`);
   }
 
   if (filtros.presentacion) {
-    sql += ` AND s.presentacion LIKE ?`;
-    params.push(`%${filtros.presentacion}%`);
+    agregarFiltro(` AND s.presentacion LIKE ?`, `%${filtros.presentacion}%`);
   }
 
   sql += ` ORDER BY s.nombreComercial ASC`;
 
-  return db.query(sql, params);
+  if (!usarPaginado) {
+    return db.query(sql, params);
+  }
+
+  sql += ` LIMIT ? OFFSET ?`;
+  params.push(limitNum, offset);
+
+  const data = await db.query(sql, params);
+  const totalRes = await db.query(countSql, countParams);
+  const total = totalRes[0].total;
+
+  return {
+    data,
+    total,
+    totalPages: Math.ceil(total / limitNum),
+    page: pageNum,
+    limit: limitNum
+  };
 }
 
 // Buscar sustancias controladas con filtros

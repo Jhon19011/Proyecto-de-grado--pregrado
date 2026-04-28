@@ -10,6 +10,10 @@ function calcularEstadoUso(cantidad, remanente) {
   return 'En uso';
 }
 
+function calcularEstadoInventario(remanente) {
+  return remanente === 0 ? 0 : 1;
+}
+
 // Registrar movimiento (entrada-salida local)
 async function registrarMovimiento(data, user) {
   const { inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha } = data;
@@ -54,9 +58,9 @@ async function registrarMovimiento(data, user) {
 
   await db.query(
     `UPDATE ${TABLA_ASIG} 
-     SET cantidadremanente = ?, cantidad = ?, gastototal = ?, estado_uso = ?
+     SET cantidadremanente = ?, cantidad = ?, gastototal = ?, estado_uso = ?, estado = ?
      WHERE idinventario_sustancia = ?`,
-    [nuevoRemanente, nuevaCantidad, nuevoGastoTotal, estadoUso, inventario_sustancia_id]
+    [nuevoRemanente, nuevaCantidad, nuevoGastoTotal, estadoUso, calcularEstadoInventario(nuevoRemanente), inventario_sustancia_id]
   );
 
   await db.query(
@@ -137,9 +141,9 @@ async function trasladarSustancia(data, user) {
 
     await db.query(
       `UPDATE ${TABLA_ASIG}
-       SET cantidadremanente = ?, gastototal = ?, estado_uso = ?
+       SET cantidadremanente = ?, gastototal = ?, estado_uso = ?, estado = ?
        WHERE idinventario_sustancia = ?`,
-      [nuevoRemanente, nuevoGasto, estadoOrigen, asigOrigen.idinventario_sustancia]
+      [nuevoRemanente, nuevoGasto, estadoOrigen, calcularEstadoInventario(nuevoRemanente), asigOrigen.idinventario_sustancia]
     );
 
     // 🔺 DESTINO (SIEMPRE NUEVO)
@@ -271,9 +275,9 @@ async function registrarMovimientoSecundario(data, user) {
   // Actualizar el stock
   await db.query(
     `UPDATE ${TABLA_ASIG} 
-   SET cantidadremanente = ?, cantidad = ?, gastototal = ?, estado_uso = ?
+   SET cantidadremanente = ?, cantidad = ?, gastototal = ?, estado_uso = ?, estado = ?
    WHERE idinventario_sustancia = ?`,
-    [nuevoRemanente, nuevaCantidad, nuevoGastoTotal, estadoUso, inventario_sustancia_id]
+    [nuevoRemanente, nuevaCantidad, nuevoGastoTotal, estadoUso, calcularEstadoInventario(nuevoRemanente), inventario_sustancia_id]
   );
 
   // Registrar movimiento en historial

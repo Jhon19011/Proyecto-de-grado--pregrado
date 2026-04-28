@@ -257,3 +257,11 @@ td {
 .custom-modal-header {
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
+
+.pagination-panel {
+  border-top: 1px solid #e9ecef;
+}
+
+.page-size-select {
+  width: 76px;
+}

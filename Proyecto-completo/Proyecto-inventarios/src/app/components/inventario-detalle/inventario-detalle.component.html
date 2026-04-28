@@ -1,4 +1,4 @@
-<div class="container-fluid py-4 px-5">
+<div class="screen-content container-fluid py-4 px-5">
   <div class="col-auto">
     <div class="card shadow-sm border-0">
       <div class="card-body d-flex justify-content-between align-items-center">
@@ -23,10 +23,10 @@
       </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="inventory-actions d-flex flex-wrap justify-content-between align-items-center gap-2">
       <!-- Botón para agregar nuevas sustancias (solo principal) -->
       <div *ngIf="esPrincipal && rol === 'Administrador'">
-        <div class="mb-3 mt-3">
+        <div>
           <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalAsignacion">
             <i class="bi bi-plus-circle me-1"></i>
             Asignar sustancia
@@ -34,11 +34,21 @@
         </div>
       </div>
 
-      <button class="btn btn-success" (click)="exportarExcel()">
-        Exportar Excel
-      </button>
+      <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
+        <button class="btn btn-sm depleted-toggle"
+          [ngClass]="estaMostrandoAgotadas() ? 'btn-outline-secondary' : 'btn-outline-danger'" type="button"
+          *ngIf="totalAgotadas > 0" (click)="estaMostrandoAgotadas() ? ocultarAgotadas() : mostrarAgotadas()">
+          <i class="bi" [ngClass]="estaMostrandoAgotadas() ? 'bi-arrow-counterclockwise' : 'bi-eye'"></i>
+          {{ estaMostrandoAgotadas() ? 'Ver disponibles' : 'Ver agotadas' }}
+        </button>
+
+        <button class="btn btn-success" (click)="exportarExcel()">
+          Exportar Excel
+        </button>
+      </div>
 
     </div>
+
 
     <div class="card shadow-sm border-0 mb-3" *ngIf="mostrarFiltros">
       <div class="card-body">
@@ -65,7 +75,7 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label">ID / Cédula</label>
+              <label class="form-label">ID</label>
               <input class="form-control" placeholder="Ej: 25" [(ngModel)]="filtro.cedula" (input)="buscarSustancias()">
             </div>
 
@@ -154,11 +164,11 @@
                 <th>Fecha de Vencimiento</th>
                 <th>Ubicación</th>
                 <th>Observaciones</th>
-                <th *ngIf="!esPrincipal || rol === 'Administrador'">Acciones</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of sustanciasAsignadas; let i = index">
+              <tr *ngFor="let item of sustanciasAsignadas; let i = index" [ngClass]="getClaseFilaInventario(item)">
                 <td>{{ i + 1 }}</td>
                 <td>
                   <span class="badge bg-primary">
@@ -187,15 +197,17 @@
                 <td>{{ item.lote || '—' }}</td>
                 <td>
                   <span [ngClass]="getClaseVencimiento(item.fechadevencimiento)">
+                    <i class="bi" [ngClass]="getIconoVencimiento(item.fechadevencimiento)"></i>
                     {{ item.fechadevencimiento ? (item.fechadevencimiento | date:'yyyy-MM-dd') : '—' }}
+                    <small>{{ getTextoVencimiento(item.fechadevencimiento) }}</small>
                   </span>
                 </td>
                 <td>{{ item.ubicaciondealmacenamiento }}</td>
                 <td>{{ item.observaciones || '-' }}</td>
-                <td *ngIf="!esPrincipal || rol === 'Administrador'">
+                <td>
                   <!-- Acciones dinámicas -->
-                  <!-- Si es principal y administrador -->
-                  <ng-container *ngIf="esPrincipal && rol === 'Administrador'">
+                  <!-- Acciones de inventario principal -->
+                  <ng-container *ngIf="esPrincipal">
 
                     <button class="action-btn warning" (click)="abrirMovimientos(item)" title="Registrar Movimiento">
                       <i class="bi bi-arrow-repeat"></i>
@@ -205,16 +217,18 @@
                       <i class="bi bi-clock-history"></i>
                     </button>
 
-                    <button class="action-btn success" (click)="abrirTraslado(item)" title="Trasladar">
+                    <button class="action-btn success" *ngIf="rol === 'Administrador'" (click)="abrirTraslado(item)"
+                      title="Trasladar">
                       <i class="bi bi-shuffle"></i>
                     </button>
 
-                    <button class="action-btn secondary" (click)="abrirEdicion(item)" title="Editar">
+                    <button class="action-btn secondary" *ngIf="rol === 'Administrador'" (click)="abrirEdicion(item)"
+                      title="Editar">
                       <i class="bi bi-pencil"></i>
                     </button>
 
-                    <button class="action-btn danger" (click)="eliminarAsignacion(item.idinventario_sustancia)"
-                      title="Eliminar">
+                    <button class="action-btn danger" *ngIf="rol === 'Administrador'"
+                      (click)="eliminarAsignacion(item.idinventario_sustancia)" title="Eliminar">
                       <i class="bi bi-trash"></i>
                     </button>
                   </ng-container>
@@ -232,20 +246,30 @@
                       <i class="bi bi-clock-history"></i>
                     </button>
 
-                    <button class="action-btn success" (click)="abrirTraslado(item)" title="Trasladar">
+                    <button class="action-btn success" *ngIf="rol === 'Administrador'" (click)="abrirTraslado(item)"
+                      title="Trasladar">
                       <i class="bi bi-shuffle"></i>
                     </button>
 
-                    <button class="action-btn secondary" (click)="abrirEdicion(item)" title="Editar">
+                    <button class="action-btn secondary" *ngIf="rol === 'Administrador'" (click)="abrirEdicion(item)"
+                      title="Editar">
                       <i class="bi bi-pencil"></i>
                     </button>
 
-                    <button class="action-btn danger" (click)="eliminarAsignacion(item.idinventario_sustancia)"
-                      title="Eliminar">
+                    <button class="action-btn danger" *ngIf="rol === 'Administrador'"
+                      (click)="eliminarAsignacion(item.idinventario_sustancia)" title="Eliminar">
                       <i class="bi bi-trash"></i>
                     </button>
 
                   </ng-container>
+                </td>
+              </tr>
+              <tr *ngIf="sustanciasAsignadas.length === 0">
+                <td colspan="14" class="empty-inventory-state">
+                  <i class="bi bi-inbox"></i>
+                  <span>
+                    {{ estaMostrandoAgotadas() ? 'No hay sustancias agotadas en este inventario' : 'No hay sustancias para mostrar' }}
+                  </span>
                 </td>
               </tr>
             </tbody>
@@ -262,36 +286,96 @@
             </strong>
           </div>
 
-          <nav *ngIf="totalPages > 1">
-            <ul class="pagination justify-content-center mt-3">
+          <div class="pagination-panel d-flex flex-wrap justify-content-between align-items-center gap-3 px-3 pb-3"
+            *ngIf="totalRegistros > 0">
+            <div class="d-flex align-items-center gap-2 text-muted small">
+              <span>
+                Página {{ page }} de {{ totalPages }}
+              </span>
+              <span>
+                {{ sustanciasAsignadas.length }} de {{ totalRegistros }} registros
+              </span>
+            </div>
 
-              <li class="page-item" [class.disabled]="page === 1">
-                <button class="page-link" (click)="cambiarPagina(page - 1)">
-                  Anterior
-                </button>
-              </li>
+            <div class="d-flex align-items-center gap-2">
+              <label class="text-muted small mb-0">Ver</label>
+              <select class="form-select form-select-sm page-size-select" [(ngModel)]="limit" (change)="cambiarLimite()">
+                <option [ngValue]="5">5</option>
+                <option [ngValue]="10">10</option>
+                <option [ngValue]="20">20</option>
+              </select>
+            </div>
 
-              <li class="page-item" *ngFor="let p of [].constructor(totalPages); let i = index"
-                [class.active]="page === i + 1">
+            <nav>
+              <ul class="pagination justify-content-center mb-0">
 
-                <button class="page-link" (click)="cambiarPagina(i + 1)">
-                  {{ i + 1 }}
-                </button>
-              </li>
+                <li class="page-item" [class.disabled]="page === 1">
+                  <button class="page-link" type="button" (click)="cambiarPagina(page - 1)">
+                    Anterior
+                  </button>
+                </li>
 
-              <li class="page-item" [class.disabled]="page === totalPages">
-                <button class="page-link" (click)="cambiarPagina(page + 1)">
-                  Siguiente
-                </button>
-              </li>
+                <li class="page-item" *ngFor="let p of [].constructor(totalPages); let i = index"
+                  [class.active]="page === i + 1">
 
-            </ul>
-          </nav>
+                  <button class="page-link" type="button" (click)="cambiarPagina(i + 1)">
+                    {{ i + 1 }}
+                  </button>
+                </li>
+
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <button class="page-link" type="button" (click)="cambiarPagina(page + 1)">
+                    Siguiente
+                  </button>
+                </li>
+
+              </ul>
+            </nav>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- PDF historial -->
+<section class="historial-print-document">
+  <header class="historial-print-header">
+    <h1>Historial de movimientos</h1>
+    <div class="historial-print-meta">
+      <div><strong>Inventario:</strong> {{ nombreInventario || 'Inventario' }}</div>
+      <div><strong>Sustancia:</strong> {{ historialSustancia?.nombreComercial || 'Sustancia' }}</div>
+      <div><strong>Código:</strong> {{ historialSustancia?.codigo || 'Sin código' }}</div>
+      <div><strong>ID:</strong> COD-{{ historialSustancia?.cedula_principal || '-' }}</div>
+      <div><strong>Generado:</strong> {{ fechaGeneracionHistorial || '-' }}</div>
+    </div>
+  </header>
+
+  <table class="historial-print-table">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Tipo</th>
+        <th>Cantidad</th>
+        <th>Motivo</th>
+        <th>Usuario</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of historial">
+        <td>{{ m.fecha | date:'yyyy-MM-dd' }}</td>
+        <td>
+          <span class="historial-print-badge" [ngClass]="m.tipo === 'entrada' ? 'entrada' : 'salida'">
+            {{ m.tipo || '-' }}
+          </span>
+        </td>
+        <td>{{ m.cantidad ?? '-' }}</td>
+        <td>{{ m.motivo || '-' }}</td>
+        <td>{{ m.usuario || '-' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
 
 <!-- Modal Movimientos -->
 <div class="modal fade" id="modalMov" tabindex="-1">
@@ -394,13 +478,20 @@
             </small>
           </div>
         </div>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-header-actions">
+          <button class="history-pdf-btn" type="button" (click)="exportarHistorialPdf()"
+            [disabled]="!historial || historial.length === 0">
+            <i class="bi bi-file-earmark-pdf"></i>
+            <span>PDF</span>
+          </button>
+          <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
       </div>
 
       <div class="modal-body">
         <div class="table-responsive" *ngIf="historial && historial.length > 0; else sinHistorial">
 
-          <table class="table table-hover text-center align-middle">
+          <table class="table table-hover text-center align-middle historial-table">
             <thead class="table-light">
               <tr>
                 <th>Fecha</th>
@@ -514,7 +605,8 @@
               <!-- INPUT -->
               <input type="text" class="form-control rounded-pill" placeholder="Buscar presentación..."
                 [(ngModel)]="busquedaSustancia" (focus)="mostrarDropdown = true" (input)="filtrarDropdown()"
-                [disabled]="!nombreSeleccionado" name="busquedaSustancia">
+                [disabled]="!nombreSeleccionado" name="busquedaSustancia" autocomplete="off"
+                autocapitalize="off" spellcheck="false">
 
               <!-- MENSAJE -->
               <small class="text-muted" *ngIf="!nombreSeleccionado">
@@ -533,7 +625,7 @@
                   </div>
 
                   <div class="text-muted small">
-                    {{ s.marca }} • Lote: {{ s.lote }}
+                    {{ s.marca }}
                   </div>
 
                   <div class="badge bg-primary mt-1">
@@ -569,7 +661,7 @@
               <input type="number" class="form-control" [(ngModel)]="cantidad" name="cantidad" min="1" required />
 
               <span class="input-group-text">
-                {{ sustanciaSeleccionadaObj?.unidad || '---' }}
+                {{ sustanciaSeleccionadaObj?.unidad_nombre || sustanciaSeleccionadaObj?.unidad || '---' }}
               </span>
             </div>
           </div>

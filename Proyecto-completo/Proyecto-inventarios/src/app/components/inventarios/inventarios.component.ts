@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { InventarioService } from '../../services/inventarios.service';
 
+declare var bootstrap: any;
+
 @Component({
   selector: 'app-inventarios',
   imports: [CommonModule, FormsModule, RouterModule],
@@ -13,11 +15,13 @@ import { InventarioService } from '../../services/inventarios.service';
 export class InventariosComponent {
   private servicioInventarios = inject(InventarioService);
   inventarios: any[] = [];
+  rol = localStorage.getItem('rol') || '';
 
   // formulario
   idtablas: number | null = null;
   nombretabla = '';
   principal: boolean = false;
+  modalInventario: any;
 
   constructor(private router: Router) { }
 
@@ -47,6 +51,7 @@ export class InventariosComponent {
           alert('Inventario actualizado con éxito');
           this.listarInventarios();
           this.resetForm();
+          this.cerrarModalInventario();
         },
         error: (err) => console.error('Error al actualizar inventario', err)
       });
@@ -57,6 +62,7 @@ export class InventariosComponent {
           alert('Inventario creado con éxito');
           this.listarInventarios();
           this.resetForm();
+          this.cerrarModalInventario();
         },
         error: (err) => {
           console.error('Error al crear inventario', err);
@@ -105,6 +111,33 @@ export class InventariosComponent {
     this.idtablas = null;
     this.nombretabla = '';
     this.principal = false;
+  }
+
+  abrirCrearInventario() {
+    this.resetForm();
+    this.abrirModalInventario();
+  }
+
+  abrirEditarInventario(inv: any) {
+    this.idtablas = inv.idtablas;
+    this.nombretabla = inv.nombretabla;
+    this.principal = !!inv.principal;
+    this.abrirModalInventario();
+  }
+
+  abrirModalInventario() {
+    const modalEl = document.getElementById('modalInventario');
+    if (!modalEl) return;
+
+    this.modalInventario = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    this.modalInventario.show();
+  }
+
+  cerrarModalInventario() {
+    const modalEl = document.getElementById('modalInventario');
+    const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+
+    modal?.hide();
   }
 
   volver() {
