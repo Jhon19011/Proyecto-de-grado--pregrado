@@ -14,9 +14,15 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
 
   const offset = (page - 1) * limit;
   const mostrarAgotadas = filtros.estado_uso === 'Agotado';
+  const estadosTrasladoVisibles = ['Traslado / Nuevo', 'Traslado / En uso'];
+  const estadosTraslado = [...estadosTrasladoVisibles, 'Traslado / Agotado'];
+  const mostrarTrasladadas = estadosTraslado.includes(filtros.estado_uso);
   const condicionVisibilidad = mostrarAgotadas
-    ? `AND (isus.estado_uso = 'Agotado' OR isus.cantidadremanente <= 0)`
-    : `AND isus.estado = 1 AND isus.estado_uso <> 'Agotado' AND isus.cantidadremanente > 0`;
+    ? `AND (isus.estado_uso IN ('Agotado', 'Traslado / Agotado') OR (isus.cantidadremanente <= 0 AND isus.estado_uso NOT LIKE 'Traslado /%'))`
+    : mostrarTrasladadas
+      ? `AND isus.estado_uso = ?`
+    : `AND ((isus.estado = 1 AND isus.estado_uso <> 'Agotado' AND isus.cantidadremanente > 0) OR isus.estado_uso IN ('Traslado / Nuevo', 'Traslado / En uso'))`;
+  const visibilidadParams = mostrarTrasladadas ? [filtros.estado_uso] : [];
 
   let query = `
     SELECT 
@@ -58,7 +64,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     WHERE isus.tabla = ? ${condicionVisibilidad}
   `;
 
-  let params = [tabla];
+  let params = [tabla, ...visibilidadParams];
 
   // FILTROS
 
@@ -77,7 +83,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     params.push(`%${filtros.codigo}%`);
   }
 
-  if (filtros.estado_uso && !mostrarAgotadas) {
+  if (filtros.estado_uso && !mostrarAgotadas && !mostrarTrasladadas) {
     query += ` AND isus.estado_uso = ?`;
     params.push(filtros.estado_uso);
   }
@@ -121,7 +127,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
 
   //Suma Remanente Total
 
-  let sumParams = [tabla];
+let sumParams = [tabla, ...visibilidadParams];
 
   if (filtros.sustancia) {
     sumQuery += ` AND s.nombreComercial LIKE ?`;
@@ -138,7 +144,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     sumParams.push(`%${filtros.codigo}%`);
   }
 
-  if (filtros.estado_uso && !mostrarAgotadas) {
+  if (filtros.estado_uso && !mostrarAgotadas && !mostrarTrasladadas) {
     sumQuery += ` AND isus.estado_uso = ?`;
     sumParams.push(filtros.estado_uso);
   }
@@ -194,7 +200,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     WHERE isus.tabla = ? ${condicionVisibilidad}
   `;
 
-  let countParams = [tabla];
+  let countParams = [tabla, ...visibilidadParams];
 
   if (filtros.sustancia) {
     countQuery += ` AND s.nombreComercial LIKE ?`;
@@ -216,7 +222,7 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
     countParams.push(`%${filtros.cedula}%`);
   }
 
-  if (filtros.estado_uso && !mostrarAgotadas) {
+  if (filtros.estado_uso && !mostrarAgotadas && !mostrarTrasladadas) {
     countQuery += ` AND isus.estado_uso = ?`;
     countParams.push(filtros.estado_uso);
   }
@@ -363,9 +369,15 @@ async function eliminarAsignacion(id) {
 
 async function buscarSustanciasInventario(filtros) {
   const mostrarAgotadas = filtros.estado_uso === 'Agotado';
+  const estadosTrasladoVisibles = ['Traslado / Nuevo', 'Traslado / En uso'];
+  const estadosTraslado = [...estadosTrasladoVisibles, 'Traslado / Agotado'];
+  const mostrarTrasladadas = estadosTraslado.includes(filtros.estado_uso);
   const condicionVisibilidad = mostrarAgotadas
-    ? `AND (i.estado_uso = 'Agotado' OR i.cantidadremanente <= 0)`
-    : `AND i.estado = 1 AND i.estado_uso <> 'Agotado' AND i.cantidadremanente > 0`;
+    ? `AND (i.estado_uso IN ('Agotado', 'Traslado / Agotado') OR (i.cantidadremanente <= 0 AND i.estado_uso NOT LIKE 'Traslado /%'))`
+    : mostrarTrasladadas
+      ? `AND i.estado_uso = ?`
+    : `AND ((i.estado = 1 AND i.estado_uso <> 'Agotado' AND i.cantidadremanente > 0) OR i.estado_uso IN ('Traslado / Nuevo', 'Traslado / En uso'))`;
+  const visibilidadParams = mostrarTrasladadas ? [filtros.estado_uso] : [];
 
   let query = `
     SELECT 
@@ -387,7 +399,7 @@ async function buscarSustanciasInventario(filtros) {
     WHERE i.tabla = ? ${condicionVisibilidad}
   `;
 
-  let params = [filtros.inventarioId];
+  let params = [filtros.inventarioId, ...visibilidadParams];
 
   // Nombre
   if (filtros.sustancia) {
@@ -408,7 +420,7 @@ async function buscarSustanciasInventario(filtros) {
   }
 
   // Estado (Nuevo, En uso, Agotado)
-  if (filtros.estado_uso && !mostrarAgotadas) {
+  if (filtros.estado_uso && !mostrarAgotadas && !mostrarTrasladadas) {
     query += ` AND i.estado_uso = ?`;
     params.push(filtros.estado_uso);
   }

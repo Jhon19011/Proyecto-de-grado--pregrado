@@ -30,7 +30,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 
 // Crear sustancia
-router.post('/', verificarToken, upload.fields([
+router.post('/', verificarToken, verificarRol(['Administrador']), upload.fields([
     { name: 'pdf_seguridad', maxCount: 1 },
     { name: 'pdf_tecnico', maxCount: 1 }
   ]), async (req, res, next) => {
@@ -115,7 +115,7 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // Actualizar sustancia
-router.put('/:id', verificarToken, upload.fields([
+router.put('/:id', verificarToken, verificarRol(['Administrador']), upload.fields([
     { name: 'pdf_seguridad', maxCount: 1 },
     { name: 'pdf_tecnico', maxCount: 1 }
   ]), async (req, res, next) => {
@@ -139,7 +139,7 @@ router.put('/:id', verificarToken, upload.fields([
 );
 
 // Eliminar sustancia 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
     try {
         const resultado = await controlador.eliminarSustancia(req.params.id);
         respuesta.success(req, res, resultado, 200);

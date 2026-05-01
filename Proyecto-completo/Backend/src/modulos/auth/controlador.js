@@ -6,7 +6,7 @@ const TABLA = 'usuario';
 
 const rolesMap = {
     1: 'Administrador',
-    4: 'Auxiliar'
+    4: 'Laboratorista'
 };
 
 async function login(data) {

@@ -98,6 +98,9 @@
                 <option value="Nuevo">Nuevo</option>
                 <option value="En uso">En uso</option>
                 <option value="Agotado">Agotado</option>
+                <option value="Traslado / Nuevo">Traslado / Nuevo</option>
+                <option value="Traslado / En uso">Traslado / En uso</option>
+                <option value="Traslado / Agotado">Traslado / Agotado</option>
               </select>
             </div>
 
@@ -185,7 +188,8 @@
                   <span class="badge" [ngClass]="{
                     'bg-primary': item.estado_uso === 'Nuevo',
                     'bg-warning text-dark': item.estado_uso === 'En uso',
-                    'bg-danger': item.estado_uso === 'Agotado'
+                    'bg-danger': item.estado_uso === 'Agotado' || item.estado_uso === 'Traslado / Agotado',
+                    'bg-info text-dark': item.estado_uso === 'Traslado / Nuevo' || item.estado_uso === 'Traslado / En uso'
                   }">
                     {{ item.estado_uso }}
                   </span>
@@ -716,17 +720,18 @@
             </select>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Cantidad</label>
+          <div class="mb-3 d-none">
+            <label class="form-label">Cantidad a trasladar</label>
 
             <div class="input-group">
-              <input type="number" step="0.01" min="0.01" class="form-control" [(ngModel)]="cantidadTraslado"
-                name="cantidad" required />
+              <input type="number" class="form-control" [value]="sustanciaSeleccionada?.cantidadremanente || 0"
+                name="cantidad" readonly />
 
               <span class="input-group-text">
                 {{ sustanciaSeleccionada?.unidad || '---' }}
               </span>
             </div>
+            <small class="text-muted">Se trasladarÃ¡ todo el remanente disponible.</small>
 
           </div>
 

@@ -366,8 +366,9 @@ export class InventarioDetalleComponent implements OnInit {
       unidad: item.unidad_nombre
     };
     this.inventarioDestino = null;
-    this.cantidadTraslado = null;
+    this.cantidadTraslado = Number(item.cantidadremanente || 0);
     this.ubicacionTraslado = '';
+    this.observacionTraslado = '';
 
     // Mostrar el modal
     const modalEl = document.getElementById('modalTraslado');
@@ -393,7 +394,7 @@ export class InventarioDetalleComponent implements OnInit {
   // Confirmar traslado
   confirmarTraslado() {
 
-    if (!this.inventarioDestino || !this.cantidadTraslado || !this.ubicacionTraslado) {
+    if (!this.inventarioDestino || !this.ubicacionTraslado) {
       alert('Todos los campos son obligatorios');
       return;
     }
@@ -406,15 +407,12 @@ export class InventarioDetalleComponent implements OnInit {
       return;
     }
 
-    this.cantidadTraslado = Number(
-      this.cantidadTraslado!.toFixed(2)
-    );
+    this.cantidadTraslado = Number(this.sustanciaSeleccionada.cantidadremanente || 0);
 
     const datos = {
       origen_id: this.tabla,
       destino_id: this.inventarioDestino,
       asignacion_id: idAsignacion,
-      cantidad: this.cantidadTraslado,
       ubicaciondealmacenamiento: this.ubicacionTraslado,
       observaciones: this.observacionTraslado
     };
@@ -432,6 +430,7 @@ export class InventarioDetalleComponent implements OnInit {
         this.cantidadTraslado = null;
         this.sustanciaSeleccionada = null;
         this.ubicacionTraslado = '';
+        this.observacionTraslado = '';
 
         const modalEl = document.getElementById('modalTraslado');
         const modal = bootstrap.Modal.getInstance(modalEl!);
@@ -597,7 +596,9 @@ export class InventarioDetalleComponent implements OnInit {
   }
 
   esSustanciaAgotada(item: any): boolean {
-    return item?.estado_uso === 'Agotado' || Number(item?.cantidadremanente || 0) <= 0;
+    return item?.estado_uso === 'Agotado'
+      || item?.estado_uso === 'Traslado / Agotado'
+      || (!String(item?.estado_uso || '').startsWith('Traslado /') && Number(item?.cantidadremanente || 0) <= 0);
   }
 
   getTextoVencimiento(fecha: string): string {

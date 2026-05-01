@@ -14,6 +14,32 @@ function calcularEstadoInventario(remanente) {
   return remanente === 0 ? 0 : 1;
 }
 
+function calcularEstadoTrasladoDesdeDestino(estadoDestino) {
+  if (estadoDestino === 'Nuevo') return 'Traslado / Nuevo';
+  if (estadoDestino === 'En uso') return 'Traslado / En uso';
+  return 'Traslado / Agotado';
+}
+
+async function sincronizarEstadoOrigenTraslado(asignacionDestino, estadoDestino) {
+  if (!asignacionDestino?.cedula_principal) return;
+
+  await db.query(
+    `UPDATE ${TABLA_ASIG}
+     SET estado_uso = ?, estado = ?
+     WHERE idinventario_sustancia <> ?
+       AND sustancia = ?
+       AND cedula_principal = ?
+       AND estado_uso LIKE 'Traslado%'`,
+    [
+      calcularEstadoTrasladoDesdeDestino(estadoDestino),
+      estadoDestino === 'Agotado' ? 0 : 1,
+      asignacionDestino.idinventario_sustancia,
+      asignacionDestino.sustancia,
+      asignacionDestino.cedula_principal
+    ]
+  );
+}
+
 // Registrar movimiento (entrada-salida local)
 async function registrarMovimiento(data, user) {
   const { inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha } = data;
@@ -63,6 +89,8 @@ async function registrarMovimiento(data, user) {
     [nuevoRemanente, nuevaCantidad, nuevoGastoTotal, estadoUso, calcularEstadoInventario(nuevoRemanente), inventario_sustancia_id]
   );
 
+  await sincronizarEstadoOrigenTraslado(asignacion, estadoUso);
+
   await db.query(
     `INSERT INTO ${TABLA_MOV} 
     (inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha)
@@ -85,16 +113,16 @@ async function registrarMovimiento(data, user) {
 
 // Traslado interno (principal -> secundario)
 async function trasladarSustancia(data, user) {
-  const { destino_id, asignacion_id, cantidad, motivo, usuario, origen_id, ubicaciondealmacenamiento, observaciones } = data;
+  const { destino_id, asignacion_id, motivo, usuario, origen_id, ubicaciondealmacenamiento, observaciones } = data;
   const sedeId = user.sedeU;
   const nombreUsuario = `${user.nombres} ${user.apellidos}`;
   const { inventario_sustancia_id } = data;
 
-  if (!destino_id || !asignacion_id || !cantidad || !origen_id) {
+  if (!destino_id || !asignacion_id || !origen_id) {
     throw error('Datos incompletos', 400);
   }
 
-  if (origen_id === destino_id) {
+  if (Number(origen_id) === Number(destino_id)) {
     throw error('Origen y destino no pueden ser iguales', 400);
   }
 
@@ -118,10 +146,10 @@ async function trasladarSustancia(data, user) {
 
   if (!asigOrigen) throw error('No existe en origen', 400);
 
-  const cantidadNum = Number(cantidad);
+  const cantidadNum = Number(asigOrigen.cantidadremanente || 0);
 
-  if (asigOrigen.cantidadremanente < cantidadNum) {
-    throw error('Cantidad insuficiente', 400);
+  if (cantidadNum <= 0) {
+    throw error('No hay remanente disponible para trasladar', 400);
   }
 
   const cedula = asigOrigen.cedula_principal || asigOrigen.idinventario_sustancia;
@@ -131,19 +159,15 @@ async function trasladarSustancia(data, user) {
   try {
 
     // 🔻 ORIGEN
-    const nuevoRemanente = asigOrigen.cantidadremanente - cantidadNum;
+    const nuevoRemanente = 0;
     const nuevoGasto = Number(asigOrigen.gastototal || 0) + cantidadNum;
-
-    const estadoOrigen = calcularEstadoUso(
-      asigOrigen.cantidad,
-      nuevoRemanente
-    );
+    const estadoOrigen = calcularEstadoTrasladoDesdeDestino('Nuevo');
 
     await db.query(
       `UPDATE ${TABLA_ASIG}
        SET cantidadremanente = ?, gastototal = ?, estado_uso = ?, estado = ?
        WHERE idinventario_sustancia = ?`,
-      [nuevoRemanente, nuevoGasto, estadoOrigen, calcularEstadoInventario(nuevoRemanente), asigOrigen.idinventario_sustancia]
+      [nuevoRemanente, nuevoGasto, estadoOrigen, 1, asigOrigen.idinventario_sustancia]
     );
 
     // 🔺 DESTINO (SIEMPRE NUEVO)
@@ -169,14 +193,14 @@ async function trasladarSustancia(data, user) {
       [insert.insertId]
     );
 
-    const motivoSalida = `Traslado hacia ${invDestino.nombretabla}`;
-    const motivoEntrada = `Traslado desde ${invOrigen.nombretabla}`;
+    const motivoSalida = `Traslado completo hacia ${invDestino.nombretabla}`;
+    const motivoEntrada = `Traslado completo desde ${invOrigen.nombretabla}`;
 
     // MOVIMIENTOS
     await db.query(
       `INSERT INTO ${TABLA_MOV}
-      (inventario_sustancia_id, tipo, cantidad, motivo, usuario, inventario_origen_id, inventario_destino_id)
-      VALUES (?, 'salida', ?, ?, ?, ?, ?)`,
+      (inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha, inventario_origen_id, inventario_destino_id)
+      VALUES (?, 'salida', ?, ?, ?, CURDATE(), ?, ?)`,
       [
         asigOrigen.idinventario_sustancia,
         cantidadNum,
@@ -189,8 +213,8 @@ async function trasladarSustancia(data, user) {
 
     await db.query(
       `INSERT INTO ${TABLA_MOV}
-      (inventario_sustancia_id, tipo, cantidad, motivo, usuario, inventario_origen_id, inventario_destino_id)
-      VALUES (?, 'entrada', ?, ?, ?, ?, ?)`,
+      (inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha, inventario_origen_id, inventario_destino_id)
+      VALUES (?, 'entrada', ?, ?, ?, CURDATE(), ?, ?)`,
       [
         asigDestino.idinventario_sustancia,
         cantidadNum,
@@ -209,7 +233,7 @@ async function trasladarSustancia(data, user) {
 
   } catch (err) {
     await db.query('ROLLBACK');
-    throw error('Error en traslado', 500);
+    throw err;
   }
 }
 
@@ -279,6 +303,8 @@ async function registrarMovimientoSecundario(data, user) {
    WHERE idinventario_sustancia = ?`,
     [nuevoRemanente, nuevaCantidad, nuevoGastoTotal, estadoUso, calcularEstadoInventario(nuevoRemanente), inventario_sustancia_id]
   );
+
+  await sincronizarEstadoOrigenTraslado(asignacion, estadoUso);
 
   // Registrar movimiento en historial
   await db.query(

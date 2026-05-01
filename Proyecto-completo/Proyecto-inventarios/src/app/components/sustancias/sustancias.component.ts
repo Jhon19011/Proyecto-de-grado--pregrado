@@ -31,6 +31,7 @@ export class SustanciasComponent {
   unidades: any[] = [];
   nuevaUnidad: string = '';
   mostrarInputUnidad: boolean = false;
+  rol = localStorage.getItem('rol') || '';
 
   filtro: any = {
     numero: '',
@@ -73,6 +74,10 @@ export class SustanciasComponent {
   limit = 5;
   totalPages = 1;
   totalRegistros = 0;
+
+  get esAdministrador() {
+    return this.rol === 'Administrador';
+  }
 
   constructor(private router: Router, private servcicioUnidades: UnidadesService) { }
 

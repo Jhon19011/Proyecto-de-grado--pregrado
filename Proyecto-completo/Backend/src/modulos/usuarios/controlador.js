@@ -38,7 +38,7 @@ async function listarUsuarios() {
             u.apellidos, 
             u.correo, 
             u.telefono, 
-            r.nombre_rol AS nombreRol, 
+            CASE WHEN r.nombre_rol = 'Auxiliar' THEN 'Laboratorista' ELSE r.nombre_rol END AS nombreRol, 
             s.nombre_sede AS nombreSede 
         FROM ${TABLA} u
         INNER JOIN rol r ON u.rol = r.idrol
@@ -95,7 +95,7 @@ async function buscarUsuarios(filtros) {
         u.telefono,
         u.rol,
         u.sedeU,
-        r.nombre_rol AS nombreRol,
+        CASE WHEN r.nombre_rol = 'Auxiliar' THEN 'Laboratorista' ELSE r.nombre_rol END AS nombreRol,
         s.nombre_sede AS nombreSede
     FROM usuario u
     LEFT JOIN rol r ON u.rol = r.idrol
@@ -125,7 +125,7 @@ async function buscarUsuarios(filtros) {
     }
 
     if (filtros.rol !== undefined && filtros.rol !== null && filtros.rol !== '') {
-        query += ` AND r.nombre_rol LIKE ?`;
+        query += ` AND CASE WHEN r.nombre_rol = 'Auxiliar' THEN 'Laboratorista' ELSE r.nombre_rol END LIKE ?`;
         params.push(`%${filtros.rol}%`);
     }
 

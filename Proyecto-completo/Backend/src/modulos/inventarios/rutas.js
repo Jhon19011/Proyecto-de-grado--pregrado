@@ -6,7 +6,7 @@ const verificarToken = require('../../middleware/auth').verificarToken;
 const verificarRol = require('../../middleware/verificarRol');
 
 // listar inventarios
-router.get('/', verificarToken, verificarRol(['Administrador', 'Auxiliar']), async (req, res, next) => {
+router.get('/', verificarToken, verificarRol(['Administrador', 'Laboratorista']), async (req, res, next) => {
   try {
     const sedeId = req.user.sedeU;
     const inventarios = await controlador.listarInventarios(sedeId);
@@ -17,7 +17,7 @@ router.get('/', verificarToken, verificarRol(['Administrador', 'Auxiliar']), asy
 });
 
 // Listar inventarios secundarios
-router.get('/secundarios', verificarToken, verificarRol(['Administrador', 'Auxiliar']), async (req, res, next) => {
+router.get('/secundarios', verificarToken, verificarRol(['Administrador', 'Laboratorista']), async (req, res, next) => {
   try {
     const sedeId = req.user.sedeU;
     const inventarios = await controlador.listarInventariosSecundarios(sedeId);
@@ -28,7 +28,7 @@ router.get('/secundarios', verificarToken, verificarRol(['Administrador', 'Auxil
 });
 
 // Listar inventarios por id
-router.get('/:id', verificarToken, verificarRol(['Administrador', 'Auxiliar']), async (req, res, next) => {
+router.get('/:id', verificarToken, verificarRol(['Administrador', 'Laboratorista']), async (req, res, next) => {
   try {
     const inventario = await controlador.obtenerInventario(req.params.id);
     respuesta.success(req, res, inventario, 200);

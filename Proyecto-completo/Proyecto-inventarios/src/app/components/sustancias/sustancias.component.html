@@ -22,7 +22,7 @@
             {{ mostrarFiltros ? 'Ocultar' : 'Filtros' }}
           </button>
 
-          <button class="btn btn-primary" (click)="resetForm()" data-bs-toggle="modal"
+          <button class="btn btn-primary" *ngIf="esAdministrador" (click)="resetForm()" data-bs-toggle="modal"
             data-bs-target="#crearSustanciaModal">
             <i class="bi bi-plus-circle me-1"></i>
             Nueva
@@ -134,7 +134,7 @@
                 <th>Unidad</th>
                 <th>FDS</th>
                 <th>COA</th>
-                <th>Acciones</th>
+                <th *ngIf="esAdministrador">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -169,7 +169,7 @@
                   </a>
                   <span *ngIf="!s.pdf_tecnico">-</span>
                 </td>
-                <td>
+                <td *ngIf="esAdministrador">
                   <button class="btn btn-sm btn-primary me-2" (click)="editarSustancia(s)" data-bs-toggle="modal"
                     data-bs-target="#crearSustanciaModal">
                     Editar

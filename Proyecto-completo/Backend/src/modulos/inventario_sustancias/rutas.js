@@ -28,7 +28,7 @@ router.get('/:tabla', verificarToken, async (req, res, next) => {
     const data = await controlador.listarPorInventario(
       req.params.tabla,
       req.user.sedeU,
-      filtros,   // ✅ ahora sí van aquí
+      filtros,  
       page,
       limit
     );
