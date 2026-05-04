@@ -4,11 +4,6 @@ const db = require('../../DB/mysql');
 
 const TABLA = 'usuario';
 
-const rolesMap = {
-    1: 'Administrador',
-    4: 'Laboratorista'
-};
-
 async function login(data) {
     const { correo, password } = data;
 
@@ -18,7 +13,12 @@ async function login(data) {
 
     // Buscar usuario por correo
     console.log('Buscando usuario con correo:', correo);
-    const usuario = await db.query(`SELECT * FROM ${TABLA} WHERE correo = ?`, [correo]);
+    const usuario = await db.query(`
+        SELECT u.*, r.nombre_rol
+        FROM ${TABLA} u
+        INNER JOIN rol r ON u.rol = r.idrol
+        WHERE u.correo = ?
+    `, [correo]);
 
     if (!usuario || usuario.length === 0) {
         throw new Error('Usuario no encontrado');
@@ -33,8 +33,7 @@ async function login(data) {
         throw new Error('Contraseña incorrecta');
     }
 
-    // Mapear rol de usuario
-    const rolNombre = rolesMap[Number(usuarios.rol)];
+    const rolNombre = usuarios.nombre_rol;
 
     // Generar token
     const token = jwt.sign(

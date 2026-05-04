@@ -15,6 +15,14 @@ export class UsuarioService {
     return this.http.get(this.apiUrl);
   }
 
+  listarRoles(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/roles`);
+  }
+
+  listarSedes(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/sedes`);
+  }
+
   obtenerUsuario(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${id}`);
   }

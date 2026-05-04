@@ -267,7 +267,7 @@ let sumParams = [tabla, ...visibilidadParams];
 async function asignarSustancia(data) {
   const { tabla, sustancia, cantidad, ubicaciondealmacenamiento, lote, fechadevencimiento, observaciones } = data;
 
-  if (!tabla || !sustancia || !cantidad || !lote || !fechadevencimiento) {
+  if (!tabla || !sustancia || !cantidad) {
     throw error('Todos los campos son obligatorios', 400);
   }
 
@@ -296,8 +296,8 @@ async function asignarSustancia(data) {
     cantidadNum,
     0,
     ubicaciondealmacenamiento || '',
-    lote,
-    fechadevencimiento,
+    lote || null,
+    fechadevencimiento || null,
     observaciones || ''
   ]);
 

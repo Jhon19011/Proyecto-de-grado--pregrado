@@ -73,8 +73,9 @@
             <select class="form-select"
               [(ngModel)]="rol" name="rol" required>
               <option [ngValue]="null" disabled>Seleccionar</option>
-              <option [ngValue]="1">Administrador</option>
-              <option [ngValue]="4">Laboratorista</option>
+              <option *ngFor="let item of roles" [ngValue]="item.idrol">
+                {{ item.nombre_rol }}
+              </option>
             </select>
           </div>
 
@@ -83,10 +84,9 @@
             <select class="form-select"
               [(ngModel)]="sedeU" name="sedeU" required>
               <option [ngValue]="null" disabled>Seleccionar</option>
-              <option [ngValue]="1">Principal Bogotá D.C.</option>
-              <option [ngValue]="21">Bucaramanga</option>
-              <option [ngValue]="3">Villavicencio</option>
-              <option [ngValue]="4">Medellín</option>
+              <option *ngFor="let item of sedes" [ngValue]="item.idsede">
+                {{ item.nombre_sede }}
+              </option>
             </select>
           </div>
 

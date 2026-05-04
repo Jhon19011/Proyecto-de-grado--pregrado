@@ -177,7 +177,6 @@ export class SustanciasComponent {
 
     const formData = new FormData();
 
-    formData.append('numero', this.numero?.toString() || '');
     formData.append('codigo', this.codigo);
     formData.append('nombreComercial', this.nombreComercial);
     formData.append('marca', this.marca);
@@ -272,6 +271,7 @@ export class SustanciasComponent {
         },
         error: (err) => {
           console.error('Error al eliminar sustancia', err);
+          alert(err.error?.body || 'No se pudo eliminar la sustancia');
         }
       });
     }

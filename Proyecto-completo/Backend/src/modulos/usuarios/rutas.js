@@ -50,6 +50,26 @@ router.get('/buscar', verificarToken, async (req, res, next) => {
   }
 });
 
+// Listar roles para formularios
+router.get('/roles', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
+    try {
+        const roles = await controlador.listarRoles();
+        respuesta.success(req, res, roles, 200);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// Listar sedes para formularios
+router.get('/sedes', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
+    try {
+        const sedes = await controlador.listarSedes();
+        respuesta.success(req, res, sedes, 200);
+    } catch (err) {
+        next(err);
+    }
+});
+
 //Listar usuario por id
 router.get('/:id', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
     try {

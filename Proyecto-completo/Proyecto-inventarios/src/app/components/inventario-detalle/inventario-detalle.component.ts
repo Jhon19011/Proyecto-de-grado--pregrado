@@ -192,8 +192,7 @@ export class InventarioDetalleComponent implements OnInit {
 
   asignarSustancia() {
 
-    if (!this.sustancia || !this.cantidad || !this.ubicaciondealmacenamiento
-      || !this.formAsignacion.lote || !this.formAsignacion.fecha_vencimiento) {
+    if (!this.sustancia || !this.cantidad || !this.ubicaciondealmacenamiento) {
       alert('Todos los campos son obligatorios');
       return;
     }
@@ -203,8 +202,8 @@ export class InventarioDetalleComponent implements OnInit {
       sustancia: this.sustancia,
       cantidad: this.cantidad,
       ubicaciondealmacenamiento: this.ubicaciondealmacenamiento,
-      lote: this.formAsignacion.lote,
-      fechadevencimiento: this.formAsignacion.fecha_vencimiento,
+      lote: this.formAsignacion.lote || null,
+      fechadevencimiento: this.formAsignacion.fecha_vencimiento || null,
       observaciones: this.formAsignacion.observaciones
     }).subscribe({
       next: () => {

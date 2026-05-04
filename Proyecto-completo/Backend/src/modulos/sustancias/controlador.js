@@ -1,4 +1,5 @@
 const db = require('../../DB/mysql');
+const error = require('../../middleware/errors');
 const TABLA = 'sustancia';
 const fs = require('fs');
 const path = require('path');
@@ -6,7 +7,6 @@ const path = require('path');
 // Crear sustancias
 async function crearSustancia(data, sedeId) {
   const {
-    numero,
     codigo,
     nombreComercial,
     marca,
@@ -22,9 +22,15 @@ async function crearSustancia(data, sedeId) {
     esControlada
   } = data;
 
-  if (!numero || !codigo || !nombreComercial) {
-    throw new Error('Numero, código y nombre comercial son obligatorios');
+  if (!codigo || !nombreComercial) {
+    throw new Error('Codigo y nombre comercial son obligatorios');
   }
+
+  const ultimoNumero = await db.query(
+    `SELECT COALESCE(MAX(CAST(numero AS UNSIGNED)), 0) + 1 AS siguienteNumero FROM ${TABLA} WHERE sede_s = ?`,
+    [sedeId]
+  );
+  const numero = ultimoNumero[0].siguienteNumero;
 
   const query = `
     INSERT INTO ${TABLA} 
@@ -176,9 +182,41 @@ async function actualizarSustancia(id, data) {
 }
 
 // Eliminar sustancia
-async function eliminarSustancia(id) {
-  await db.query(`DELETE FROM ${TABLA} WHERE idsustancia = ?`, [id]);
-  return { mensaje: 'Sustancia eliminada con éxito' };
+async function eliminarSustancia(id, sedeId) {
+  const [sustancia] = await db.query(
+    `SELECT pdf_seguridad, pdf_tecnico FROM ${TABLA} WHERE idsustancia = ? AND sede_s = ?`,
+    [id, sedeId]
+  );
+
+  if (!sustancia) {
+    throw error('Sustancia no encontrada', 404);
+  }
+
+  const dependencias = await db.query(`
+    SELECT
+      (SELECT COUNT(*) FROM inventario_sustancia WHERE sustancia = ?) AS inventarios,
+      (SELECT COUNT(*) FROM autorizacion_sustancia WHERE sustancia_id = ?) AS autorizaciones,
+      (SELECT COUNT(*) FROM alertas WHERE idsustancia = ?) AS alertas
+  `, [id, id, id]);
+
+  const { inventarios, autorizaciones, alertas } = dependencias[0];
+
+  if (inventarios > 0 || autorizaciones > 0 || alertas > 0) {
+    throw error('No se puede eliminar la sustancia porque tiene datos registrados en otras tablas del sistema', 400);
+  }
+
+  await db.query(`DELETE FROM ${TABLA} WHERE idsustancia = ? AND sede_s = ?`, [id, sedeId]);
+
+  [sustancia.pdf_seguridad, sustancia.pdf_tecnico].forEach((archivo) => {
+    if (!archivo) return;
+
+    const ruta = path.join(__dirname, '../../../', archivo);
+    if (fs.existsSync(ruta)) {
+      fs.unlinkSync(ruta);
+    }
+  });
+
+  return { mensaje: 'Sustancia eliminada con exito' };
 }
 
 async function listarSustanciasPorSede(sedeId) {

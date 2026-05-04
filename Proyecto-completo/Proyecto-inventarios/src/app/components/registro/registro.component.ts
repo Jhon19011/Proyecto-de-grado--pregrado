@@ -4,6 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute ,Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 
+interface Rol {
+  idrol: number;
+  nombre_rol: string;
+}
+
+interface Sede {
+  idsede: number;
+  nombre_sede: string;
+}
+
 @Component({
   selector: 'app-registro',
   imports: [CommonModule, FormsModule],
@@ -24,11 +34,16 @@ export class RegistroComponent implements OnInit {
   password = '';
   rol: number | null = null;
   sedeU: number | null = null;
+  roles: Rol[] = [];
+  sedes: Sede[] = [];
 
   modoEdicion: boolean = false;
   idUsuario: number | null = null;
 
   ngOnInit(): void {
+    this.cargarRoles();
+    this.cargarSedes();
+
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -44,6 +59,30 @@ export class RegistroComponent implements OnInit {
           this.rol = usuario.rol;
           this.sedeU = usuario.sedeU;
         });
+      }
+    });
+  }
+
+  cargarRoles(): void {
+    this.servicioUsuarios.listarRoles().subscribe({
+      next: (res) => {
+        this.roles = res.body || res;
+      },
+      error: (err) => {
+        console.error('Error al cargar roles', err);
+        alert('No se pudieron cargar los roles');
+      }
+    });
+  }
+
+  cargarSedes(): void {
+    this.servicioUsuarios.listarSedes().subscribe({
+      next: (res) => {
+        this.sedes = res.body || res;
+      },
+      error: (err) => {
+        console.error('Error al cargar sedes', err);
+        alert('No se pudieron cargar las sedes');
       }
     });
   }

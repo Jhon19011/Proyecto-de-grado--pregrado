@@ -141,7 +141,7 @@ router.put('/:id', verificarToken, verificarRol(['Administrador']), upload.field
 // Eliminar sustancia 
 router.delete('/:id', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
     try {
-        const resultado = await controlador.eliminarSustancia(req.params.id);
+        const resultado = await controlador.eliminarSustancia(req.params.id, req.user.sedeU);
         respuesta.success(req, res, resultado, 200);
     } catch (err) {
         next(err);

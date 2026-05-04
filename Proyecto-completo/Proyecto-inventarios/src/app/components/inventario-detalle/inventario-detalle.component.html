@@ -678,8 +678,7 @@
             <textarea class="form-control" [(ngModel)]="formAsignacion.observaciones" name="observaciones">
             </textarea>
           </div>
-          <button class="btn btn-success" type="submit"
-            [disabled]="!formAsignacion.lote || !formAsignacion.fecha_vencimiento || !cantidad">
+          <button class="btn btn-success" type="submit" [disabled]="!sustancia || !cantidad || !ubicaciondealmacenamiento">
             Asignar
           </button>
         </form>

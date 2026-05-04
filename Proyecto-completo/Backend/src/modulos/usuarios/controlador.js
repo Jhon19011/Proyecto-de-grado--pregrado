@@ -38,12 +38,28 @@ async function listarUsuarios() {
             u.apellidos, 
             u.correo, 
             u.telefono, 
-            CASE WHEN r.nombre_rol = 'Auxiliar' THEN 'Laboratorista' ELSE r.nombre_rol END AS nombreRol, 
+            r.nombre_rol AS nombreRol, 
             s.nombre_sede AS nombreSede 
         FROM ${TABLA} u
         INNER JOIN rol r ON u.rol = r.idrol
         INNER JOIN sede s ON u.sedeU = s.idsede
         `);
+}
+
+async function listarRoles() {
+    return db.query(`
+        SELECT idrol, nombre_rol
+        FROM rol
+        ORDER BY nombre_rol ASC
+    `);
+}
+
+async function listarSedes() {
+    return db.query(`
+        SELECT idsede, nombre_sede
+        FROM sede
+        ORDER BY nombre_sede ASC
+    `);
 }
 
 async function obtenerUsuario(id) {
@@ -95,7 +111,7 @@ async function buscarUsuarios(filtros) {
         u.telefono,
         u.rol,
         u.sedeU,
-        CASE WHEN r.nombre_rol = 'Auxiliar' THEN 'Laboratorista' ELSE r.nombre_rol END AS nombreRol,
+        r.nombre_rol AS nombreRol,
         s.nombre_sede AS nombreSede
     FROM usuario u
     LEFT JOIN rol r ON u.rol = r.idrol
@@ -125,7 +141,7 @@ async function buscarUsuarios(filtros) {
     }
 
     if (filtros.rol !== undefined && filtros.rol !== null && filtros.rol !== '') {
-        query += ` AND CASE WHEN r.nombre_rol = 'Auxiliar' THEN 'Laboratorista' ELSE r.nombre_rol END LIKE ?`;
+        query += ` AND r.nombre_rol LIKE ?`;
         params.push(`%${filtros.rol}%`);
     }
 
@@ -136,6 +152,8 @@ async function buscarUsuarios(filtros) {
 
 module.exports = {
     listarUsuarios,
+    listarRoles,
+    listarSedes,
     crearUsuario,
     obtenerUsuario,
     actualizarUsuario,
