@@ -42,9 +42,23 @@
           {{ estaMostrandoAgotadas() ? 'Ver disponibles' : 'Ver agotadas' }}
         </button>
 
-        <button class="btn btn-success" (click)="exportarExcel()">
-          Exportar Excel
-        </button>
+        <div class="btn-group">
+          <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Exportar Excel
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <button class="dropdown-item" type="button" (click)="exportarExcel()">
+                Vista actual
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item" type="button" (click)="exportarExcel(true)">
+                Todo el inventario
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
 
     </div>
@@ -443,16 +457,17 @@
           <div class="mb-3">
             <label class="form-label">Motivo:</label>
             <textarea class="form-control" [(ngModel)]="movimientoSeleccionado.motivo" name="motivo" rows="2"
-              name="motivo" required></textarea>
+              required></textarea>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Usuario:</label>
             <input type="text" class="form-control" [(ngModel)]="movimientoSeleccionado.usuario" name="usuario"
-              placeholder="Nombre del usuario" />
+              placeholder="Nombre del usuario" required />
           </div>
 
-          <button class="btn btn-primary w-100" type="submit">
+          <button class="btn btn-primary w-100" type="submit"
+            [disabled]="!movimientoSeleccionado.tipo || !movimientoSeleccionado.fecha || !movimientoSeleccionado.cantidad || !movimientoSeleccionado.motivo?.trim() || !movimientoSeleccionado.usuario?.trim()">
             <i class="bi bi-save me-1"></i>
             Registrar movimiento
           </button>

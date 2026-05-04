@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: ''
+  apiUrl: 'http://IP_DEL_SERVIDOR:4000/api'
 };

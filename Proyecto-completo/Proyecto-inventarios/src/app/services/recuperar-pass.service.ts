@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +9,7 @@ import { Observable } from 'rxjs';
 export class RecuperarPassService {
 
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:4000/api/usuarios';
+  private apiUrl = `${environment.apiUrl}/usuarios`;
 
   solicitarRecuperacion(correo: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/recuperar`, { correo });

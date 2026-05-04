@@ -2,12 +2,14 @@ const ExcelJS = require('exceljs');
 const path = require('path');
 const db = require('../../DB/mysql');
 
-function construirConsultaInventario({ tabla, sedeId, filtros = {}, page = 1, limit = 10 }) {
+function construirConsultaInventario({ tabla, sedeId, filtros = {}, page = 1, limit = 10, exportarTodo = false }) {
     const pageNum = Math.max(parseInt(page, 10) || 1, 1);
     const limitNum = Math.max(parseInt(limit, 10) || 10, 1);
     const offset = (pageNum - 1) * limitNum;
     const mostrarAgotadas = filtros.estado_uso === 'Agotado';
-    const condicionVisibilidad = mostrarAgotadas
+    const condicionVisibilidad = exportarTodo
+        ? ''
+        : mostrarAgotadas
         ? `AND (isus.estado_uso = 'Agotado' OR isus.cantidadremanente <= 0)`
         : `AND isus.estado = 1 AND isus.estado_uso <> 'Agotado' AND isus.cantidadremanente > 0`;
 
@@ -101,20 +103,24 @@ function construirConsultaInventario({ tabla, sedeId, filtros = {}, page = 1, li
         params.push(Number(filtros.esControlada));
     }
 
-    if (mostrarAgotadas) {
+    if (exportarTodo) {
+        sql += ` ORDER BY isus.cedula_principal ASC, isus.idinventario_sustancia ASC`;
+    } else if (mostrarAgotadas) {
         sql += ` ORDER BY fecha_agotado DESC, isus.idinventario_sustancia DESC LIMIT ? OFFSET ?`;
+        params.push(limitNum, offset);
     } else {
         sql += ` ORDER BY isus.cedula_principal ASC, isus.idinventario_sustancia ASC LIMIT ? OFFSET ?`;
+        params.push(limitNum, offset);
     }
-    params.push(limitNum, offset);
 
     return { sql, params };
 }
 
 async function exportarInventario(req, res) {
     try {
-        const { tabla, page, limit, ...filtros } = req.query;
+        const { tabla, page, limit, todo, ...filtros } = req.query;
         const sedeId = req.user.sedeU;
+        const exportarTodo = todo === '1' || todo === 'true';
 
         if (!tabla) {
             return res.status(400).json({
@@ -141,9 +147,10 @@ async function exportarInventario(req, res) {
         const { sql, params } = construirConsultaInventario({
             tabla,
             sedeId,
-            filtros,
+            filtros: exportarTodo ? {} : filtros,
             page,
-            limit
+            limit,
+            exportarTodo
         });
 
         const data = await db.query(sql, params);

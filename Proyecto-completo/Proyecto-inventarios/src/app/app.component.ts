@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,6 @@ export class AppComponent{
   title = 'Proyecto-inventarios';
   private http = inject(HttpClient);
   roles: any[] = [];
-  apiUrl = 'http://localhost:4000/api/rol';
+  apiUrl = `${environment.apiUrl}/rol`;
   
 }

@@ -45,7 +45,7 @@ async function registrarMovimiento(data, user) {
   const { inventario_sustancia_id, tipo, cantidad, motivo, usuario, fecha } = data;
   const nombreUsuario = `${user.nombres} ${user.apellidos}`;
 
-  if (!inventario_sustancia_id || !tipo || !cantidad || !fecha) {
+  if (!inventario_sustancia_id || !tipo || !cantidad || !motivo?.trim() || !usuario?.trim() || !fecha) {
     throw error('Todos los datos son obligatorios', 400);
   }
 
@@ -99,8 +99,8 @@ async function registrarMovimiento(data, user) {
       inventario_sustancia_id,
       tipo,
       cantidad,
-      motivo || (tipo === 'entrada' ? 'Devolución usuario' : 'Entrega usuario'),
-      usuario || nombreUsuario,
+      motivo.trim(),
+      usuario.trim(),
       fecha
     ]
   );
@@ -246,8 +246,8 @@ async function registrarMovimientoSecundario(data, user) {
   const nombreUsuario = `${user.nombres} ${user.apellidos}`;
   
 
-  if (!inventario_sustancia_id || !tipo || !cantidad || !fecha) {
-    throw error('Inventario, tipo y cantidad son requeridos', 400);
+  if (!inventario_sustancia_id || !tipo || !cantidad || !motivo?.trim() || !usuario?.trim() || !fecha) {
+    throw error('Todos los datos son obligatorios', 400);
   }
 
   // Verificar asignación
@@ -315,8 +315,8 @@ async function registrarMovimientoSecundario(data, user) {
       inventario_sustancia_id,
       tipo,
       cantidad,
-      motivo || (tipo === 'salida' ? 'Uso en práctica' : 'Devolución interna'),
-      usuario || nombreUsuario,
+      motivo.trim(),
+      usuario.trim(),
       fecha
     ]
   );
@@ -336,7 +336,7 @@ async function listarMovimientos(inventario_sustancia_id) {
         INNER JOIN inventario_sustancia i ON m.inventario_sustancia_id = i.idinventario_sustancia
         INNER JOIN sustancia s ON i.sustancia = s.idsustancia
         WHERE m.inventario_sustancia_id = ?
-        ORDER BY m.fecha DESC`, [inventario_sustancia_id]
+        ORDER BY m.fecha DESC, m.idmovimiento DESC`, [inventario_sustancia_id]
   );
 }
 

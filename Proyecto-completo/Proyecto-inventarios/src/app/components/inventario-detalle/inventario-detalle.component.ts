@@ -258,11 +258,23 @@ export class InventarioDetalleComponent implements OnInit {
   }
 
   registrarMovimiento() {
+    if (
+      !this.movimientoSeleccionado?.idinventario_sustancia ||
+      !this.movimientoSeleccionado.tipo ||
+      !this.movimientoSeleccionado.fecha ||
+      !this.movimientoSeleccionado.cantidad ||
+      !this.movimientoSeleccionado.motivo?.trim() ||
+      !this.movimientoSeleccionado.usuario?.trim()
+    ) {
+      alert('Todos los campos del movimiento son obligatorios');
+      return;
+    }
+
     this.movimientoSeleccionado.cantidad = Number(
       parseFloat(this.movimientoSeleccionado.cantidad).toFixed(2)
     );
 
-    if (this.movimientoSeleccionado.cantidad <= 0) {
+    if (!Number.isFinite(this.movimientoSeleccionado.cantidad) || this.movimientoSeleccionado.cantidad <= 0) {
       alert('Cantidad inválida');
       return;
     }
@@ -271,8 +283,8 @@ export class InventarioDetalleComponent implements OnInit {
       inventario_sustancia_id: this.movimientoSeleccionado.idinventario_sustancia,
       tipo: this.movimientoSeleccionado.tipo,
       cantidad: this.movimientoSeleccionado.cantidad,
-      motivo: this.movimientoSeleccionado.motivo,
-      usuario: this.movimientoSeleccionado.usuario,
+      motivo: this.movimientoSeleccionado.motivo.trim(),
+      usuario: this.movimientoSeleccionado.usuario.trim(),
       fecha: this.movimientoSeleccionado.fecha
     };
 
@@ -618,16 +630,16 @@ export class InventarioDetalleComponent implements OnInit {
     return 'bi-dash-circle';
   }
 
-  exportarExcel() {
+  exportarExcel(todoElInventario = false) {
     const filtrosLimpios = Object.fromEntries(
       Object.entries(this.filtro).filter(([_, v]) => v != null && v !== '')
     );
 
     const params = {
       tabla: this.tabla,
-      page: this.page,
-      limit: this.limit,
-      ...filtrosLimpios
+      ...(todoElInventario
+        ? { todo: 1 }
+        : { page: this.page, limit: this.limit, ...filtrosLimpios })
     };
 
     this.reportesService.exportarInventario(params).subscribe({
@@ -636,7 +648,8 @@ export class InventarioDetalleComponent implements OnInit {
         const a = document.createElement('a');
 
         a.href = url;
-        a.download = `inventario-${this.nombreInventario || this.tabla}.xlsx`;
+        const alcance = todoElInventario ? 'completo' : 'vista';
+        a.download = `inventario-${this.nombreInventario || this.tabla}-${alcance}.xlsx`;
         a.style.display = 'none';
 
         document.body.appendChild(a);

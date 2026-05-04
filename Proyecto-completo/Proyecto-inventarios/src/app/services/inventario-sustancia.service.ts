@@ -10,8 +10,8 @@ export class InventarioSustanciaService {
 
   constructor(private http: HttpClient) { }
   baseUrl = environment.apiUrl;
-  private apiUrl = 'http://localhost:4000/api/inventario_sustancias';
-  private apiUrlMov = 'http://localhost:4000/api/movimientos';
+  private apiUrl = `${environment.apiUrl}/inventario_sustancias`;
+  private apiUrlMov = `${environment.apiUrl}/movimientos`;
 
 
   listarPorInventario(

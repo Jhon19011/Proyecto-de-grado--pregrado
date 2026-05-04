@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-editar-perfil',
@@ -21,7 +22,7 @@ export class EditarPerfilComponent {
   guardar() {
     const token = localStorage.getItem('token');
 
-    this.http.put('http://localhost:4000/api/usuarios/perfil', {
+    this.http.put(`${environment.apiUrl}/usuarios/perfil`, {
       nombres: this.nombres,
       apellidos: this.apellidos,
       correo: this.correo,
