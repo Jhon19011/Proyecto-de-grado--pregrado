@@ -124,6 +124,21 @@ async function obtenerSustancia(id) {
 
 // Actualizar sustancia
 async function actualizarSustancia(id, data) {
+  const camposPermitidos = [
+    'codigo',
+    'nombreComercial',
+    'marca',
+    'CAS',
+    'clasedepeligrosegunonu',
+    'categoriaIARC',
+    'estado',
+    'presentacion',
+    'unidad',
+    'pdf_seguridad',
+    'pdf_tecnico',
+    'PDF',
+    'esControlada'
+  ];
 
   // Obtener sustancia actual (para saber qué PDF tiene)
   const [actual] = await db.query(
@@ -165,6 +180,14 @@ async function actualizarSustancia(id, data) {
     }
     data.pdf_tecnico = null;
     delete data.eliminar_pdf_tecnico;
+  }
+
+  data = Object.fromEntries(
+    Object.entries(data).filter(([campo]) => camposPermitidos.includes(campo))
+  );
+
+  if (Object.keys(data).length === 0) {
+    throw error('No hay datos validos para actualizar', 400);
   }
 
   // construir query dinámico

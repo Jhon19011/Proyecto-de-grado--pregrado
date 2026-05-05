@@ -39,11 +39,9 @@ export class SustanciasComponent {
     codigo: '',
     CAS: '',
     marca: '',
-    lote: '',
     clasedepeligrosegunonu: '',
     categoriaIARC: '',
     estado: '',
-    fechadevencimiento: '',
     presentacion: '',
     unidad: '',
     esControlada: ''
@@ -57,12 +55,10 @@ export class SustanciasComponent {
   codigo = '';
   nombreComercial = '';
   marca = '';
-  lote = '';
   CAS = '';
   clasedepeligrosegunonu = '';
   categoriaIARC = '';
   estado = '';
-  fechadevencimiento = '';
   presentacion = '';
   unidad: number | null = null;
   pdfSeguridadFile: File | null = null;
@@ -154,11 +150,9 @@ export class SustanciasComponent {
       codigo: '',
       CAS: '',
       marca: '',
-      lote: '',
       clasedepeligrosegunonu: '',
       categoriaIARC: '',
       estado: '',
-      fechadevencimiento: '',
       presentacion: '',
       unidad: '',
       esControlada: ''
@@ -180,12 +174,10 @@ export class SustanciasComponent {
     formData.append('codigo', this.codigo);
     formData.append('nombreComercial', this.nombreComercial);
     formData.append('marca', this.marca);
-    formData.append('lote', this.lote);
     formData.append('CAS', this.CAS);
     formData.append('clasedepeligrosegunonu', this.clasedepeligrosegunonu);
     formData.append('categoriaIARC', this.categoriaIARC);
     formData.append('estado', this.estado);
-    formData.append('fechadevencimiento', this.fechadevencimiento);
     formData.append('presentacion', this.presentacion);
     formData.append('unidad', this.unidad ? this.unidad.toString() : '');
     formData.append('PDF', this.PDF);
@@ -245,14 +237,10 @@ export class SustanciasComponent {
     this.codigo = s.codigo;
     this.nombreComercial = s.nombreComercial;
     this.marca = s.marca;
-    this.lote = s.lote;
     this.CAS = s.CAS;
     this.clasedepeligrosegunonu = s.clasedepeligrosegunonu;
     this.categoriaIARC = s.categoriaIARC;
     this.estado = s.estado;
-    this.fechadevencimiento = s.fechadevencimiento
-      ? s.fechadevencimiento.split('T')[0]
-      : '';
     this.esControlada = s.esControlada;
     this.presentacion = s.presentacion;
     this.unidad = s.unidad;
@@ -301,12 +289,10 @@ export class SustanciasComponent {
     this.codigo = '';
     this.nombreComercial = '';
     this.marca = '';
-    this.lote = '';
     this.CAS = '';
     this.clasedepeligrosegunonu = '';
     this.categoriaIARC = '';
     this.estado = '';
-    this.fechadevencimiento = '';
     this.presentacion = '';
     this.unidad = null;
     this.pdfSeguridadFile = null;

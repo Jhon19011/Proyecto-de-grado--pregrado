@@ -3,7 +3,7 @@ const db = require('../../DB/mysql');
 const jwt = require('jsonwebtoken');
 const error = require('../../middleware/errors');
 const enviarCorreo = require('../../recuperacion/mailer');
-const FRONT_URL = 'http://localhost:4200';
+const FRONT_URL = process.env.FRONT_URL || 'http://localhost:4200';
 
 const TABLA = 'usuario';
 
