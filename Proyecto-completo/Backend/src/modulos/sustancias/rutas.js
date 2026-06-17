@@ -7,7 +7,7 @@ const verificarRol = require('../../middleware/verificarRol');
 const multer = require('multer');
 const path = require('path');
 
-// Configuración de almacenamiento pdf
+// Almacenamiento pdf
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, '../../../uploads/sustancias'));
@@ -152,7 +152,6 @@ router.post('/:id/autorizacion', verificarToken, verificarRol(['Administrador'])
     try {
         const { autorizada } = req.body;
         const sedeId = req.user.sedeU;
-        console.log("sede detectada:", sedeId);
         const result = await controlador.actualizarAutorizacion(req.params.id, sedeId, autorizada);
         respuesta.success(req, res, result, 200);
     } catch (err) {

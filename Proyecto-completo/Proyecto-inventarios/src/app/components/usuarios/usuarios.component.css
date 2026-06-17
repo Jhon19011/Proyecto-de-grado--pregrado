@@ -15,7 +15,6 @@ input, select {
   border-radius: 8px !important;
 }
 
-/* Hover suave en filas */
 .table tbody tr {
   transition: all 0.2s ease;
   background: white;

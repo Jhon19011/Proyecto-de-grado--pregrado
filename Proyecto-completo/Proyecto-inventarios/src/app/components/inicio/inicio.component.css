@@ -231,7 +231,6 @@ font-size: 40px;
 
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 
-  /* 🔥 importante */
   display: block;
   flex-direction: column;
 }
@@ -256,21 +255,21 @@ font-size: 40px;
   transition: all 0.2s ease;
 }
 
-/* 🔴 vencido o agotado */
+/* vencido o agotado */
 .alert-danger {
   background-color: #f8d7da;
   border-left: 5px solid #dc3545;
   color: #842029;
 }
 
-/* 🟠 próximo a vencer */
+/* próximo a vencer */
 .alert-warning {
   background-color: #fff3cd;
   border-left: 5px solid #fd7e14;
   color: #664d03;
 }
 
-/* 🆕 no leída */
+/* no leída */
 .no-leida {
   font-weight: 600;
 }

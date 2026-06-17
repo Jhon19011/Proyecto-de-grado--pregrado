@@ -1,4 +1,3 @@
-/* Avatar */
 .profile-avatar {
   width: 55px;
   height: 55px;
@@ -11,12 +10,10 @@
   font-size: 26px;
 }
 
-/* Espaciado más limpio */
 .card-body {
   padding: 1.5rem 1.5rem;
 }
 
-/* Botón consistente */
 .btn {
   border-radius: 8px;
   transition: all 0.2s ease;

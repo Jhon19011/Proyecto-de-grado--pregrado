@@ -24,7 +24,6 @@ async function login(data) {
         throw new Error('Usuario no encontrado');
     }
 
-    // Se define el usuario
     const usuarios = usuario[0];
 
     const validPassword = await bcrypt.compare(password, usuario[0].password);

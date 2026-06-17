@@ -28,7 +28,6 @@ router.post('/', verificarToken, async (req, res, next) => {
 
 router.post('/trasladar', verificarToken, verificarRol(['Administrador']), async (req, res, next) => {
     try {
-        console.log('Datos recibidos para traslado:', req.body);
         const asignacion = await controlador.trasladarSustancia(req.body, req.user);
         respuesta.success(req, res, asignacion, 201);
     } catch (err) {

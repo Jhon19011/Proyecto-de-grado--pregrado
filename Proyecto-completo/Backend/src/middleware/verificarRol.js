@@ -1,4 +1,3 @@
-
 function verificarRol(rolesPermitidos) {
     return (req, res, next) => {
         try {

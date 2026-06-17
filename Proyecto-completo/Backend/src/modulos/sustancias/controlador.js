@@ -140,7 +140,7 @@ async function actualizarSustancia(id, data) {
     'esControlada'
   ];
 
-  // Obtener sustancia actual (para saber qué PDF tiene)
+  // Obtener sustancia actual
   const [actual] = await db.query(
     `SELECT pdf_seguridad, pdf_tecnico FROM ${TABLA} WHERE idsustancia = ?`,
     [id]
@@ -190,7 +190,6 @@ async function actualizarSustancia(id, data) {
     throw error('No hay datos validos para actualizar', 400);
   }
 
-  // construir query dinámico
   const campos = Object.keys(data)
     .map(campo => `${campo} = ?`)
     .join(', ');

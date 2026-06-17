@@ -31,7 +31,6 @@ router.put('/perfil', verificarToken, async (req, res, next) => {
     try {
         const userId = req.user.id;
         const { nombres, apellidos, correo, telefono } = req.body;
-        console.log("Usuario desde token:", req.user);
         const actualizado = await controlador.actualizarPerfil(userId, { nombres, apellidos, correo, telefono });
         respuesta.success(req, res, actualizado, 200);
     } catch (err) {

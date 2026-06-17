@@ -11,7 +11,6 @@ async function crearUsuario(data) {
         throw new Error('Todos los campos son obligatorios');
     }
 
-    // Ya existe el correo?
     const usuarioExistente = await db.query(`SELECT * FROM ${TABLA} WHERE correo = ?`, [correo]);
 
     if (usuarioExistente.length > 0) {

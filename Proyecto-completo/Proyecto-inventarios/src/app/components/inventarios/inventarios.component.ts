@@ -67,7 +67,6 @@ export class InventariosComponent {
         error: (err) => {
           console.error('Error al crear inventario', err);
 
-          // Si el error es un string se parsea
           let mensaje = 'Error inesperado al crear inventario';
 
           if (err.error) {

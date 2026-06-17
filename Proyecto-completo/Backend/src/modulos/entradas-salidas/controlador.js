@@ -158,7 +158,7 @@ async function trasladarSustancia(data, user) {
 
   try {
 
-    // 🔻 ORIGEN
+    // ORIGEN
     const nuevoRemanente = 0;
     const nuevoGasto = Number(asigOrigen.gastototal || 0) + cantidadNum;
     const estadoOrigen = calcularEstadoTrasladoDesdeDestino('Nuevo');
@@ -170,7 +170,7 @@ async function trasladarSustancia(data, user) {
       [nuevoRemanente, nuevoGasto, estadoOrigen, 1, asigOrigen.idinventario_sustancia]
     );
 
-    // 🔺 DESTINO (SIEMPRE NUEVO)
+    // DESTINO
     const insert = await db.query(
       `INSERT INTO ${TABLA_ASIG}
       (tabla, sustancia, cantidad, cantidadremanente, gastototal, ubicaciondealmacenamiento, estado, cedula_principal, estado_uso, lote, fechadevencimiento, observaciones)

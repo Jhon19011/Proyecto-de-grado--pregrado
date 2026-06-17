@@ -19,7 +19,7 @@ async function generarAlertas(sedeId) {
 
   for (const item of datos) {
 
-    // 🔴 AGOTADO
+    // AGOTADO
     if (item.cantidadremanente <= 0) {
       await insertarAlerta({
         mensaje: `La sustancia ${item.nombreComercial} está agotada`,
@@ -30,7 +30,7 @@ async function generarAlertas(sedeId) {
       });
     }
 
-    // 🔴 VENCIDO
+    // VENCIDO
     if (item.fechadevencimiento < new Date()) {
       await insertarAlerta({
         mensaje: `La sustancia ${item.nombreComercial} está vencida`,
@@ -41,7 +41,7 @@ async function generarAlertas(sedeId) {
       });
     }
 
-    // 🟡 PRÓXIMO (30 días)
+    // PRÓXIMO  A VENCER
     const hoy = new Date();
     const proximo = new Date();
     proximo.setDate(hoy.getDate() + 30);

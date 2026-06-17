@@ -3,7 +3,7 @@ const error = require('../../middleware/errors'); // ajusta la ruta
 
 async function insertarAlerta({ mensaje, tipo, sedeId, idsustancia, idinventario }) {
 
-  // evitar duplicados correctamente
+  // evitar duplicados
   const existe = await db.query(`
     SELECT idalerta FROM alertas
     WHERE tipo = ?

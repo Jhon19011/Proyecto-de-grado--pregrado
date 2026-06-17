@@ -264,7 +264,7 @@
         <!-- Cuerpo con formulario -->
         <div class="modal-body pt-2">
           <form class="form-modern" (ngSubmit)="guardarSustancia()" #formSustancia="ngForm">
-            <!-- 🔹 INFORMACIÓN BÁSICA -->
+            <!-- INFORMACIÓN BÁSICA -->
             <h6 class="form-section-title">Información Básica</h6>
             <div class="row g-3">
               <div class="col-md-6">
@@ -285,7 +285,7 @@
               </div>
 
             </div>
-            <!-- 🔹 IDENTIFICACIÓN QUÍMICA -->
+            <!-- IDENTIFICACIÓN QUÍMICA -->
             <h6 class="form-section-title mt-4">Identificación Química</h6>
             <div class="row g-3">
               <div class="col-md-4">
@@ -295,8 +295,12 @@
 
               <div class="col-md-4">
                 <label class="form-label">Clase ONU</label>
-                <input type="text" [(ngModel)]="clasedepeligrosegunonu" name="clasedepeligrosegunonu"
-                  class="form-control">
+                <select [(ngModel)]="clasedepeligrosegunonu" name="clasedepeligrosegunonu" class="form-select">
+                  <option value="" disabled>Seleccionar</option>
+                  <option *ngFor="let clase of clasesPeligroONU" [value]="clase">
+                    {{ clase }}
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-4">
@@ -305,7 +309,7 @@
               </div>
             </div>
 
-            <!-- 🔹 CARACTERÍSTICAS -->
+            <!-- CARACTERÍSTICAS -->
             <h6 class="form-section-title mt-4">Características</h6>
             <div class="row g-3">
               <div class="col-md-4">
@@ -371,7 +375,7 @@
               
 
             </div>
-            <!-- 🔹 CONTROL -->
+            <!-- CONTROL -->
             <h6 class="form-section-title mt-4">Control</h6>
             <div class="row g-3">
 

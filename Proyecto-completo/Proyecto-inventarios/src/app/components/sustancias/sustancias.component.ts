@@ -65,6 +65,25 @@ export class SustanciasComponent {
   pdfTecnicoFile: File | null = null;
   PDF = '';
   esControlada: number | null = null;
+  clasesPeligroONU: string[] = [
+    '1. Explosivo',
+    '2.1. Gas Inflamable',
+    '2.2. Gas no Inflamable, no toxico',
+    '2.3. Gas toxico o venenoso',
+    '3. Liquido Inflamable',
+    '4.1. Solido Inflamable',
+    '4.2. Sustancia combustible espontaneamente',
+    '4.3. Sustancia que desprende gas Inflamable al contacto con el agua',
+    '5.1. Sustancia comburente',
+    '5.2. Peroxido organico',
+    '6.1. Sustancia toxica con efectos agudos',
+    '6.1. Sustancia toxica con efectos cronicos',
+    '6.2. Sustancia infecciosa',
+    '7. Sustancia radioactiva',
+    '8. Sustancia corrosiva',
+    '9. Sustancia y objetos peligrosos varios y peligrosos para el medio ambiente',
+    'No regulada'
+  ];
 
   page = 1;
   limit = 5;
@@ -344,7 +363,6 @@ export class SustanciasComponent {
         // recargar lista
         this.cargarUnidades();
 
-        // si la unidad eliminada estaba seleccionada
         if (this.unidad === id) {
           this.unidad = null;
         }

@@ -31,17 +31,21 @@ app.set('port', config.app.port);
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', userRoutes);
 
-
-app.use(verificarToken);
-
 // Rutas Privadas
-app.use('/api/sustancias', sustanciasRoutes);
-app.use('/api/inventarios', inventariosRoutes);
-app.use('/api/inventario_sustancias', inventarioSustancias);
-app.use('/api/movimientos', movimientos);
-app.use('/api/unidades', unidadesRoutes);
-app.use('/api/alertas', alertasRoutes);
-app.use('/api/reportes', reportes);
+app.use('/api/sustancias', verificarToken, sustanciasRoutes);
+app.use('/api/inventarios', verificarToken, inventariosRoutes);
+app.use('/api/inventario_sustancias', verificarToken, inventarioSustancias);
+app.use('/api/movimientos', verificarToken, movimientos);
+app.use('/api/unidades', verificarToken, unidadesRoutes);
+app.use('/api/alertas', verificarToken, alertasRoutes);
+app.use('/api/reportes', verificarToken, reportes);
+
+// Servir Angular compilado
+app.use(express.static(path.join(__dirname, '../public')));
+
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, '../public', 'index.html'));
+});
 
 app.use(error);
 

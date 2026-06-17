@@ -10,8 +10,6 @@ async function listarPorInventario(tabla, sedeId, filtros = {}, page = 1, limit 
 
   await generarAlertas(sedeId);
 
-  console.log("FILTROS BACK:", filtros);
-
   const offset = (page - 1) * limit;
   const mostrarAgotadas = filtros.estado_uso === 'Agotado';
   const estadosTrasladoVisibles = ['Traslado / Nuevo', 'Traslado / En uso'];
@@ -191,7 +189,7 @@ let sumParams = [tabla, ...visibilidadParams];
 
   const data = await db.query(query, params);
 
-  // TOTAL CON LOS MISMOS FILTROS
+  // TOTAL CON LOS FILTROS
   let countQuery = `
     SELECT COUNT(*) as total
     FROM inventario_sustancia isus
@@ -303,7 +301,7 @@ async function asignarSustancia(data) {
 
   const idNuevo = insertResult.insertId;
 
-  // asignar cédula principal
+  // Asignar cédula principal
   await db.query(
     `UPDATE ${TABLA_ASIG} 
      SET cedula_principal = ? 
@@ -425,7 +423,7 @@ async function buscarSustanciasInventario(filtros) {
     params.push(filtros.estado_uso);
   }
 
-  // Unidad (CORREGIDO)
+  // Unidad
   if (filtros.unidad) {
     query += ` AND u.nombre LIKE ?`;
     params.push(`%${filtros.unidad}%`);

@@ -10,16 +10,14 @@ async function crearInventario(data, sedeId) {
         throw error('El nombre del inventario es obligatorio', 400);
     }
 
-    // 🔍 Buscar inventario existente (activo o inactivo)
+    // Buscar inventario existente
     const existente = await db.query(
         `SELECT * FROM ${TABLA} WHERE nombretabla = ? AND sedeT = ?`,
         [nombretabla, sedeId]
     );
 
-    // 🟡 CASO 1: Existe pero está INACTIVO → REACTIVAR
     if (existente.length > 0 && existente[0].estado === 0) {
 
-        // ⚠️ Validar principal antes de reactivar
         if (principal) {
             const existePrincipal = await db.query(
                 `SELECT * FROM ${TABLA} 
@@ -46,12 +44,10 @@ async function crearInventario(data, sedeId) {
         };
     }
 
-    // 🔴 CASO 2: Existe y está ACTIVO → ERROR
     if (existente.length > 0 && existente[0].estado === 1) {
         throw error(`El inventario "${nombretabla}" ya existe en la sede ${sedeId}`, 400);
     }
 
-    // 🔍 Validar inventario principal (solo activos)
     if (principal) {
         const existePrincipal = await db.query(
             `SELECT * FROM ${TABLA} 
@@ -64,7 +60,6 @@ async function crearInventario(data, sedeId) {
         }
     }
 
-    // 🟢 CREAR NUEVO
     const query = `INSERT INTO ${TABLA} (nombretabla, sedeT, principal, estado) VALUES (?, ?, ?, 1)`;
     const result = await db.query(query, [nombretabla, sedeId, principal || 0]);
 
@@ -113,7 +108,6 @@ async function actualizarInventario(id, data) {
 // Eliminar inventario
 async function eliminarInventario(id) {
 
-    // 🔍 1. Verificar si tiene sustancias activas
     const sustancias = await db.query(
         `SELECT idinventario_sustancia 
          FROM inventario_sustancia
@@ -121,13 +115,10 @@ async function eliminarInventario(id) {
         [id]
     );
 
-    console.log('Sustancias encontradas:', sustancias);
-
     if (sustancias.length > 0) {
         throw error('No se puede eliminar el inventario porque aún contiene sustancias', 400);
     }
 
-    // 🧾 2. Ocultar inventario (soft delete)
     const result = await db.query(
         `UPDATE tablas SET estado = 0 WHERE idtablas = ?`,
         [id]
